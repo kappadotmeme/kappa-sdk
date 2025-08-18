@@ -1,0 +1,41 @@
+{
+  "name": "@kappa/sdk",
+  "version": "1.2.0",
+  "description": "SDK for creating and trading tokens on Kappa's Sui bonding curve (create/buy/sell)",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./src/index.js",
+      "import": "./src/index.js",
+      "types": "./src/index.d.ts"
+    }
+  },
+  "files": [
+    "src",
+    "kappa.js",
+    "math.js",
+    "move-bytecode"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@mysten/bcs": "^1.6.4",
+    "@mysten/sui": "^1.36.0",
+    "dotenv": "^16.6.1"
+  },
+  "scripts": {
+    "start": "node -e \"console.log('@kappa/sdk: library only')\""
+  },
+  "keywords": [
+    "sui",
+    "blockchain",
+    "token",
+    "bonding-curve",
+    "kappa",
+    "sdk"
+  ],
+  "author": "Kappa Protocol",
+  "license": "MIT"
+}
