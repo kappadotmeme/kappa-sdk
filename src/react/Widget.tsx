@@ -572,7 +572,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
           if (!contract) { setSearchResults([]); return; }
           setIsSearching(true);
           try {
-            const res = await fetch('https://api.kappa.fun/v1/coins/');
+            const res = await fetch('https://api.kappa.fun/v1/coins?nameOrSymbol=' + contract.trim().toLowerCase());
             const json = await res.json();
             const all: any[] = (json?.data || []) as any[];
             const isMigratedCoin = (item: any): boolean => {
@@ -597,7 +597,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
           }
           return;
         }
-        const res = await fetch('https://api.kappa.fun/v1/coins/');
+        const res = await fetch('https://api.kappa.fun/v1/coins?nameOrSymbol=' + normalized.toLowerCase());
         const json = await res.json();
         const listAll = (json?.data || []) as any[];
         const list = listAll.filter((c) => !([c?.pairAddress, c?.pairContractAddress, c?.pair, c?.pair_object, c?.pairObject, c?.poolAddress, c?.lpAddress].some((v: any) => !!(typeof v === 'string' ? v.trim() : v))));

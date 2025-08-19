@@ -517,7 +517,7 @@ function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defaultThem
           if (!contract) { setSearchResults([]); return; }
           setIsSearching(true);
           try {
-            const res = await fetch('https://api.kappa.fun/v1/coins/trending');
+            const res = await fetch('https://api.kappa.fun/v1/coins?nameOrSymbol=' + contract.trim().toLowerCase());
             const json = await res.json();
             const all: any[] = (json?.data || []) as any[];
             const list = all.filter((c) => !isMigratedCoin(c));
