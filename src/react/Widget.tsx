@@ -1,8 +1,8 @@
+// @ts-nocheck
 "use client";
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { SuiClient, getFullnodeUrl } from '@mysten/sui/client';
-import { ConnectButton, createNetworkConfig, SuiClientProvider, WalletProvider, useConnectWallet, useCurrentAccount, useDisconnectWallet, useSignAndExecuteTransaction, useSuiClient, useWallets } from '@mysten/dapp-kit';
-import { CiSettings } from 'react-icons/ci';
+import { createNetworkConfig, SuiClientProvider, WalletProvider, useConnectWallet, useCurrentAccount, useDisconnectWallet, useSignAndExecuteTransaction, useSuiClient, useWallets } from '@mysten/dapp-kit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const { networkConfig } = createNetworkConfig({
@@ -52,7 +52,6 @@ const tabBtn = (active: boolean): React.CSSProperties => ({
   cursor: 'pointer',
 });
 
-// Theme defaults; third-parties can override via the `theme` prop on `Widget`
 const defaultTheme = {
   '--kappa-bg': '#0f1218',
   '--kappa-panel': '#0b0f16',
@@ -75,7 +74,6 @@ const defaultTheme = {
   '--kappa-avatar-bg': '#233B53',
 } as const;
 
-// Utilities and stable subcomponents defined at module scope to avoid remounting inputs
 const abbreviateContract = (val: string) => {
   if (!val || val.length <= 20) return val;
   const head = val.slice(0, 5);
@@ -83,7 +81,6 @@ const abbreviateContract = (val: string) => {
   return `${head}...${tail}`;
 };
 
-// Sanitize numeric input allowing only digits and a single '.'
 const sanitizeDecimalInput = (raw: string): string => {
   let v = String(raw || '').replace(/[^0-9.]/g, '');
   const firstDot = v.indexOf('.');
@@ -114,7 +111,7 @@ function AmountRow(props: {
           if (mode === 'buy') onSuiChange(v); else onTokensChange(v);
         }}
         inputMode="decimal"
-        style={{ background: 'transparent', border: 'none', outline: 'none', color: '#e5e7eb', fontSize: 18, height: 44, padding: '0 10px' }}
+        style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--kappa-text)', fontSize: 18, height: 44, padding: '0 10px' }}
       />
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', borderLeft: '1px solid var(--kappa-border)', height: '100%' }}>
         <span style={{ color: 'var(--kappa-accent)' }}>{mode === 'buy' ? 'SUI' : tokenSymbol}</span>
@@ -214,7 +211,7 @@ function ContractInput(props: {
           {tokenAvatarUrl ? (
             <img src={tokenAvatarUrl} alt="token" crossOrigin="anonymous" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} style={{ width: 24, height: 24, borderRadius: 6, objectFit: 'cover' }} />
           ) : (
-            <div style={{ width: 24, height: 24, borderRadius: 6, background: '#233B53' }} />
+            <div style={{ width: 24, height: 24, borderRadius: 6, background: 'var(--kappa-avatar-bg)' }} />
           )}
           <span style={{ fontSize: 12, color: '#9ca3af' }}>{abbreviateContract(contract)}</span>
         </div>
@@ -245,7 +242,7 @@ function ContractInput(props: {
                 {item.avatarUrl ? (
                   <img src={String(item.avatarUrl)} alt="token" crossOrigin="anonymous" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} style={{ width: 24, height: 24, borderRadius: 6, objectFit: 'cover' }} />
                 ) : (
-                  <div style={{ width: 24, height: 24, borderRadius: 6, background: '#233B53' }} />
+                  <div style={{ width: 24, height: 24, borderRadius: 6, background: 'var(--kappa-avatar-bg)' }} />
                 )}
                 <span style={{ color: '#e5e7eb', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   ${String(item.symbol || '').toUpperCase()} {String(item.name || '') ? '| ' + String(item.name) : ''}
@@ -262,6 +259,35 @@ function ContractInput(props: {
   );
 }
 
+function QuickSelectRow(props: { values: string[]; onPick: (v: string) => void }) {
+  const { values, onPick } = props;
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  return (
+    <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginTop: 10, flexWrap: 'wrap' }}>
+      {values.map((v, i) => (
+        <button
+          key={v}
+          onClick={() => onPick(v)}
+          onMouseEnter={() => setHoverIdx(i)}
+          onMouseLeave={() => setHoverIdx(null)}
+          style={{
+            padding: '6px 10px',
+            borderRadius: 6,
+            border: '1px solid var(--kappa-chip-border)',
+            background: hoverIdx===i ? 'var(--kappa-panel)' : 'var(--kappa-chip-bg)',
+            color: v === 'MAX' ? '#f87171' : 'var(--kappa-accent)',
+            minWidth: 54,
+            textAlign: 'center',
+            transition: 'background 120ms ease'
+          }}
+        >
+          {v}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function TradePanelView(props: {
   contract: string;
   setContract: (v: string) => void;
@@ -269,7 +295,6 @@ function TradePanelView(props: {
   tokenName: string;
   tokenAvatarUrl: string;
   clearContract: () => void;
-  // search props
   searchResults: any[];
   showSearch: boolean;
   setShowSearch: (v: boolean) => void;
@@ -351,9 +376,7 @@ function TradePanelView(props: {
             </span>
           </div>
         </div>
-        <button onClick={() => setView('slippage')} title="Slippage settings" style={{ padding: 6, borderRadius: 8, border: '1px solid var(--kappa-border)', background: 'var(--kappa-panel)', color: 'var(--kappa-text)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <CiSettings size={18} />
-        </button>
+        <button onClick={() => setView('slippage')} title="Slippage settings" style={{ padding: 6, borderRadius: 8, border: '1px solid var(--kappa-border)', background: 'var(--kappa-panel)', color: 'var(--kappa-text)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>⚙️</button>
       </div>
 
       <div style={{ marginTop: 12 }}>
@@ -412,415 +435,6 @@ function TransactionModal(props: {
     </div>
   );
 }
-
-function QuickSelectRow(props: { values: string[]; onPick: (v: string) => void }) {
-  const { values, onPick } = props;
-  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
-  return (
-    <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginTop: 10, flexWrap: 'wrap' }}>
-      {values.map((v, i) => (
-        <button
-          key={v}
-          onClick={() => onPick(v)}
-          onMouseEnter={() => setHoverIdx(i)}
-          onMouseLeave={() => setHoverIdx(null)}
-          style={{
-            padding: '6px 10px',
-            borderRadius: 6,
-            border: '1px solid var(--kappa-chip-border)',
-            background: hoverIdx===i ? 'var(--kappa-panel)' : 'var(--kappa-chip-bg)',
-            color: v === 'MAX' ? '#f87171' : 'var(--kappa-accent)',
-            minWidth: 54,
-            textAlign: 'center',
-            transition: 'background 120ms ease'
-          }}
-        >
-          {v}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defaultTheme, string>> }) {
-  const { theme } = props || {} as any;
-  const [contract, setContract] = useState('');
-  const [mode, setMode] = useState<'buy' | 'sell'>('buy');
-  const [slippage, setSlippage] = useState('1');
-  const [view, setView] = useState<'trade' | 'slippage'>('trade');
-
-  // search state
-  const [showSearch, setShowSearch] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-
-  const [suiIn, setSuiIn] = useState('0');
-  const [tokensIn, setTokensIn] = useState('0');
-  const [quoteTokens, setQuoteTokens] = useState<number>(0);
-  const [quoteSui, setQuoteSui] = useState<number>(0);
-  const [statusText, setStatusText] = useState<string>('Ready to trade');
-  const [hasError, setHasError] = useState<boolean>(false);
-  const [isPrimaryDisabled, setIsPrimaryDisabled] = useState<boolean>(false);
-  const [txOpen, setTxOpen] = useState<boolean>(false);
-  const [txLoading, setTxLoading] = useState<boolean>(false);
-  const [txDigest, setTxDigest] = useState<string | null>(null);
-  const [txError, setTxError] = useState<string | null>(null);
-
-  const [curve, setCurve] = useState<any>(null);
-  const [tokenSymbol, setTokenSymbol] = useState<string>('');
-  const [tokenAvatarUrl, setTokenAvatarUrl] = useState<string>('');
-  const [tokenName, setTokenName] = useState<string>('');
-  const [isVerified, setIsVerified] = useState(false);
-
-  const [suiBalance, setSuiBalance] = useState<number>(0);
-  const [tokenBalance, setTokenBalance] = useState<number>(0);
-
-  const client = useMemo(() => new SuiClient({ url: networkConfig.mainnet.url }), []);
-  const suiClientHook = useSuiClient();
-  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
-  const account = useCurrentAccount();
-
-  const signer = useMemo(() => (
-    account ? {
-      address: account.address,
-      signAndExecuteTransaction: (args: any) => signAndExecuteTransaction(args),
-    } : null
-  ), [account, signAndExecuteTransaction]);
-
-  // Helper: exclude migrated coins (those that already have a pair/pool address)
-  const isMigratedCoin = (item: any): boolean => {
-    const fields = [
-      item?.pairAddress,
-      item?.pairContractAddress,
-      item?.pair,
-      item?.pair_object,
-      item?.pairObject,
-      item?.poolAddress,
-      item?.lpAddress,
-    ];
-    return fields.some((v) => !!(typeof v === 'string' ? v.trim() : v));
-  };
-
-  useEffect(() => {
-    let abort = false;
-    async function load() {
-      try {
-        setCurve(null);
-        setTokenSymbol('');
-        setTokenName('');
-        setTokenAvatarUrl('');
-        setIsVerified(false);
-        // If user is typing a name/symbol (no ::), trigger search and skip contract load
-        if (!contract || !contract.includes('::')) {
-          // Show search dropdown and run search when input is not a contract type
-          setShowSearch(true);
-          if (!contract) { setSearchResults([]); return; }
-          setIsSearching(true);
-          try {
-            const res = await fetch('https://api.kappa.fun/v1/coins/trending');
-            const json = await res.json();
-            const all: any[] = (json?.data || []) as any[];
-            const list = all.filter((c) => !isMigratedCoin(c));
-            const q = contract.trim().toLowerCase();
-            const bySymbol = list.filter((c) => String(c.symbol || '').toLowerCase().includes(q));
-            const byName = list.filter((c) => String(c.name || '').toLowerCase().includes(q));
-            const merged: any[] = [];
-            const seen = new Set<string>();
-            for (const it of bySymbol.concat(byName)) {
-              const key = String(it.contractAddress || '');
-              if (!seen.has(key)) { seen.add(key); merged.push(it); }
-            }
-            setSearchResults(merged.slice(0, 100));
-          } catch {
-            setSearchResults([]);
-          } finally {
-            setIsSearching(false);
-          }
-          return;
-        }
-        const res = await fetch('https://api.kappa.fun/v1/coins/trending');
-        const json = await res.json();
-        const listAll = (json?.data || []) as any[];
-        const list = listAll.filter((c) => !isMigratedCoin(c));
-        const normalized = contract.trim();
-        // Try exact full type match first
-        let item = list.find((c: any) => (c.contractAddress || '').toLowerCase() === normalized.toLowerCase());
-        // Fallback: try by packageId prefix
-        if (!item) {
-          const pkg = normalized.split('::')[0];
-          item = list.find((c: any) => (c.contractAddress || '').toLowerCase().startsWith(`${pkg.toLowerCase()}::`));
-        }
-        const coinType = normalized;
-        if (item?.symbol) setTokenSymbol(String(item.symbol).toUpperCase());
-        else {
-          const seg = normalized.split('::')[2];
-          if (seg) setTokenSymbol(seg.toUpperCase());
-        }
-        if (item?.avatarUrl) {
-          const url = String(item.avatarUrl).trim();
-          if (url.startsWith('http')) setTokenAvatarUrl(url); else setTokenAvatarUrl('');
-        }
-        if (item?.name) setTokenName(String(item.name));
-        setIsVerified(!!item);
-        if (item?.bondingContractAddress) {
-          const obj = await client.getObject({ id: item.bondingContractAddress, options: { showContent: true } });
-          if (!abort) setCurve(obj?.data || null);
-        }
-        if (account?.address) {
-          const bal = await suiClientHook.getBalance({ owner: account.address });
-          setSuiBalance(Math.max(0, Number(bal.totalBalance || 0)) / 1e9);
-          const tbal = await suiClientHook.getBalance({ owner: account.address, coinType });
-          setTokenBalance(Math.max(0, Number(tbal.totalBalance || 0)) / 1e9);
-        }
-      } catch {}
-    }
-    load();
-    return () => { abort = true; };
-  }, [contract, account?.address, client, suiClientHook]);
-
-  useEffect(() => {
-    async function computeQuotes() {
-      try {
-        const math = await import('../../../math.js');
-        const suiMist = Math.max(0, Math.floor(Number(suiIn) * 1e9));
-        const tokensAmt = Math.max(0, Math.floor(Number(tokensIn)));
-        if (curve && suiMist > 0) setQuoteTokens(math.buyMath(curve, suiMist)); else setQuoteTokens(0);
-        if (curve && tokensAmt > 0) setQuoteSui(math.sellMath(curve, tokensAmt)); else setQuoteSui(0);
-      } catch {
-        setQuoteTokens(0); setQuoteSui(0);
-      }
-    }
-    computeQuotes();
-  }, [curve, suiIn, tokensIn]);
-
-  // Always load SUI balance as soon as wallet connects (independent of contract input)
-  useEffect(() => {
-    let cancelled = false;
-    async function loadSuiBalance() {
-      try {
-        if (!account?.address) { setSuiBalance(0); return; }
-        const bal = await suiClientHook.getBalance({ owner: account.address });
-        if (!cancelled) setSuiBalance(Math.max(0, Number(bal.totalBalance || 0)) / 1e9);
-      } catch {}
-    }
-    loadSuiBalance();
-    return () => { cancelled = true; };
-  }, [account?.address, suiClientHook]);
-
-  // removed click search trigger (dropdown is dynamic on input)
-
-  const onSelectResult = (item: any) => {
-    const ca = String(item.contractAddress || '');
-    setContract(ca);
-    setTokenSymbol(String(item.symbol || '').toUpperCase());
-    setTokenName(String(item.name || ''));
-    setTokenAvatarUrl(String(item.avatarUrl || ''));
-    setIsVerified(true);
-    setShowSearch(false);
-  };
-
-  const maxBuys = ['5','10','15','20','50','MAX'];
-  const maxSells = ['1/4','1/2','3/4','MAX'];
-
-  const handleQuick = (val: string) => {
-    if (mode === 'buy') {
-      if (val === 'MAX') setSuiIn(String(Math.max(0, Math.floor(suiBalance*100)/100)));
-      else setSuiIn(val);
-    } else {
-      const bal = tokenBalance;
-      if (val === 'MAX') setTokensIn(String(Math.floor(bal*1e9)));
-      else if (val === '1/2') setTokensIn(String(Math.floor(bal*1e9/2)));
-      else if (val === '1/4') setTokensIn(String(Math.floor(bal*1e9/4)));
-      else if (val === '3/4') setTokensIn(String(Math.floor(bal*1e9*3/4)));
-    }
-  };
-
-  const clearContract = () => {
-    setContract('');
-    setTokenSymbol('');
-    setTokenName('');
-    setTokenAvatarUrl('');
-    setIsVerified(false);
-    setCurve(null);
-    setQuoteSui(0);
-    setQuoteTokens(0);
-    setStatusText('Ready to trade');
-    setHasError(false);
-    setIsPrimaryDisabled(false);
-  };
-
-  const abbreviateContract = (val: string) => {
-    if (!val || val.length <= 20) return val;
-    const head = val.slice(0, 5);
-    const tail = val.slice(-12);
-    return `${head}...${tail}`;
-  };
-
-  const onBuy = async () => {
-    try {
-      if (!signer) { alert('Connect wallet first'); return; }
-      setTxOpen(true); setTxLoading(true); setTxDigest(null); setTxError(null);
-      const trade = await import('../../../kappa-trade.js');
-      trade.setSuiClient(client);
-      const [pkg, mod] = contract.split('::');
-      const slip = Math.max(0, Math.min(100, Number(slippage) || 0));
-      const minOut = Math.floor(Math.max(0, quoteTokens) * (1 - slip / 100));
-      const res = await trade.buyWeb3(signer as any, {
-        publishedObject: { packageId: pkg },
-        name: (mod || '').replaceAll('_', ' '),
-        sui: Math.floor(parseFloat(suiIn) * 1e9),
-        min_tokens: minOut,
-      });
-      if (res?.success) { setTxDigest(res?.digest || null); } else { setTxError(res?.error || 'unknown error'); }
-    } catch (e: any) { alert('Buy failed: ' + (e?.message || String(e))); }
-    finally { setTxLoading(false); }
-  };
-
-  const onSell = async () => {
-    try {
-      if (!signer) { alert('Connect wallet first'); return; }
-      setTxOpen(true); setTxLoading(true); setTxDigest(null); setTxError(null);
-      const trade = await import('../../../kappa-trade.js');
-      trade.setSuiClient(client);
-      const [pkg, mod] = contract.split('::');
-      const slip = Math.max(0, Math.min(100, Number(slippage) || 0));
-      const minSui = Math.floor(Math.max(0, quoteSui) * (1 - slip / 100));
-      const res = await trade.sellWeb3(signer as any, {
-        publishedObject: { packageId: pkg },
-        name: (mod || '').replaceAll('_', ' '),
-        sell_token: String(Math.floor(parseFloat(tokensIn))),
-        min_sui: minSui,
-      });
-      if (res?.success) { setTxDigest(res?.digest || null); } else { setTxError(res?.error || 'unknown error'); }
-    } catch (e: any) { alert('Sell failed: ' + (e?.message || String(e))); }
-    finally { setTxLoading(false); }
-  };
-  // validation for balances and inputs
-  useEffect(() => {
-    const suiInNum = Math.max(0, Number(suiIn));
-    const tokensInNum = Math.max(0, Number(tokensIn));
-    let text = 'Ready to trade';
-    let error = false;
-    let disabled = false;
-    if (!contract) {
-      text = 'Enter a token contract or search by name';
-      error = true; disabled = true;
-    } else if (!curve) {
-      text = 'Token data not loaded yet';
-      error = false; disabled = true;
-    } else if (mode === 'buy') {
-      if (!suiIn || isNaN(suiInNum) || suiInNum <= 0) { text = 'Enter SUI amount'; error = true; disabled = true; }
-      else if (suiInNum > suiBalance) { text = 'Insufficient SUI balance'; error = true; disabled = true; }
-      else { text = 'Ready to trade'; error = false; disabled = false; }
-    } else {
-      if (!tokensIn || isNaN(tokensInNum) || tokensInNum <= 0) { text = 'Enter token amount'; error = true; disabled = true; }
-      else if (tokensInNum/1e9 > tokenBalance) { text = 'Insufficient token balance'; error = true; disabled = true; }
-      else { text = 'Ready to trade'; error = false; disabled = false; }
-    }
-    setStatusText(text);
-    setHasError(error);
-    setIsPrimaryDisabled(disabled);
-  }, [contract, curve, mode, suiIn, tokensIn, suiBalance, tokenBalance]);
-
-
-  
-  
-
-  const themeVars = { ...defaultTheme, ...(theme || {}) } as Record<string, string>;
-  return (
-    <div style={{ width: 440, background: 'var(--kappa-bg)', borderRadius: 16, padding: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.45)', border: '1px solid var(--kappa-border)', position: 'relative', overflow: 'hidden', ...(themeVars as any) }}>
-      <style>{`
-        .kappa-dropdown::-webkit-scrollbar { width: 6px; }
-        .kappa-dropdown::-webkit-scrollbar-track { background: transparent; }
-        .kappa-dropdown::-webkit-scrollbar-thumb { background: #2f3b4a; border-radius: 6px; }
-        .kappa-dropdown::-webkit-scrollbar-thumb:hover { background: #3a4a5f; }
-      `}</style>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ margin: 0, color: 'var(--kappa-text)' }}>KAPPA</h2>
-        <WalletControls />
-      </div>
-
-      <div style={{ position: 'relative', minHeight: 360, paddingBottom: 26 }}>
-        <div
-          style={{ position: 'absolute', inset: 0, transition: 'transform 200ms ease, opacity 200ms ease', transform: view==='trade' ? 'translateX(0)' : 'translateX(-12px)', opacity: view==='trade' ? 1 : 0, pointerEvents: view==='trade' ? 'auto' : 'none' }}
-          onMouseDown={() => setShowSearch(false)}
-        >
-          <TradePanelView
-            contract={contract}
-            setContract={setContract}
-            tokenSymbol={tokenSymbol}
-            tokenName={tokenName}
-            tokenAvatarUrl={tokenAvatarUrl}
-            clearContract={clearContract}
-            searchResults={searchResults}
-            showSearch={showSearch}
-            setShowSearch={setShowSearch}
-            onSelectResult={onSelectResult}
-            isSearching={isSearching}
-            mode={mode}
-            setMode={setMode}
-            suiBalance={suiBalance}
-            tokenBalance={tokenBalance}
-            setView={setView}
-            maxBuys={maxBuys}
-            maxSells={maxSells}
-            handleQuick={handleQuick}
-            amountProps={{ mode, suiIn, tokensIn, onSuiChange: setSuiIn, onTokensChange: setTokensIn, tokenSymbol, tokenAvatarUrl }}
-            youReceive={mode==='buy' ? `${(quoteTokens/1e9).toLocaleString(undefined,{maximumFractionDigits:2})} ${tokenSymbol || 'TOKEN'}` : `${(quoteSui/1e9).toLocaleString(undefined,{maximumFractionDigits:6})} SUI`}
-            onPrimary={mode==='buy' ? onBuy : onSell}
-            primaryLabel={mode==='buy' ? 'Buy' : 'Sell'}
-            statusText={statusText}
-            hasError={hasError}
-            isPrimaryDisabled={isPrimaryDisabled}
-          />
-        </div>
-        <div style={{ position: 'absolute', inset: 0, transition: 'transform 200ms ease, opacity 200ms ease', transform: view==='slippage' ? 'translateX(0)' : 'translateX(12px)', opacity: view==='slippage' ? 1 : 0, pointerEvents: view==='slippage' ? 'auto' : 'none' }}>
-          <SlippagePanel slippage={slippage} setSlippage={setSlippage} onClose={() => setView('trade')} />
-        </div>
-      </div>
-      <TransactionModal
-        open={txOpen}
-        loading={txLoading}
-        digest={txDigest}
-        error={txError}
-        spentLabel={mode==='buy' ? `${suiIn} SUI` : `${tokensIn} ${tokenSymbol}`}
-        forLabel={mode==='buy' ? `${(quoteTokens/1e9).toFixed(2)} ${tokenSymbol}` : `${(quoteSui/1e9).toFixed(6)} SUI`}
-        onClose={() => setTxOpen(false)}
-      />
-    </div>
-  );
-}
-
-function WidgetStandalone(props: { theme?: Partial<Record<keyof typeof defaultTheme, string>> }) {
-  const client = useMemo(() => new SuiClient({ url: networkConfig.mainnet.url }), []);
-  const queryClient = useMemo(() => new QueryClient(), []);
-  return (
-    <QueryClientProvider client={queryClient}>
-      <SuiClientProvider networks={networkConfig} defaultNetwork="mainnet">
-        <WalletProvider autoConnect>
-          <WidgetEmbedded {...props} />
-        </WalletProvider>
-      </SuiClientProvider>
-    </QueryClientProvider>
-  );
-}
-
-export default function Page() {
-  const client = useMemo(() => new SuiClient({ url: networkConfig.mainnet.url }), []);
-  const queryClient = useMemo(() => new QueryClient(), []);
-  return (
-    <QueryClientProvider client={queryClient}>
-      <SuiClientProvider networks={networkConfig} defaultNetwork="mainnet">
-        <WalletProvider autoConnect>
-          <div style={{ display: 'grid', placeItems: 'center', height: '100vh', padding: 24, overflow: 'hidden' }}>
-            <WidgetStandalone />
-          </div>
-        </WalletProvider>
-      </SuiClientProvider>
-    </QueryClientProvider>
-  );
-}
-
 
 function WalletControls() {
   const account = useCurrentAccount();
@@ -895,6 +509,333 @@ function WalletControls() {
         </div>
       )}
     </div>
+  );
+}
+
+export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defaultTheme, string>> }) {
+  const { theme } = props || {} as any;
+  const [contract, setContract] = useState('');
+  const [mode, setMode] = useState<'buy' | 'sell'>('buy');
+  const [slippage, setSlippage] = useState('1');
+  const [view, setView] = useState<'trade' | 'slippage'>('trade');
+
+  const [showSearch, setShowSearch] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+
+  const [suiIn, setSuiIn] = useState('0');
+  const [tokensIn, setTokensIn] = useState('0');
+  const [quoteTokens, setQuoteTokens] = useState<number>(0);
+  const [quoteSui, setQuoteSui] = useState<number>(0);
+  const [statusText, setStatusText] = useState<string>('Ready to trade');
+  const [hasError, setHasError] = useState<boolean>(false);
+  const [isPrimaryDisabled, setIsPrimaryDisabled] = useState<boolean>(false);
+  const [txOpen, setTxOpen] = useState<boolean>(false);
+  const [txLoading, setTxLoading] = useState<boolean>(false);
+  const [txDigest, setTxDigest] = useState<string | null>(null);
+  const [txError, setTxError] = useState<string | null>(null);
+
+  const [curve, setCurve] = useState<any>(null);
+  const [tokenSymbol, setTokenSymbol] = useState<string>('');
+  const [tokenAvatarUrl, setTokenAvatarUrl] = useState<string>('');
+  const [tokenName, setTokenName] = useState<string>('');
+  const [isVerified, setIsVerified] = useState(false);
+
+  const [suiBalance, setSuiBalance] = useState<number>(0);
+  const [tokenBalance, setTokenBalance] = useState<number>(0);
+
+  const client = useMemo(() => new SuiClient({ url: networkConfig.mainnet.url }), []);
+  const suiClientHook = useSuiClient();
+  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+  const account = useCurrentAccount();
+
+  const signer = useMemo(() => (
+    account ? {
+      address: account.address,
+      signAndExecuteTransaction: (args: any) => signAndExecuteTransaction(args),
+    } : null
+  ), [account, signAndExecuteTransaction]);
+
+  // Token + balances loader
+  useEffect(() => {
+    let abort = false;
+    async function load() {
+      try {
+        setCurve(null);
+        setTokenSymbol('');
+        setTokenName('');
+        setTokenAvatarUrl('');
+        setIsVerified(false);
+        if (!contract || !contract.includes('::')) {
+          // search mode
+          setShowSearch(true);
+          if (!contract) { setSearchResults([]); return; }
+          setIsSearching(true);
+          try {
+            const res = await fetch('https://api.kappa.fun/v1/coins/');
+            const json = await res.json();
+            const all: any[] = (json?.data || []) as any[];
+            const isMigratedCoin = (item: any): boolean => {
+              const fields = [item?.pairAddress, item?.pairContractAddress, item?.pair, item?.pair_object, item?.pairObject, item?.poolAddress, item?.lpAddress];
+              return fields.some((v) => !!(typeof v === 'string' ? v.trim() : v));
+            };
+            const list = all.filter((c) => !isMigratedCoin(c));
+            const q = contract.trim().toLowerCase();
+            const bySymbol = list.filter((c) => String(c.symbol || '').toLowerCase().includes(q));
+            const byName = list.filter((c) => String(c.name || '').toLowerCase().includes(q));
+            const merged: any[] = [];
+            const seen = new Set<string>();
+            for (const it of bySymbol.concat(byName)) {
+              const key = String(it.contractAddress || '');
+              if (!seen.has(key)) { seen.add(key); merged.push(it); }
+            }
+            setSearchResults(merged.slice(0, 100));
+          } catch {
+            setSearchResults([]);
+          } finally {
+            setIsSearching(false);
+          }
+          return;
+        }
+        const res = await fetch('https://api.kappa.fun/v1/coins/');
+        const json = await res.json();
+        const listAll = (json?.data || []) as any[];
+        const list = listAll.filter((c) => !([c?.pairAddress, c?.pairContractAddress, c?.pair, c?.pair_object, c?.pairObject, c?.poolAddress, c?.lpAddress].some((v: any) => !!(typeof v === 'string' ? v.trim() : v))));
+        const normalized = contract.trim();
+        let item = list.find((c: any) => (c.contractAddress || '').toLowerCase() === normalized.toLowerCase());
+        if (!item) {
+          const pkg = normalized.split('::')[0];
+          item = list.find((c: any) => (c.contractAddress || '').toLowerCase().startsWith(`${pkg.toLowerCase()}::`));
+        }
+        const coinType = normalized;
+        if (item?.symbol) setTokenSymbol(String(item.symbol).toUpperCase()); else { const seg = normalized.split('::')[2]; if (seg) setTokenSymbol(seg.toUpperCase()); }
+        if (item?.avatarUrl) { const url = String(item.avatarUrl).trim(); if (url.startsWith('http')) setTokenAvatarUrl(url); else setTokenAvatarUrl(''); }
+        if (item?.name) setTokenName(String(item.name));
+        setIsVerified(!!item);
+        if (item?.bondingContractAddress) {
+          const obj = await client.getObject({ id: item.bondingContractAddress, options: { showContent: true } });
+          if (!abort) setCurve(obj?.data || null);
+        }
+        if (account?.address) {
+          const bal = await suiClientHook.getBalance({ owner: account.address });
+          setSuiBalance(Math.max(0, Number(bal.totalBalance || 0)) / 1e9);
+          const tbal = await suiClientHook.getBalance({ owner: account.address, coinType });
+          setTokenBalance(Math.max(0, Number(tbal.totalBalance || 0)) / 1e9);
+        }
+      } catch {}
+    }
+    load();
+    return () => { abort = true; };
+  }, [contract, account?.address, client, suiClientHook]);
+
+  // Quotes
+  useEffect(() => {
+    async function computeQuotes() {
+      try {
+        const math = await import('../../math.js');
+        const suiMist = Math.max(0, Math.floor(Number(suiIn) * 1e9));
+        const tokensAmt = Math.max(0, Math.floor(Number(tokensIn)));
+        if (curve && suiMist > 0) setQuoteTokens((math as any).buyMath(curve, suiMist)); else setQuoteTokens(0);
+        if (curve && tokensAmt > 0) setQuoteSui((math as any).sellMath(curve, tokensAmt)); else setQuoteSui(0);
+      } catch {
+        setQuoteTokens(0); setQuoteSui(0);
+      }
+    }
+    computeQuotes();
+  }, [curve, suiIn, tokensIn]);
+
+  // Always load SUI balance when wallet connects
+  useEffect(() => {
+    let cancelled = false;
+    async function loadSuiBalance() {
+      try {
+        if (!account?.address) { setSuiBalance(0); return; }
+        const bal = await suiClientHook.getBalance({ owner: account.address });
+        if (!cancelled) setSuiBalance(Math.max(0, Number(bal.totalBalance || 0)) / 1e9);
+      } catch {}
+    }
+    loadSuiBalance();
+    return () => { cancelled = true; };
+  }, [account?.address, suiClientHook]);
+
+  const maxBuys = ['5','10','15','20','50','MAX'];
+  const maxSells = ['1/4','1/2','3/4','MAX'];
+
+  const handleQuick = (val: string) => {
+    if (mode === 'buy') {
+      if (val === 'MAX') setSuiIn(String(Math.max(0, Math.floor(suiBalance*100)/100)));
+      else setSuiIn(val);
+    } else {
+      const bal = tokenBalance;
+      if (val === 'MAX') setTokensIn(String(Math.floor(bal*1e9)));
+      else if (val === '1/2') setTokensIn(String(Math.floor(bal*1e9/2)));
+      else if (val === '1/4') setTokensIn(String(Math.floor(bal*1e9/4)));
+      else if (val === '3/4') setTokensIn(String(Math.floor(bal*1e9*3/4)));
+    }
+  };
+
+  const clearContract = () => {
+    setContract('');
+    setTokenSymbol('');
+    setTokenName('');
+    setTokenAvatarUrl('');
+    setIsVerified(false);
+    setCurve(null);
+    setQuoteSui(0);
+    setQuoteTokens(0);
+    setStatusText('Ready to trade');
+    setHasError(false);
+    setIsPrimaryDisabled(false);
+  };
+
+  const onBuy = async () => {
+    try {
+      if (!signer) { alert('Connect wallet first'); return; }
+      setTxOpen(true); setTxLoading(true); setTxDigest(null); setTxError(null);
+      const trade = await import('../../kappa-trade.js');
+      (trade as any).setSuiClient(client);
+      const [pkg, mod] = contract.split('::');
+      const slip = Math.max(0, Math.min(100, Number(slippage) || 0));
+      const minOut = Math.floor(Math.max(0, quoteTokens) * (1 - slip / 100));
+      const res = await (trade as any).buyWeb3(signer as any, {
+        publishedObject: { packageId: pkg },
+        name: (mod || '').replaceAll('_', ' '),
+        sui: Math.floor(parseFloat(suiIn) * 1e9),
+        min_tokens: minOut,
+      });
+      if (res?.success) { setTxDigest(res?.digest || null); } else { setTxError(res?.error || 'unknown error'); }
+    } catch (e: any) { alert('Buy failed: ' + (e?.message || String(e))); }
+    finally { setTxLoading(false); }
+  };
+
+  const onSell = async () => {
+    try {
+      if (!signer) { alert('Connect wallet first'); return; }
+      setTxOpen(true); setTxLoading(true); setTxDigest(null); setTxError(null);
+      const trade = await import('../../kappa-trade.js');
+      (trade as any).setSuiClient(client);
+      const [pkg, mod] = contract.split('::');
+      const slip = Math.max(0, Math.min(100, Number(slippage) || 0));
+      const minSui = Math.floor(Math.max(0, quoteSui) * (1 - slip / 100));
+      const res = await (trade as any).sellWeb3(signer as any, {
+        publishedObject: { packageId: pkg },
+        name: (mod || '').replaceAll('_', ' '),
+        sell_token: String(Math.floor(parseFloat(tokensIn))),
+        min_sui: minSui,
+      });
+      if (res?.success) { setTxDigest(res?.digest || null); } else { setTxError(res?.error || 'unknown error'); }
+    } catch (e: any) { alert('Sell failed: ' + (e?.message || String(e))); }
+    finally { setTxLoading(false); }
+  };
+
+  // validation for balances and inputs
+  useEffect(() => {
+    const suiInNum = Math.max(0, Number(suiIn));
+    const tokensInNum = Math.max(0, Number(tokensIn));
+    let text = 'Ready to trade';
+    let error = false;
+    let disabled = false;
+    if (!contract) {
+      text = 'Enter a token contract or search by name';
+      error = true; disabled = true;
+    } else if (!curve) {
+      text = 'Token data not loaded yet';
+      error = false; disabled = true;
+    } else if (mode === 'buy') {
+      if (!suiIn || isNaN(suiInNum) || suiInNum <= 0) { text = 'Enter SUI amount'; error = true; disabled = true; }
+      else if (suiInNum > suiBalance) { text = 'Insufficient SUI balance'; error = true; disabled = true; }
+      else { text = 'Ready to trade'; error = false; disabled = false; }
+    } else {
+      if (!tokensIn || isNaN(tokensInNum) || tokensInNum <= 0) { text = 'Enter token amount'; error = true; disabled = true; }
+      else if (tokensInNum/1e9 > tokenBalance) { text = 'Insufficient token balance'; error = true; disabled = true; }
+      else { text = 'Ready to trade'; error = false; disabled = false; }
+    }
+    setStatusText(text);
+    setHasError(error);
+    setIsPrimaryDisabled(disabled);
+  }, [contract, curve, mode, suiIn, tokensIn, suiBalance, tokenBalance]);
+
+  const themeVars = { ...defaultTheme, ...(theme || {}) } as Record<string, string>;
+  return (
+    <div style={{ width: 440, background: 'var(--kappa-bg)', borderRadius: 16, padding: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.45)', border: '1px solid var(--kappa-border)', position: 'relative', overflow: 'hidden', ...(themeVars as any) }}>
+      <style>{`
+        .kappa-dropdown::-webkit-scrollbar { width: 6px; }
+        .kappa-dropdown::-webkit-scrollbar-track { background: transparent; }
+        .kappa-dropdown::-webkit-scrollbar-thumb { background: #2f3b4a; border-radius: 6px; }
+        .kappa-dropdown::-webkit-scrollbar-thumb:hover { background: #3a4a5f; }
+      `}</style>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 style={{ margin: 0, color: 'var(--kappa-text)' }}>KAPPA</h2>
+        <WalletControls />
+      </div>
+
+      <div style={{ position: 'relative', minHeight: 360, paddingBottom: 26 }}>
+        <div
+          style={{ position: 'absolute', inset: 0, transition: 'transform 200ms ease, opacity 200ms ease', transform: view==='trade' ? 'translateX(0)' : 'translateX(-12px)', opacity: view==='trade' ? 1 : 0, pointerEvents: view==='trade' ? 'auto' : 'none' }}
+          onMouseDown={() => setShowSearch(false)}
+        >
+          <TradePanelView
+            contract={contract}
+            setContract={setContract}
+            tokenSymbol={tokenSymbol}
+            tokenName={tokenName}
+            tokenAvatarUrl={tokenAvatarUrl}
+            clearContract={clearContract}
+            searchResults={searchResults}
+            showSearch={showSearch}
+            setShowSearch={setShowSearch}
+            onSelectResult={(item) => {
+              const ca = String(item.contractAddress || '');
+              setContract(ca);
+              setTokenSymbol(String(item.symbol || '').toUpperCase());
+              setTokenName(String(item.name || ''));
+              setTokenAvatarUrl(String(item.avatarUrl || ''));
+              setIsVerified(true);
+              setShowSearch(false);
+            }}
+            isSearching={isSearching}
+            mode={mode}
+            setMode={setMode}
+            suiBalance={suiBalance}
+            tokenBalance={tokenBalance}
+            setView={setView}
+            maxBuys={['5','10','15','20','50','MAX']}
+            maxSells={['1/4','1/2','3/4','MAX']}
+            handleQuick={handleQuick}
+            amountProps={{ mode, suiIn, tokensIn, onSuiChange: setSuiIn, onTokensChange: setTokensIn, tokenSymbol, tokenAvatarUrl }}
+            youReceive={mode==='buy' ? `${(quoteTokens/1e9).toLocaleString(undefined,{maximumFractionDigits:2})} ${tokenSymbol || 'TOKEN'}` : `${(quoteSui/1e9).toLocaleString(undefined,{maximumFractionDigits:6})} SUI`}
+            onPrimary={mode==='buy' ? onBuy : onSell}
+            primaryLabel={mode==='buy' ? 'Buy' : 'Sell'}
+            statusText={statusText}
+            hasError={hasError}
+            isPrimaryDisabled={isPrimaryDisabled}
+          />
+        </div>
+      </div>
+      <TransactionModal
+        open={txOpen}
+        loading={txLoading}
+        digest={txDigest}
+        error={txError}
+        spentLabel={mode==='buy' ? `${suiIn} SUI` : `${tokensIn} ${tokenSymbol}`}
+        forLabel={mode==='buy' ? `${(quoteTokens/1e9).toFixed(2)} ${tokenSymbol}` : `${(quoteSui/1e9).toFixed(6)} SUI`}
+        onClose={() => setTxOpen(false)}
+      />
+    </div>
+  );
+}
+
+export function WidgetStandalone(props: { theme?: Partial<Record<keyof typeof defaultTheme, string>> }) {
+  const client = useMemo(() => new SuiClient({ url: networkConfig.mainnet.url }), []);
+  const queryClient = useMemo(() => new QueryClient(), []);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SuiClientProvider networks={networkConfig} defaultNetwork="mainnet">
+        <WalletProvider autoConnect>
+          <WidgetEmbedded {...props} />
+        </WalletProvider>
+      </SuiClientProvider>
+    </QueryClientProvider>
   );
 }
 

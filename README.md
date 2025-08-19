@@ -92,6 +92,12 @@ export default function Page() {
 }
 ```
 
+You can also import explicitly from the `react` subpath:
+
+```js
+import { WidgetStandalone } from '@kappa/sdk/react';
+```
+
 ### Embedded usage (reuse host providers)
 
 ```tsx
@@ -113,6 +119,24 @@ export default function App() {
     </QueryClientProvider>
   );
 }
+```
+
+### Next.js notes
+
+If your app imports the widget from the SDK (outside your `app/` directory), Next may require these settings:
+
+```js
+// next.config.js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: { externalDir: true },
+  transpilePackages: [
+    '@mysten/dapp-kit',
+    '@mysten/sui',
+    '@tanstack/react-query',
+  ],
+};
+export default nextConfig;
 ```
 
 ### Widget features
@@ -187,7 +211,7 @@ partner-sdk/
 │   └── trade.js
 ├── kappa.js            # On-chain functions, client injection helpers
 ├── math.js             # Bonding curve math (re-exported)
-├── src/react/         # React widget re-exports (clean import path)
+├── src/react/         # React widget (Widget.tsx) and re-exports
 └── move-bytecode/     # WASM for Move bytecode editing (token creation)
 ```
 

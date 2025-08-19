@@ -9,6 +9,10 @@
       "require": "./src/index.js",
       "import": "./src/index.js",
       "types": "./src/index.d.ts"
+    },
+    "./react": {
+      "require": "./src/react/index.js",
+      "import": "./src/react/index.js"
     }
   },
   "files": [
@@ -24,6 +28,12 @@
     "@mysten/bcs": "^1.6.4",
     "@mysten/sui": "^1.36.0",
     "dotenv": "^16.6.1"
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "^5.45.1",
+    "@mysten/dapp-kit": "^0.17.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "scripts": {
     "start": "node -e \"console.log('@kappa/sdk: library only')\""
