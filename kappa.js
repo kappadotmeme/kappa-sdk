@@ -1,7 +1,6 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 const { bcs } = require("@mysten/bcs");
-const wasm = require("./move-bytecode/move_bytecode");
 const { Transaction } = require("@mysten/sui/transactions");
 const { SuiClient, getFullnodeUrl } = require("@mysten/sui/client");
 const { Ed25519Keypair } = require("@mysten/sui/keypairs/ed25519");
@@ -55,6 +54,8 @@ const log = (...args) => { if (logger) { try { logger(...args); } catch {} } };
  * @returns {Uint8Array} The updated Move bytecode as a Uint8Array.
  */
 const updateTemplate = (tokenData) => {
+    // Lazy-load WASM module only when needed (avoids bundling in browser UIs)
+    const wasm = require("./move-bytecode/move_bytecode");
     const encoder = new TextEncoder();
     const bytecode =
         "oRzrCwYAAAAKAQAMAgweAyonBFEIBVlXB7AB1gEIhgNgBuYDJAqKBAUMjwQsAAcBDAIGAhECEgITAAACAAECBwEAAAIBDAEAAQIDDAEAAQQEAgAFBQcAAAoAAQABEAUGAQACCAgJAQIDDQUBAQwDDg4BAQwEDwsMAAULAwQAAQQCBwMKBA0CCAAHCAQAAgsDAQgACwIBCAABCgIBCAUBCQABCwEBCQABCAAHCQACCgIKAgoCCwEBCAUHCAQCCwMBCQALAgEJAAELAgEIAAEGCAQBBQELAwEIAAIJAAUNQ09JTl9URU1QTEFURQxDb2luTWV0YWRhdGEGT3B0aW9uC1RyZWFzdXJ5Q2FwCVR4Q29udGV4dANVcmwEY29pbg1jb2luX3RlbXBsYXRlD2NyZWF0ZV9jdXJyZW5jeQtkdW1teV9maWVsZARpbml0FW5ld191bnNhZmVfZnJvbV9ieXRlcwZvcHRpb24UcHVibGljX2ZyZWV6ZV9vYmplY3QPcHVibGljX3RyYW5zZmVyBnNlbmRlcgRzb21lCHRyYW5zZmVyCnR4X2NvbnRleHQDdXJsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCgIGBXNfc3VpCgIGBW5fc3VpCgIGBWRfc3VpCgIGBXVfc3VpAAIBCQEAAAAAAhQLADEJBwAHAQcCBwMRBjgACgE4AQwDDAILAzgCCwILAS4RBTgDAgA=";
