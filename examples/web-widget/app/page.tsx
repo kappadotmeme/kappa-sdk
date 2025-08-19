@@ -441,7 +441,7 @@ function QuickSelectRow(props: { values: string[]; onPick: (v: string) => void }
   );
 }
 
-function Widget(props: { theme?: Partial<Record<keyof typeof defaultTheme, string>> }) {
+function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defaultTheme, string>> }) {
   const { theme } = props || {} as any;
   const [contract, setContract] = useState('');
   const [mode, setMode] = useState<'buy' | 'sell'>('buy');
@@ -790,6 +790,20 @@ function Widget(props: { theme?: Partial<Record<keyof typeof defaultTheme, strin
   );
 }
 
+function WidgetStandalone(props: { theme?: Partial<Record<keyof typeof defaultTheme, string>> }) {
+  const client = useMemo(() => new SuiClient({ url: networkConfig.mainnet.url }), []);
+  const queryClient = useMemo(() => new QueryClient(), []);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SuiClientProvider networks={networkConfig} defaultNetwork="mainnet">
+        <WalletProvider autoConnect>
+          <WidgetEmbedded {...props} />
+        </WalletProvider>
+      </SuiClientProvider>
+    </QueryClientProvider>
+  );
+}
+
 export default function Page() {
   const client = useMemo(() => new SuiClient({ url: networkConfig.mainnet.url }), []);
   const queryClient = useMemo(() => new QueryClient(), []);
@@ -798,13 +812,16 @@ export default function Page() {
       <SuiClientProvider networks={networkConfig} defaultNetwork="mainnet">
         <WalletProvider autoConnect>
           <div style={{ display: 'grid', placeItems: 'center', minHeight: '100vh', padding: 24 }}>
-            <Widget />
+            <WidgetStandalone />
           </div>
         </WalletProvider>
       </SuiClientProvider>
     </QueryClientProvider>
   );
 }
+
+// Re-exports for package consumers
+export { WidgetStandalone, WidgetEmbedded };
 
 function WalletControls() {
   const account = useCurrentAccount();

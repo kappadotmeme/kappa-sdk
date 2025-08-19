@@ -58,6 +58,13 @@ module.exports = {
     calculatePriceImpact,
     simulateCurveAfterDevBuy,
     calculateSuiForBundledPurchase,
+    // React widget re-exports (from src/react)
+    get WidgetStandalone() {
+        try { return require('./react').WidgetStandalone; } catch { return undefined; }
+    },
+    get WidgetEmbedded() {
+        try { return require('./react').WidgetEmbedded; } catch { return undefined; }
+    },
 };
 
 
