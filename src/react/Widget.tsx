@@ -707,6 +707,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
               return fields.some((v) => !!(typeof v === 'string' ? v.trim() : v));
             };
             const list = (all || []).filter((c) => !isMigratedCoin(c));
+            const qStr = contract.trim().toLowerCase();
             const bySymbol = list.filter((c) => String(c.symbol || '').toLowerCase().includes(qStr));
             const byName = list.filter((c) => String(c.name || '').toLowerCase().includes(qStr));
             const merged: any[] = [];
@@ -724,6 +725,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
           return;
         }
         const normalized = contract.trim();
+        const [pkg, mod, sym] = normalized.split('::');
         const res = await fetch('https://api.kappa.fun/v1/coins/trending');
         const json = await res.json();
         const listAll = (json?.data || []) as any[];
