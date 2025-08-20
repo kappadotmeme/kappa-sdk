@@ -183,8 +183,9 @@ function ContractInput(props: {
   setShowSearch: (v: boolean) => void;
   onSelectResult: (item: any) => void;
   isSearching: boolean;
+  locked?: boolean;
 }) {
-  const { contract, setContract, tokenSymbol, tokenName, tokenAvatarUrl, onClear, searchResults, showSearch, setShowSearch, onSelectResult, isSearching } = props;
+  const { contract, setContract, tokenSymbol, tokenName, tokenAvatarUrl, onClear, searchResults, showSearch, setShowSearch, onSelectResult, isSearching, locked } = props;
   const rootRef = useRef<HTMLDivElement | null>(null);
   const showCA = !!contract && contract.includes('::');
   useEffect(() => {
@@ -200,11 +201,12 @@ function ContractInput(props: {
     <div ref={rootRef} style={{ position: 'relative' }}>
       <input
         value={showCA ? '' : contract}
-        onChange={(e) => { setContract(e.target.value); setShowSearch(true); }}
-        onBlur={() => setTimeout(() => setShowSearch(false), 100)}
+        onChange={(e) => { if (!locked) { setContract(e.target.value); setShowSearch(true); } }}
+        onBlur={() => { if (!locked) setTimeout(() => setShowSearch(false), 100); }}
         placeholder={showCA ? '' : "type a coin name/symbol or contract address"}
         title={contract}
-        style={{ ...inputStyle, paddingRight: (tokenSymbol || tokenName) ? 220 : 10, paddingLeft: showCA ? 170 : 10 }}
+        style={{ ...inputStyle, paddingRight: (tokenSymbol || tokenName) ? 220 : 10, paddingLeft: showCA ? 170 : 10, opacity: locked ? 0.8 : 1 }}
+        disabled={!!locked}
       />
       {showCA && (
         <div style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', gap: 8, pointerEvents: 'none' }}>
@@ -225,17 +227,17 @@ function ContractInput(props: {
             {tokenSymbol ? `$${tokenSymbol}` : ''}{tokenName ? (tokenSymbol ? ' | ' : '') + tokenName : ''}
           </span>
         )}
-        {(tokenSymbol || tokenName) && (
+        {(tokenSymbol || tokenName) && !locked && (
           <button onClick={onClear} title="Clear" style={{ border: 'none', background: 'transparent', color: '#9ca3af', cursor: 'pointer', fontSize: 14 }}>🗑</button>
         )}
       </div>
-      {showSearch && (
+      {!locked && showSearch && (
         <div className="kappa-dropdown" style={{ position: 'absolute', left: 0, right: 0, top: '100%', marginTop: 6, background: 'var(--kappa-panel)', border: '1px solid var(--kappa-border)', borderRadius: 10, maxHeight: 240, overflowY: 'auto', zIndex: 5, boxShadow: '0 6px 16px rgba(0,0,0,0.35)', scrollbarWidth: 'thin' }}>
           {isSearching ? (
             <div style={{ padding: 10, color: '#9ca3af', fontSize: 12 }}>Searching…</div>
           ) : searchResults && searchResults.length > 0 ? (
             searchResults.map((item: any) => (
-              <button key={item.contractAddress}
+              <button key={String(item.contractAddress || item.coinType || item.contract || item.id || item.name || item.symbol)}
                 onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onSelectResult(item); }}
                 style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', padding: '10px 12px', background: 'transparent', color: '#e5e7eb', border: 'none', cursor: 'pointer', gap: 10 }}
               >
@@ -247,7 +249,7 @@ function ContractInput(props: {
                 <span style={{ color: '#e5e7eb', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   ${String(item.symbol || '').toUpperCase()} {String(item.name || '') ? '| ' + String(item.name) : ''}
                 </span>
-                <span style={{ color: '#6b7280', fontSize: 12 }}>{abbreviateContract(String(item.contractAddress || ''))}</span>
+                <span style={{ color: '#6b7280', fontSize: 12 }}>{abbreviateContract(String(item.contractAddress || item.coinType || item.contract || ''))}</span>
               </button>
             ))
           ) : (
@@ -323,13 +325,15 @@ function TradePanelView(props: {
   statusText: string;
   hasError: boolean;
   isPrimaryDisabled: boolean;
+  lockContract?: boolean;
 }) {
   const {
     contract, setContract, tokenSymbol, tokenName, tokenAvatarUrl, clearContract,
     searchResults, showSearch, setShowSearch, onSelectResult, isSearching,
     mode, setMode,
     suiBalance, tokenBalance, setView, maxBuys, maxSells, handleQuick,
-    amountProps, youReceive, onPrimary, primaryLabel, statusText, hasError, isPrimaryDisabled
+    amountProps, youReceive, onPrimary, primaryLabel, statusText, hasError, isPrimaryDisabled,
+    lockContract
   } = props;
 
   return (
@@ -353,6 +357,7 @@ function TradePanelView(props: {
           setShowSearch={setShowSearch}
           onSelectResult={onSelectResult}
           isSearching={isSearching}
+          locked={!!lockContract}
         />
       </div>
 
@@ -512,8 +517,8 @@ function WalletControls() {
   );
 }
 
-export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defaultTheme, string>> }) {
-  const { theme } = props || {} as any;
+export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defaultTheme, string>>, defaultContract?: string, lockContract?: boolean }) {
+  const { theme, defaultContract, lockContract } = props || {} as any;
   const [contract, setContract] = useState('');
   const [mode, setMode] = useState<'buy' | 'sell'>('buy');
   const [slippage, setSlippage] = useState('1');
@@ -556,6 +561,13 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
     } : null
   ), [account, signAndExecuteTransaction]);
 
+  // Initialize default contract once
+  useEffect(() => {
+    if (defaultContract && !contract) {
+      setContract(String(defaultContract));
+    }
+  }, [defaultContract]);
+
   // Token + balances loader
   useEffect(() => {
     let abort = false;
@@ -564,7 +576,6 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
         setCurve(null);
         setTokenSymbol('');
         setTokenName('');
-        setTokenAvatarUrl('');
         setIsVerified(false);
         if (!contract || !contract.includes('::')) {
           // search mode
@@ -572,7 +583,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
           if (!contract) { setSearchResults([]); return; }
           setIsSearching(true);
           try {
-            const res = await fetch('https://api.kappa.fun/v1/coins?nameOrSymbol=' + contract.trim().toLowerCase());
+            const res = await fetch('https://api.kappa.fun/v1/coins?nameOrSymbol=' + encodeURIComponent(contract.trim().toLowerCase()));
             const json = await res.json();
             const all: any[] = (json?.data || []) as any[];
             const isMigratedCoin = (item: any): boolean => {
@@ -597,11 +608,11 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
           }
           return;
         }
-        const res = await fetch('https://api.kappa.fun/v1/coins?nameOrSymbol=' + normalized.toLowerCase());
+        const normalized = contract.trim();
+        const res = await fetch('https://api.kappa.fun/v1/coins');
         const json = await res.json();
         const listAll = (json?.data || []) as any[];
         const list = listAll.filter((c) => !([c?.pairAddress, c?.pairContractAddress, c?.pair, c?.pair_object, c?.pairObject, c?.poolAddress, c?.lpAddress].some((v: any) => !!(typeof v === 'string' ? v.trim() : v))));
-        const normalized = contract.trim();
         let item = list.find((c: any) => (c.contractAddress || '').toLowerCase() === normalized.toLowerCase());
         if (!item) {
           const pkg = normalized.split('::')[0];
@@ -609,12 +620,64 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
         }
         const coinType = normalized;
         if (item?.symbol) setTokenSymbol(String(item.symbol).toUpperCase()); else { const seg = normalized.split('::')[2]; if (seg) setTokenSymbol(seg.toUpperCase()); }
-        if (item?.avatarUrl) { const url = String(item.avatarUrl).trim(); if (url.startsWith('http')) setTokenAvatarUrl(url); else setTokenAvatarUrl(''); }
+        {
+          const avatarCandidates = [
+            item?.avatarUrl,
+            item?.icon,
+            item?.avatar,
+            item?.logo,
+            item?.image,
+            item?.img,
+            item?.iconUrl,
+            item?.avatar_url,
+            item?.imageUrl,
+            item?.logoUrl,
+            item?.logoURI,
+          ];
+          let avatar = avatarCandidates.find((v: any) => typeof v === 'string' && v.trim().length > 0);
+          let picked = '';
+          if (avatar) {
+            avatar = String(avatar).trim();
+            if (avatar.startsWith('ipfs://')) {
+              const cid = avatar.replace('ipfs://', '').replace(/^ipfs\//, '');
+              picked = `https://ipfs.io/ipfs/${cid}`;
+            } else if (/^https?:\/\//i.test(avatar)) {
+              picked = avatar;
+            }
+          }
+          if (picked) {
+            setTokenAvatarUrl(picked);
+          } else {
+            try {
+              const meta: any = await client.getCoinMetadata({ coinType });
+              const mUrl = String(meta?.iconUrl || '').trim();
+              if (mUrl && /^https?:\/\//i.test(mUrl)) setTokenAvatarUrl(mUrl);
+            } catch {}
+          }
+        }
         if (item?.name) setTokenName(String(item.name));
         setIsVerified(!!item);
-        if (item?.bondingContractAddress) {
-          const obj = await client.getObject({ id: item.bondingContractAddress, options: { showContent: true } });
-          if (!abort) setCurve(obj?.data || null);
+        {
+          const candidateIds = [
+            item?.bondingContractAddress,
+            item?.bondingAddress,
+            item?.bondingContract,
+            item?.bonding,
+            item?.bonding_object,
+            item?.bondingObject,
+            item?.curve,
+            item?.curveId,
+            item?.curveAddress,
+            item?.curve_object,
+            item?.curveObject,
+          ];
+          const bondingId = candidateIds
+            .map((v: any) => (typeof v === 'string' ? v.trim() : ''))
+            .find((v: string) => v && v.startsWith('0x'));
+          if (bondingId) {
+            const obj = await client.getObject({ id: bondingId, options: { showContent: true } });
+            if (!abort) setCurve(obj?.data || null);
+          }
         }
         if (account?.address) {
           const bal = await suiClientHook.getBalance({ owner: account.address });
@@ -735,12 +798,12 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
     let text = 'Ready to trade';
     let error = false;
     let disabled = false;
-    if (!contract) {
+    if (!account?.address) {
+      text = 'Connect wallet to continue';
+      error = false; disabled = true;
+    } else if (!contract) {
       text = 'Enter a token contract or search by name';
       error = true; disabled = true;
-    } else if (!curve) {
-      text = 'Token data not loaded yet';
-      error = false; disabled = true;
     } else if (mode === 'buy') {
       if (!suiIn || isNaN(suiInNum) || suiInNum <= 0) { text = 'Enter SUI amount'; error = true; disabled = true; }
       else if (suiInNum > suiBalance) { text = 'Insufficient SUI balance'; error = true; disabled = true; }
@@ -753,7 +816,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
     setStatusText(text);
     setHasError(error);
     setIsPrimaryDisabled(disabled);
-  }, [contract, curve, mode, suiIn, tokensIn, suiBalance, tokenBalance]);
+  }, [account?.address, contract, curve, mode, suiIn, tokensIn, suiBalance, tokenBalance]);
 
   const themeVars = { ...defaultTheme, ...(theme || {}) } as Record<string, string>;
   return (
@@ -785,11 +848,32 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
             showSearch={showSearch}
             setShowSearch={setShowSearch}
             onSelectResult={(item) => {
-              const ca = String(item.contractAddress || '');
+              const ca = String(item.contractAddress || item.coinType || item.contract || '')
+                .trim();
               setContract(ca);
               setTokenSymbol(String(item.symbol || '').toUpperCase());
               setTokenName(String(item.name || ''));
-              setTokenAvatarUrl(String(item.avatarUrl || ''));
+              {
+                const avatarCandidates = [
+                  item?.avatarUrl,
+                  item?.icon,
+                  item?.avatar,
+                  item?.logo,
+                  item?.image,
+                  item?.img,
+                  item?.iconUrl,
+                ];
+                let avatar = avatarCandidates.find((v: any) => typeof v === 'string' && v.trim().length > 0);
+                if (avatar) {
+                  avatar = String(avatar).trim();
+                  if (avatar.startsWith('ipfs://')) {
+                    const cid = avatar.replace('ipfs://', '').replace(/^ipfs\//, '');
+                    setTokenAvatarUrl(`https://ipfs.io/ipfs/${cid}`);
+                  } else if (/^https?:\/\//i.test(avatar)) {
+                    setTokenAvatarUrl(avatar);
+                  }
+                }
+              }
               setIsVerified(true);
               setShowSearch(false);
             }}
@@ -809,6 +893,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
             statusText={statusText}
             hasError={hasError}
             isPrimaryDisabled={isPrimaryDisabled}
+            lockContract={!!lockContract}
           />
         </div>
       </div>
@@ -825,7 +910,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
   );
 }
 
-export function WidgetStandalone(props: { theme?: Partial<Record<keyof typeof defaultTheme, string>> }) {
+export function WidgetStandalone(props: { theme?: Partial<Record<keyof typeof defaultTheme, string>>, defaultContract?: string, lockContract?: boolean }) {
   const client = useMemo(() => new SuiClient({ url: networkConfig.mainnet.url }), []);
   const queryClient = useMemo(() => new QueryClient(), []);
   return (

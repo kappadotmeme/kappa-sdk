@@ -13,4 +13,5 @@ const getNetworkConfig = (network = 'mainnet') => NETWORKS[network] || NETWORKS.
 
 module.exports = { getNetworkConfig };
 
+// Concern - should we be passing these values to the module during tx? if so are these verified by the module / ca. 
 
