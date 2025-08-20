@@ -74,10 +74,6 @@ const defaultTheme = {
   '--kappa-avatar-bg': '#233B53',
 } as const;
 
-// Inline SVG fallbacks so assets work even if host app doesn't serve them from /public
-const DEFAULT_LOGO_DATA = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<?xml version="1.0" encoding="UTF-8"?><svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.1268 21.8877C13.7496 26.7985 8.64625 34.9674 7.14173 38.4375C9.30824 36.7042 13.3404 35.107 15.0856 34.5257C8.44164 42.5177 6.5002 50.6145 6.35938 53.6633C8.52589 50.582 11.234 48.7284 12.3173 48.1868C8.80272 57.1417 10.4914 65.0772 11.7757 67.9261C12.0164 66.1929 13.4403 63.5125 14.1227 62.3895C14.6523 64.9893 16.4301 68.0862 17.2521 69.3103L19.4788 66.1207C17.9863 63.9061 17.7733 60.0629 17.8539 58.4176C14.9171 53.9401 16.3097 47.5645 17.3725 44.937C18.3354 40.1225 22.1063 35.9905 23.872 34.5257C24.333 36.9329 26.3154 42.3011 30.5521 44.5157C30.2151 42.59 31.3742 39.2198 31.9965 37.7755C33.3 39.9624 37.3405 44.7204 43.0698 46.261C41.9624 43.6612 42.6088 39.5207 43.0698 37.7755C45.0353 39.5412 49.9906 43.1436 54.0829 43.4325C53.0237 42.3733 52.1968 38.9394 51.9164 37.3542C53.7218 38.8383 58.6567 41.928 63.9526 42.4094C62.3157 40.3873 61.0242 37.2736 60.5824 35.97C67.2746 38.8106 70.954 45.2981 71.9567 48.1868C75.4231 60.0304 71.5956 67.7251 69.2485 70.0927C71.6076 69.9964 75.0463 66.5215 76.4702 64.7967C76.6628 80.1068 65.4715 87.1034 59.8519 88.6886C58.9154 90.2316 57.8731 91.4942 57.2725 92.1189C66.5644 91.2042 73.7825 84.0751 76.2295 80.6243C76.2776 82.0205 75.5675 84.0546 75.2064 84.8972C81.7541 81.3826 84.3539 72.8008 84.8354 68.9492C85.3566 70.3731 86.4001 73.8961 86.4001 76.5922C91.0701 69.7075 90.5129 60.3638 89.6499 56.5519C90.6128 57.4342 92.8996 60.0063 94.344 63.232C95.8365 52.4957 89.2286 41.266 85.7381 36.9931C87.8649 37.8561 92.4423 39.8818 93.7422 41.0854C90.3239 31.9861 81.8865 24.6957 78.0951 22.1886C80.7431 17.3741 78.4562 10.7542 67.8042 7.74515C59.2825 5.33791 51.6155 5.01654 48.8472 5.15737C21.212 6.98687 19.5186 17.0732 22.1268 21.8877Z" fill="#141315"/></svg>`);
-const TRIP_ICON_DATA = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<?xml version="1.0" encoding="UTF-8"?><svg width="226" height="226" viewBox="0 0 226 226" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M119.76 9C109.345 9 107.088 17.3321 107.262 21.4982C104.138 60.5551 90.0758 54.8268 67.1624 70.9703C48.8317 83.8851 42.8604 106.555 42.166 116.276V154.812C42.5132 157.937 45.4989 164.394 54.6642 165.228C63.8296 166.061 66.8153 158.631 67.1624 154.812V126.691C67.1624 116.276 68.5511 111.589 69.2455 110.548L137.986 214.7C140.416 216.436 146.943 218.866 153.608 214.7C160.274 210.534 158.816 202.201 157.254 198.556L118.718 139.19H159.337L175.48 161.062C178.605 165.748 185.375 167.311 193.186 162.103C199.435 157.937 198.289 149.084 196.831 147.001C191.971 140.058 181.104 124.921 176.522 119.922C171.939 114.922 166.627 113.673 164.544 113.673L126.008 113.152L102.574 79.8232C125.487 66.9084 131.347 43.3701 132.258 21.4982C132.432 17.3321 130.175 9 119.76 9Z" fill="white" stroke="white"/><circle cx="48.4119" cy="41.2869" r="19.2888" fill="white" stroke="white"/></svg>`);
-
 const abbreviateContract = (val: string) => {
   if (!val || val.length <= 20) return val;
   const head = val.slice(0, 5);
@@ -351,26 +347,8 @@ function TradePanelView(props: {
   return (
     <div style={{ paddingLeft: 4, paddingRight: 4 }}>
       <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-        <button
-          style={{
-            ...tabBtn(mode === 'buy'),
-            background: mode === 'buy' ? 'rgba(16,185,129,0.15)' : 'var(--kappa-panel)',
-            borderColor: 'rgba(16,185,129,0.35)',
-          }}
-          onClick={() => setMode('buy')}
-        >
-          Buy
-        </button>
-        <button
-          style={{
-            ...tabBtn(mode === 'sell'),
-            background: mode === 'sell' ? 'rgba(248,113,113,0.15)' : 'var(--kappa-panel)',
-            borderColor: 'rgba(248,113,113,0.35)',
-          }}
-          onClick={() => setMode('sell')}
-        >
-          Sell
-        </button>
+        <button style={tabBtn(mode === 'buy')} onClick={() => setMode('buy')}>Buy</button>
+        <button style={tabBtn(mode === 'sell')} onClick={() => setMode('sell')}>Sell</button>
       </div>
 
       <div style={{ marginTop: 12 }}>
@@ -412,9 +390,7 @@ function TradePanelView(props: {
             </span>
           </div>
         </div>
-        <button onClick={() => setView('slippage')} title="Slippage settings" style={{ padding: 6, borderRadius: 8, border: '1px solid var(--kappa-border)', background: 'var(--kappa-panel)', color: 'var(--kappa-text)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
-          <img src={TRIP_ICON_DATA} alt="slippage" style={{ width: 18, height: 18 }} />
-        </button>
+        <button onClick={() => setView('slippage')} title="Slippage settings" style={{ padding: 6, borderRadius: 8, border: '1px solid var(--kappa-border)', background: 'var(--kappa-panel)', color: 'var(--kappa-text)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>⚙️</button>
       </div>
 
       <div style={{ marginTop: 12 }}>
@@ -550,8 +526,8 @@ function WalletControls() {
   );
 }
 
-export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defaultTheme, string>>, defaultContract?: string, lockContract?: boolean, logoUrl?: string, projectName?: string }) {
-  const { theme, defaultContract, lockContract, logoUrl, projectName } = props || {} as any;
+export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defaultTheme, string>>, defaultContract?: string, lockContract?: boolean }) {
+  const { theme, defaultContract, lockContract } = props || {} as any;
   const [contract, setContract] = useState('');
   const [mode, setMode] = useState<'buy' | 'sell'>('buy');
   const [slippage, setSlippage] = useState('1');
@@ -577,7 +553,6 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
   const [txError, setTxError] = useState<string | null>(null);
 
   const [curve, setCurve] = useState<any>(null);
-  const lastCurveRef = useRef<any>(null);
   const [tokenSymbol, setTokenSymbol] = useState<string>('');
   const [tokenAvatarUrl, setTokenAvatarUrl] = useState<string>('');
   const [tokenName, setTokenName] = useState<string>('');
@@ -625,26 +600,6 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
       const f = c?.fields || c;
       if (f?.virtual_sui_reserve != null && f?.virtual_coin_reserve != null) {
         return tryBuild(f.virtual_sui_reserve, f.virtual_coin_reserve);
-      }
-    }
-    // Deep search (limited) as final fallback
-    const seen = new Set<any>();
-    const stack: any[] = [node];
-    let depth = 0;
-    while (stack.length && depth < 2000) {
-      depth++;
-      const cur = stack.pop();
-      if (!cur || typeof cur !== 'object' || seen.has(cur)) continue;
-      seen.add(cur);
-      const maybeFields = (cur as any)?.fields || cur;
-      if (maybeFields && typeof maybeFields === 'object') {
-        if (maybeFields.virtual_sui_reserve != null && maybeFields.virtual_coin_reserve != null) {
-          return tryBuild(maybeFields.virtual_sui_reserve, maybeFields.virtual_coin_reserve);
-        }
-      }
-      for (const k of Object.keys(cur)) {
-        const v = (cur as any)[k];
-        if (v && typeof v === 'object') stack.push(v);
       }
     }
     return null;
@@ -738,9 +693,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
         }
         const normalized = contract.trim();
         const pkg = normalized.split('::')[0]?.toLowerCase();
-        const mod = normalized.split('::')[1] || '';
-        const sym = normalized.split('::')[2] || '';
-        // Contract mode: try filtered by package first, then full list (matches the working example)
+        // Contract mode: first try filtered by package (safe), then fallback to full list
         let listAll: any[] = [];
         try {
           if (pkg) {
@@ -764,13 +717,6 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
         let item = list.find((c: any) => (c.contractAddress || '').toLowerCase() === normalized.toLowerCase());
         if (!item && pkg) {
           item = list.find((c: any) => (c.contractAddress || '').toLowerCase().startsWith(`${pkg}::`));
-        }
-        // If still not found, try matching by symbol or name as a last resort
-        if (!item && (sym || mod)) {
-          const ql = (s: string) => String(s||'').trim().toLowerCase();
-          const symL = ql(sym);
-          const modL = ql(mod).replaceAll('_',' ');
-          item = list.find((c: any) => ql(c.symbol) === symL || ql(c.name) === modL);
         }
         const coinType = normalized;
         if (item?.symbol) setTokenSymbol(String(item.symbol).toUpperCase()); else { const seg = normalized.split('::')[2]; if (seg) setTokenSymbol(seg.toUpperCase()); }
@@ -832,7 +778,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
           if (bondingId) {
             const obj = await client.getObject({ id: bondingId, options: { showContent: true } });
             const norm = normalizeCurveObject(obj);
-            if (!abort) { setCurve(norm); if (norm) lastCurveRef.current = norm; }
+            if (!abort) setCurve(norm);
           }
         }
         if (account?.address) {
@@ -857,9 +803,8 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
         const sellMath = (mathMod as any).sellMath || (mathMod as any).default?.sellMath;
         const suiMist = Math.max(0, Math.floor(Number(suiIn) * 1e9));
         const tokensAmt = Math.max(0, Math.floor(Number(tokensIn)));
-        const usableCurve = normalizeCurveObject(curve) || lastCurveRef.current || null;
-        if (usableCurve && suiMist > 0 && typeof buyMath === 'function') {
-          const q = buyMath(usableCurve, suiMist);
+        if (normalizeCurveObject(curve) && suiMist > 0 && typeof buyMath === 'function') {
+          const q = buyMath(normalizeCurveObject(curve), suiMist);
           quoteTokensRef.current = q;
           setQuoteTokens(q);
         } else if (suiMist > 0) {
@@ -869,8 +814,8 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
           quoteTokensRef.current = 0;
           setQuoteTokens(0);
         }
-        if (usableCurve && tokensAmt > 0 && typeof sellMath === 'function') {
-          const qS = sellMath(usableCurve, tokensAmt);
+        if (normalizeCurveObject(curve) && tokensAmt > 0 && typeof sellMath === 'function') {
+          const qS = sellMath(normalizeCurveObject(curve), tokensAmt);
           quoteSuiRef.current = qS;
           setQuoteSui(qS);
         } else if (tokensAmt > 0) {
@@ -1030,16 +975,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
         .kappa-dropdown::-webkit-scrollbar-thumb:hover { background: #3a4a5f; }
       `}</style>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <img
-            src={(logoUrl && String(logoUrl)) || '/kappa3emoji.svg'}
-            alt="logo"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-            style={{ width: 22, height: 22, borderRadius: 4, objectFit: 'cover' }}
-          />
-          <span style={{ color: 'var(--kappa-muted)' }}>|</span>
-          <span style={{ color: 'var(--kappa-text)', fontWeight: 600 }}>{projectName || 'Kappa'}</span>
-        </div>
+        <h2 style={{ margin: 0, color: 'var(--kappa-text)' }}>KAPPA</h2>
         <WalletControls />
       </div>
 
@@ -1108,9 +1044,6 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
             dropdownTitle={dropdownTitle}
           />
         </div>
-        <div style={{ position: 'absolute', inset: 0, transition: 'transform 200ms ease, opacity 200ms ease', transform: view==='slippage' ? 'translateX(0)' : 'translateX(12px)', opacity: view==='slippage' ? 1 : 0, pointerEvents: view==='slippage' ? 'auto' : 'none' }}>
-          <SlippagePanel slippage={slippage} setSlippage={setSlippage} onClose={() => setView('trade')} />
-        </div>
         {debugQuote}
       </div>
       <TransactionModal
@@ -1119,12 +1052,9 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
         digest={txDigest}
         error={txError}
         spentLabel={mode==='buy' ? `${suiIn} SUI` : `${tokensIn} ${tokenSymbol}`}
-        forLabel={mode==='buy' ? `${formatTokenOut(quoteTokens)} ${tokenSymbol}` : `${formatSuiOut(quoteSui)} SUI`}
+        forLabel={mode==='buy' ? `${(quoteTokens/1e9).toFixed(2)} ${tokenSymbol}` : `${(quoteSui/1e9).toFixed(6)} SUI`}
         onClose={() => setTxOpen(false)}
       />
-      <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end' }}>
-        <span style={{ color: 'var(--kappa-muted)', fontSize: 11 }}>Powered by <a href="https://kappa.meme" target="_blank" rel="noreferrer" style={{ color: 'var(--kappa-accent)', textDecoration: 'underline' }}>Kappa</a></span>
-      </div>
     </div>
   );
 }
