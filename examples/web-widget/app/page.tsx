@@ -4,9 +4,7 @@ import { WidgetStandalone } from '../../../src/react/Widget';
 export default function Page() {
   return (
     <div style={{ display: 'grid', placeItems: 'center', height: '100vh', padding: 24, overflow: 'hidden' }}>
-      <WidgetStandalone />
+      <WidgetStandalone projectName="KAPPA" />
     </div>
   );
 }
-
-
