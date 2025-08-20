@@ -1092,9 +1092,6 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
         forLabel={mode==='buy' ? `${formatTokenOut(quoteTokens)} ${tokenSymbol}` : `${formatSuiOut(quoteSui)} SUI`}
         onClose={() => setTxOpen(false)}
       />
-      <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end' }}>
-        <span style={{ color: 'var(--kappa-muted)', fontSize: 11 }}>Powered by <a href="https://kappa.meme" target="_blank" rel="noreferrer" style={{ color: 'var(--kappa-accent)', textDecoration: 'underline' }}>Kappa</a></span>
-      </div>
     </div>
   );
 }
