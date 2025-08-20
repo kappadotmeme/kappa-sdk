@@ -10,6 +10,10 @@
       "import": "./src/index.js",
       "types": "./src/index.d.ts"
     },
+    "./server": {
+      "require": "./src/server.js",
+      "import": "./src/server.js"
+    },
     "./react": {
       "require": "./src/react/index.js",
       "import": "./src/react/index.js"
@@ -24,6 +28,7 @@
   "engines": {
     "node": ">=18"
   },
+  "sideEffects": false,
   "dependencies": {
     "@mysten/bcs": "^1.6.4",
     "@mysten/sui": "^1.36.0",

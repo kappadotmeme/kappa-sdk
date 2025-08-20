@@ -11,7 +11,8 @@ npm install @kappa/sdk @mysten/sui
 ## Quickstart (Node)
 
 ```js
-const { initKappa, createToken, buyTokens, sellTokens, listCoins } = require('@kappa/sdk');
+const { initKappa, buyTokens, sellTokens, listCoins } = require('@kappa/sdk');
+const { createToken } = require('@kappa/sdk/server'); // server-only
 const { SuiClient, getFullnodeUrl, Ed25519Keypair } = require('@mysten/sui');
 
 const client = new SuiClient({ url: getFullnodeUrl('mainnet') });
@@ -20,7 +21,7 @@ initKappa({ client, logger: console.log });
 // Your signer: either a Keypair or a Uint8Array secret key (server-side only)
 const signer = Ed25519Keypair.fromSecretKey(/* Uint8Array secret key */);
 
-// Create + launch (optional first buy)
+// Create + launch (optional first buy) — server-only
 await createToken({
   signer,
   name: 'My Coin', symbol: 'MYC', description: '...', icon: 'https://...',
