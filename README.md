@@ -194,7 +194,14 @@ Pass either:
 ## Browser vs server
 
 - Do not use custodial private keys in the browser. Prefer wallet adapters.
-- Token creation (bytecode publish) should run server-side.
+- Token creation (bytecode publish) should run server-side. Import from `@kappa/sdk/server` only.
+
+### Server-only entry quickstart
+
+```js
+// Node only
+const { createToken } = require('@kappa/sdk/server');
+```
 
 ## Types
 
@@ -219,3 +226,19 @@ partner-sdk/
 ## License
 
 MIT 
+
+## Releases
+
+Automated npm publish on semver tags via GitHub Actions.
+
+Prereqs:
+- Add `NPM_TOKEN` (automation token) to repo secrets.
+- Ensure `package.json` version is updated.
+
+Release steps:
+1. Merge your changes to `main` (CI must be green).
+2. Bump version in `package.json` (or use your chosen versioning tool).
+3. Tag the commit, e.g. `git tag v1.3.0 && git push --tags`.
+4. The `Release` workflow will publish to npm with provenance.
+
+Example consumers can then install `@kappa/sdk@^1.3.0` and import `@kappa/sdk/react`.

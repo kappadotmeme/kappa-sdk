@@ -1,10 +1,8 @@
 // Constants for calculations
-const TOTAL_SUPPLY = 1_000_000_000;
 const INITIAL_INPUT_RESERVE = 1_900 * 1e9;      // 1,900 SUI in MIST (corrected)
 const INITIAL_OUTPUT_RESERVE = 876_800_000 * 1e9; // 876.8M tokens in smallest unit (corrected)
 const FEE_BPS = 100;
 const BPS_DENOMINATOR = 10000;
-const PRECISION = 10000;
 
 /**
  * Calculates the amount of output tokens received for the first buy in a bonding curve.
@@ -65,7 +63,6 @@ const buyMath = (realCurve, sui_for_buy) => {
         const out =
             (_amount_after_fee * output_reserve_val) /
             (input_reserve_val + _amount_after_fee);
-        const out_fee = _fee_amount;
 
         console.log("buy input_reserve_val ", input_reserve_val);
         console.log("buy output_reserve_val ", output_reserve_val);
