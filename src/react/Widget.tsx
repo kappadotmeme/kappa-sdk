@@ -1005,18 +1005,17 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
         .kappa-dropdown::-webkit-scrollbar-track { background: transparent; }
         .kappa-dropdown::-webkit-scrollbar-thumb { background: rgba(229,231,235,0.4); border-radius: 6px; }
         .kappa-dropdown::-webkit-scrollbar-thumb:hover { background: rgba(229,231,235,0.55); }
-        /* Force wider layout on small viewports for better usability */
-        @media (max-width: 780px) {
-          .kappa-root { width: 780px !important; max-width: none !important; }
-        }
-        @media (max-width: 420px) {
-          .kappa-root { padding: 14px !important; border-radius: 14px; }
+        @media (max-width: 430px) {
+          .kappa-root { padding: 10px !important; border-radius: 12px; max-width: 430px !important; }
           .kappa-header-name { font-size: 16px !important; }
           .kappa-main { min-height: 300px !important; }
           .kappa-tabs button { padding: 8px !important; }
           .kappa-balance-chip { padding: 4px 8px !important; }
           .kappa-quick button { min-width: 48px !important; padding: 6px 8px !important; }
           .kappa-primary-btn { padding: 10px !important; }
+        }
+        @media (max-width: 320px) {
+          .kappa-root { padding: 8px !important; }
         }
       `}</style>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
