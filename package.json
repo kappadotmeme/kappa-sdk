@@ -1,6 +1,6 @@
 {
   "name": "kappa-sdk",
-  "version": "1.3.4",
+  "version": "1.3.5",
   "description": "SDK for creating and trading tokens on Kappa's Sui bonding curve (create/buy/sell)",
   "main": "src/index.js",
   "types": "src/index.d.ts",
