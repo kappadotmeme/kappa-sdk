@@ -6,6 +6,7 @@ Minimal Next.js app that consumes the published SDK widget.
 
 ```bash
 npm install
+npm i kappa-sdk
 npm run dev
 ```
 
