@@ -996,17 +996,21 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
   return (
     <div style={{ width: 440, background: 'var(--kappa-bg)', borderRadius: 16, padding: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.45)', border: '1px solid var(--kappa-border)', position: 'relative', overflow: 'hidden', ...(themeVars as any) }}>
       <style>{`
+        /* Consistent font across widget */
+        .kappa-root, .kappa-root * {
+          font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+        }
         .kappa-dropdown { scrollbar-width: thin; scrollbar-color: rgba(229,231,235,0.4) transparent; }
         .kappa-dropdown::-webkit-scrollbar { width: 4px; }
         .kappa-dropdown::-webkit-scrollbar-track { background: transparent; }
         .kappa-dropdown::-webkit-scrollbar-thumb { background: rgba(229,231,235,0.4); border-radius: 6px; }
         .kappa-dropdown::-webkit-scrollbar-thumb:hover { background: rgba(229,231,235,0.55); }
       `}</style>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="kappa-root" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <img src={headerLogo} alt="logo" style={{ width: 22, height: 22, borderRadius: 4 }} />
           <div style={{ width: 1, height: 16, background: 'var(--kappa-border)', opacity: 0.8 }} />
-          <div style={{ color: 'var(--kappa-text)', fontWeight: 600 }}>{headerName}</div>
+          <div style={{ color: 'var(--kappa-text)', fontWeight: 700 }}>{headerName}</div>
         </div>
         <WalletControls />
       </div>
