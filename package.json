@@ -1,6 +1,6 @@
 {
   "name": "kappa-sdk",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "description": "SDK for creating and trading tokens on Kappa's Sui bonding curve (create/buy/sell)",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -57,8 +57,7 @@
     "sdk"
   ],
   "author": "Kappa Protocol",
-  "license": "MIT"
-  ,
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/Kappa-developer/kappa-sdk"
