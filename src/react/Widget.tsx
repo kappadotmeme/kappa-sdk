@@ -137,7 +137,7 @@ function SlippagePanel(props: { slippage: string; setSlippage: (v: string) => vo
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   return (
     <div style={{ paddingTop: 8, paddingLeft: 4, paddingRight: 4, height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 10 }}>
         <h3 style={{ margin: 0, color: '#e5e7eb' }}>Slippage Settings</h3>
       </div>
       <div style={{ marginTop: 16 }}>
@@ -503,7 +503,7 @@ function WalletControls() {
           Connect
         </button>
         {open && (
-          <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 6, background: 'var(--kappa-panel)', border: '1px solid var(--kappa-border)', borderRadius: 10, boxShadow: '0 6px 16px rgba(0,0,0,0.35)', zIndex: 10, width: 'max-content', minWidth: 120, maxWidth: 220, overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 6, background: 'var(--kappa-panel)', border: '1px solid var(--kappa-border)', borderRadius: 10, boxShadow: '0 6px 16px rgba(0,0,0,0.35)', zIndex: 9999, width: 'max-content', minWidth: 120, maxWidth: 220, overflow: 'hidden' }}>
             {(wallets || []).map((w, i) => (
               <button
                 key={w.name}
@@ -532,7 +532,7 @@ function WalletControls() {
         {addressShort}
       </button>
       {open && (
-        <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 6, background: 'var(--kappa-panel)', border: '1px solid var(--kappa-border)', borderRadius: 10, boxShadow: '0 6px 16px rgba(0,0,0,0.35)', zIndex: 10, width: 'max-content', minWidth: 120, maxWidth: 200, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 6, background: 'var(--kappa-panel)', border: '1px solid var(--kappa-border)', borderRadius: 10, boxShadow: '0 6px 16px rgba(0,0,0,0.35)', zIndex: 9999, width: 'max-content', minWidth: 120, maxWidth: 200, overflow: 'hidden' }}>
           <button
             onClick={() => disconnect()}
             onMouseEnter={() => setHoverDisconnect(true)}
@@ -996,7 +996,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
   const headerLogo = (logoUrl && logoUrl.length > 0) ? logoUrl : defaultLogoDataUri;
   const headerName = projectName || 'Kappa';
   return (
-    <div className="kappa-root" style={{ width: '100%', maxWidth: 440, background: 'var(--kappa-bg)', borderRadius: 16, padding: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.45)', border: '1px solid var(--kappa-border)', position: 'relative', overflow: 'hidden', ...(themeVars as any), fontFamily: 'ui-sans-serif, -apple-system, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, \'Noto Sans\', \'Liberation Sans\', sans-serif, \'Apple Color Emoji\', \'Segoe UI Emoji\'' }}>
+    <div className="kappa-root" style={{ width: '100%', maxWidth: 440, background: 'var(--kappa-bg)', borderRadius: 16, padding: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.45)', border: '1px solid var(--kappa-border)', position: 'relative', overflow: 'visible', ...(themeVars as any), fontFamily: 'ui-sans-serif, -apple-system, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, \'Noto Sans\', \'Liberation Sans\', sans-serif, \'Apple Color Emoji\', \'Segoe UI Emoji\'' }}>
       <style>{`
         .kappa-root input, .kappa-root button, .kappa-root select, .kappa-root textarea { font-family: inherit !important; }
         .kappa-root label, .kappa-root span, .kappa-root p, .kappa-root div { font-family: inherit !important; }
@@ -1005,6 +1005,10 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
         .kappa-dropdown::-webkit-scrollbar-track { background: transparent; }
         .kappa-dropdown::-webkit-scrollbar-thumb { background: rgba(229,231,235,0.4); border-radius: 6px; }
         .kappa-dropdown::-webkit-scrollbar-thumb:hover { background: rgba(229,231,235,0.55); }
+        /* Force wider layout on small viewports for better usability */
+        @media (max-width: 780px) {
+          .kappa-root { width: 780px !important; max-width: none !important; }
+        }
         @media (max-width: 420px) {
           .kappa-root { padding: 14px !important; border-radius: 14px; }
           .kappa-header-name { font-size: 16px !important; }
