@@ -346,7 +346,7 @@ function TradePanelView(props: {
 
   return (
     <div style={{ paddingLeft: 4, paddingRight: 4 }}>
-      <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+      <div className="kappa-tabs" style={{ display: 'flex', gap: 10, marginTop: 8 }}>
         <button
           style={{
             ...tabBtn(mode === 'buy'),
@@ -416,7 +416,9 @@ function TradePanelView(props: {
         <AmountRow {...amountProps} />
       </div>
 
-      <QuickSelectRow values={(mode === 'buy' ? maxBuys : maxSells)} onPick={handleQuick} />
+      <div className="kappa-quick">
+        <QuickSelectRow values={(mode === 'buy' ? maxBuys : maxSells)} onPick={handleQuick} />
+      </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12 }}>
         <span style={{ color: 'var(--kappa-accent)', fontSize: 13 }}>You receive:</span>
@@ -428,7 +430,7 @@ function TradePanelView(props: {
       </div>
 
       <div style={{ height: 8 }} />
-      <button onClick={onPrimary} disabled={isPrimaryDisabled} style={{ ...primaryBtn, marginTop: 14, opacity: isPrimaryDisabled ? 0.6 : 1, cursor: isPrimaryDisabled ? 'not-allowed' : 'pointer' }}>{primaryLabel}</button>
+      <button className="kappa-primary-btn" onClick={onPrimary} disabled={isPrimaryDisabled} style={{ ...primaryBtn, marginTop: 14, opacity: isPrimaryDisabled ? 0.6 : 1, cursor: isPrimaryDisabled ? 'not-allowed' : 'pointer' }}>{primaryLabel}</button>
       <div style={{ height: 26 }} />
     </div>
   );
@@ -994,7 +996,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
   const headerLogo = (logoUrl && logoUrl.length > 0) ? logoUrl : defaultLogoDataUri;
   const headerName = projectName || 'Kappa';
   return (
-    <div className="kappa-root" style={{ width: 440, background: 'var(--kappa-bg)', borderRadius: 16, padding: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.45)', border: '1px solid var(--kappa-border)', position: 'relative', overflow: 'hidden', ...(themeVars as any), fontFamily: 'ui-sans-serif, -apple-system, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, \'Noto Sans\', \'Liberation Sans\', sans-serif, \'Apple Color Emoji\', \'Segoe UI Emoji\'' }}>
+    <div className="kappa-root" style={{ width: '100%', maxWidth: 440, background: 'var(--kappa-bg)', borderRadius: 16, padding: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.45)', border: '1px solid var(--kappa-border)', position: 'relative', overflow: 'hidden', ...(themeVars as any), fontFamily: 'ui-sans-serif, -apple-system, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, \'Noto Sans\', \'Liberation Sans\', sans-serif, \'Apple Color Emoji\', \'Segoe UI Emoji\'' }}>
       <style>{`
         .kappa-root input, .kappa-root button, .kappa-root select, .kappa-root textarea { font-family: inherit !important; }
         .kappa-root label, .kappa-root span, .kappa-root p, .kappa-root div { font-family: inherit !important; }
@@ -1003,17 +1005,26 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
         .kappa-dropdown::-webkit-scrollbar-track { background: transparent; }
         .kappa-dropdown::-webkit-scrollbar-thumb { background: rgba(229,231,235,0.4); border-radius: 6px; }
         .kappa-dropdown::-webkit-scrollbar-thumb:hover { background: rgba(229,231,235,0.55); }
+        @media (max-width: 420px) {
+          .kappa-root { padding: 14px !important; border-radius: 14px; }
+          .kappa-header-name { font-size: 16px !important; }
+          .kappa-main { min-height: 300px !important; }
+          .kappa-tabs button { padding: 8px !important; }
+          .kappa-balance-chip { padding: 4px 8px !important; }
+          .kappa-quick button { min-width: 48px !important; padding: 6px 8px !important; }
+          .kappa-primary-btn { padding: 10px !important; }
+        }
       `}</style>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <img src={headerLogo} alt="logo" style={{ width: 22, height: 22, borderRadius: 4 }} />
           <div style={{ width: 1, height: 16, background: 'var(--kappa-border)', opacity: 0.8 }} />
-          <div style={{ color: 'var(--kappa-text)', fontWeight: 700 }}>{headerName}</div>
+          <div className="kappa-header-name" style={{ color: 'var(--kappa-text)', fontWeight: 700 }}>{headerName}</div>
         </div>
         <WalletControls />
       </div>
 
-      <div style={{ position: 'relative', minHeight: 360, paddingBottom: 26 }}>
+      <div className="kappa-main" style={{ position: 'relative', minHeight: 360, paddingBottom: 26 }}>
         <div
           style={{ position: 'absolute', inset: 0, transition: 'transform 200ms ease, opacity 200ms ease', transform: view==='trade' ? 'translateX(0)' : 'translateX(-12px)', opacity: view==='trade' ? 1 : 0, pointerEvents: view==='trade' ? 'auto' : 'none', zIndex: 1 }}
           onMouseDown={() => setShowSearch(false)}
