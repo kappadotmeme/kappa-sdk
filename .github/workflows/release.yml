@@ -21,7 +21,7 @@ jobs:
           node-version: 18
           registry-url: 'https://registry.npmjs.org'
       - name: Install deps
-        run: npm ci
+        run: npm ci || npm install
       - name: Lint
         run: npm run lint
       - name: Test

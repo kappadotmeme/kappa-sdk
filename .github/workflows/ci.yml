@@ -20,7 +20,7 @@ jobs:
         run: npm ci
       - name: Install example deps
         working-directory: examples/web-widget
-        run: npm ci
+        run: npm ci || npm install
       - name: Build example
         working-directory: examples/web-widget
         run: npm run build

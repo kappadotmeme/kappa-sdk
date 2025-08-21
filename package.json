@@ -16,7 +16,8 @@
     },
     "./react": {
       "require": "./src/react/index.js",
-      "import": "./src/react/index.js"
+      "import": "./src/react/index.js",
+      "types": "./src/react/index.d.ts"
     }
   },
   "files": [
