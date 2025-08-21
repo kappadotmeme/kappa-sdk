@@ -27,6 +27,7 @@
     "node_modules/",
     "**/node_modules/",
     ".next/",
+    "examples/**",
     "examples/web-widget/.next/",
     "move-bytecode/**"
   ],
