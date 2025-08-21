@@ -118,18 +118,22 @@ Two ready-to-use React components power an embeddable buy/sell widget on Sui:
 Import (CommonJS):
 
 ```js
-const { WidgetStandalone, WidgetEmbedded } = require('kappa-sdk');
+const { WidgetStandalone, WidgetEmbedded } = require('kappa-sdk/react');
 ```
 
 Import (ESM):
 
 ```js
-import { WidgetStandalone, WidgetEmbedded } from 'kappa-sdk';
+import { WidgetStandalone, WidgetEmbedded } from 'kappa-sdk/react';
 ```
 
-### Standalone usage (Next.js page)
+### Standalone usage (plug-and-play)
+
+Minimal Next.js page:
 
 ```tsx
+import { WidgetStandalone } from 'kappa-sdk/react';
+
 export default function Page() {
   return (
     <div style={{ display: 'grid', placeItems: 'center', minHeight: '100vh', padding: 24 }}>
@@ -139,18 +143,24 @@ export default function Page() {
 }
 ```
 
-You can also import explicitly from the `react` subpath:
+Optional props (branding, theming, defaults):
 
-```js
-import { WidgetStandalone } from 'kappa-sdk/react';
+```tsx
+<WidgetStandalone
+  projectName="Kappa"
+  logoUrl="https://your.cdn/logo.png"
+  theme={{ '--kappa-primary': '#8b5cf6' }}
+  defaultContract="0x...::My_Coin::MY_COIN"   // preselect a token
+  lockContract={false}                         // true disables search/changes
+/>
 ```
 
-### Embedded usage (reuse host providers)
+### Integrated usage (reuse your app providers)
 
 ```tsx
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createNetworkConfig, SuiClientProvider, WalletProvider } from '@mysten/dapp-kit';
-import { WidgetEmbedded } from 'kappa-sdk';
+import { WidgetEmbedded } from 'kappa-sdk/react';
 
 const { networkConfig } = createNetworkConfig({ mainnet: { url: 'https://fullnode.mainnet.sui.io:443' } });
 const queryClient = new QueryClient();
@@ -160,13 +170,40 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <SuiClientProvider networks={networkConfig} defaultNetwork="mainnet">
         <WalletProvider autoConnect>
-          <WidgetEmbedded />
+          <WidgetEmbedded
+            projectName="Kappa"
+            defaultContract="0x...::My_Coin::MY_COIN"
+          />
         </WalletProvider>
       </SuiClientProvider>
     </QueryClientProvider>
   );
 }
 ```
+
+### Default token examples
+
+- Preload a default token but allow users to change it:
+
+```tsx
+<WidgetStandalone defaultContract="0x...::My_Coin::MY_COIN" />
+```
+
+- Lock the widget to a single token (no search/input):
+
+```tsx
+<WidgetEmbedded defaultContract="0x...::My_Coin::MY_COIN" lockContract />
+```
+
+### Props reference
+
+All widget props are optional:
+
+- `projectName?: string` – label shown in the top-left of the widget
+- `logoUrl?: string` – custom logo image URL
+- `theme?: Record<'--kappa-*', string>` – override CSS variables (see Theming below)
+- `defaultContract?: string` – preselected coin type `0x...::Module::TOKEN`
+- `lockContract?: boolean` – when true, disables search/editing of the token field
 
 ### Next.js notes
 
