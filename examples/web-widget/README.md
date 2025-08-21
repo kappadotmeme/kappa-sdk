@@ -19,7 +19,7 @@ npm run dev
 This example imports from the published package subpath:
 
 ```ts
-import { WidgetStandalone } from '@kappa/sdk/react';
+import { WidgetStandalone } from 'kappa-sdk/react';
 ```
 
 If you are developing locally against the workspace package, ensure your Next config allows external transpilation:
@@ -28,8 +28,8 @@ If you are developing locally against the workspace package, ensure your Next co
 // next.config.js
 export default {
   experimental: { externalDir: true },
-  transpilePackages: ['@mysten/dapp-kit', '@mysten/sui', '@tanstack/react-query'],
+  transpilePackages: ['kappa-sdk', '@mysten/dapp-kit', '@mysten/sui', '@tanstack/react-query'],
 };
 ```
 
-Note: Token deployment (create/curve) is server-only: use `@kappa/sdk/server` from a Node environment. Never ship private keys to the browser.
+Note: Token deployment (create/curve) is server-only: use `kappa-sdk/server` from a Node environment. Never ship private keys to the browser.

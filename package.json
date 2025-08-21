@@ -44,7 +44,7 @@
     "eslint": "^8.57.0"
   },
   "scripts": {
-    "start": "node -e \"console.log('@kappa/sdk: library only')\"",
+    "start": "node -e \"console.log('kappa-sdk: library only')\"",
     "lint": "eslint .",
     "test": "node --test",
     "prepublishOnly": "npm run lint && npm test"
@@ -61,6 +61,6 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Kappa-developer/kappa-sdk"
+    "url": "https://github.com/kappadotmeme/kappa-sdk"
   }
 }
