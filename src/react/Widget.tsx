@@ -23,6 +23,7 @@ const inputStyle: React.CSSProperties = {
   border: '1px solid var(--kappa-border)',
   background: 'var(--kappa-input-bg)',
   color: 'var(--kappa-text)',
+  fontSize: 18,
   outline: 'none',
   boxSizing: 'border-box',
 };
@@ -1005,6 +1006,8 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
     <div className="kappa-root" style={{ width: '100%', maxWidth: 440, background: 'var(--kappa-bg)', borderRadius: 16, padding: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.45)', border: '1px solid var(--kappa-border)', position: 'relative', overflow: 'visible', ...(themeVars as any), fontFamily: 'ui-sans-serif, -apple-system, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, \'Noto Sans\', \'Liberation Sans\', sans-serif, \'Apple Color Emoji\', \'Segoe UI Emoji\'' }}>
       <style>{`
         .kappa-root input, .kappa-root button, .kappa-root select, .kappa-root textarea { font-family: inherit !important; }
+        /* Prevent iOS auto-zoom on inputs */
+        .kappa-root input, .kappa-root select, .kappa-root textarea { font-size: 18px; }
         .kappa-root label, .kappa-root span, .kappa-root p, .kappa-root div { font-family: inherit !important; }
         .kappa-dropdown { scrollbar-width: thin; scrollbar-color: rgba(229,231,235,0.4) transparent; }
         .kappa-dropdown::-webkit-scrollbar { width: 4px; }
