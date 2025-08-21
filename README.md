@@ -11,7 +11,8 @@ npm install @kappa/sdk @mysten/sui
 ## Quickstart (Node)
 
 ```js
-const { initKappa, createToken, buyTokens, sellTokens, listCoins } = require('@kappa/sdk');
+const { initKappa, buyTokens, sellTokens, listCoins } = require('kappa-sdk');
+const { createToken } = require('kappa-sdk/server'); // server-only
 const { SuiClient, getFullnodeUrl, Ed25519Keypair } = require('@mysten/sui');
 
 const client = new SuiClient({ url: getFullnodeUrl('mainnet') });
@@ -20,7 +21,7 @@ initKappa({ client, logger: console.log });
 // Your signer: either a Keypair or a Uint8Array secret key (server-side only)
 const signer = Ed25519Keypair.fromSecretKey(/* Uint8Array secret key */);
 
-// Create + launch (optional first buy)
+// Create + launch (optional first buy) — server-only
 await createToken({
   signer,
   name: 'My Coin', symbol: 'MYC', description: '...', icon: 'https://...',
@@ -77,7 +78,7 @@ const { WidgetStandalone, WidgetEmbedded } = require('@kappa/sdk');
 Import (ESM):
 
 ```js
-import { WidgetStandalone, WidgetEmbedded } from '@kappa/sdk';
+import { WidgetStandalone, WidgetEmbedded } from 'kappa-sdk';
 ```
 
 ### Standalone usage (Next.js page)
@@ -95,7 +96,7 @@ export default function Page() {
 You can also import explicitly from the `react` subpath:
 
 ```js
-import { WidgetStandalone } from '@kappa/sdk/react';
+import { WidgetStandalone } from 'kappa-sdk/react';
 ```
 
 ### Embedded usage (reuse host providers)
@@ -193,7 +194,14 @@ Pass either:
 ## Browser vs server
 
 - Do not use custodial private keys in the browser. Prefer wallet adapters.
-- Token creation (bytecode publish) should run server-side.
+- Token creation (bytecode publish) should run server-side. Import from `@kappa/sdk/server` only.
+
+### Server-only entry quickstart
+
+```js
+// Node only
+const { createToken } = require('@kappa/sdk/server');
+```
 
 ## Types
 
@@ -218,3 +226,19 @@ partner-sdk/
 ## License
 
 MIT 
+
+## Releases
+
+Automated npm publish on semver tags via GitHub Actions.
+
+Prereqs:
+- Add `NPM_TOKEN` (automation token) to repo secrets.
+- Ensure `package.json` version is updated.
+
+Release steps:
+1. Merge your changes to `main` (CI must be green).
+2. Bump version in `package.json` (or use your chosen versioning tool).
+3. Tag the commit, e.g. `git tag v1.3.0 && git push --tags`.
+4. The `Release` workflow will publish to npm with provenance.
+
+Example consumers can then install `@kappa/sdk@^1.3.0` and import `@kappa/sdk/react`.

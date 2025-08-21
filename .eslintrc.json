@@ -1,0 +1,41 @@
+{
+  "env": {
+    "es2021": true,
+    "node": true,
+    "browser": false
+  },
+  "extends": ["eslint:recommended"],
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "script"
+  },
+  "overrides": [
+    {
+      "files": ["examples/web-widget/next.config.js"],
+      "parserOptions": { "sourceType": "module" }
+    },
+    {
+      "files": ["examples/web-widget/app/**/*.ts", "examples/web-widget/app/**/*.tsx"],
+      "parserOptions": { "sourceType": "module" }
+    },
+    {
+      "files": ["test/**/*.js"],
+      "env": { "node": true }
+    }
+  ],
+  "ignorePatterns": [
+    "node_modules/",
+    "**/node_modules/",
+    ".next/",
+    "examples/**",
+    "examples/web-widget/.next/",
+    "move-bytecode/**"
+  ],
+  "rules": {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-undef": "error",
+    "no-empty": ["warn", { "allowEmptyCatch": true }]
+  }
+}
+
+

@@ -1,5 +1,4 @@
-// Public SDK entry
-const { createToken } = require('./deploy');
+// Public SDK entry (browser-safe)
 const { buyTokens, sellTokens } = require('./trade');
 const { listCoins } = require('./api');
 const { setSuiClient, setNetworkConfig, setLogger } = require('../kappa');
@@ -21,7 +20,6 @@ const initKappa = (config = {}) => {
     if (config.networkConfig) setNetworkConfig(config.networkConfig);
     if (config.logger) setLogger(config.logger);
     return {
-        createToken,
         buyTokens,
         sellTokens,
         listCoins,
@@ -43,7 +41,6 @@ const initKappa = (config = {}) => {
 
 module.exports = {
     initKappa,
-    createToken,
     buyTokens,
     sellTokens,
     listCoins,

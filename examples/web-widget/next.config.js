@@ -5,6 +5,7 @@ const nextConfig = {
     externalDir: true,
   },
   transpilePackages: [
+    '@kappa/sdk',
     '@mysten/dapp-kit',
     '@mysten/sui',
     '@tanstack/react-query',

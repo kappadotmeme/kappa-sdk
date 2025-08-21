@@ -1,5 +1,5 @@
 "use client";
-import { WidgetStandalone } from '../../../src/react/Widget';
+import { WidgetStandalone } from 'kappa-sdk/react';
 
 export default function Page() {
   return (

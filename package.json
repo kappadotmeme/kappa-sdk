@@ -1,6 +1,6 @@
 {
-  "name": "@kappa/sdk",
-  "version": "1.2.0",
+  "name": "kappa-sdk",
+  "version": "1.3.4",
   "description": "SDK for creating and trading tokens on Kappa's Sui bonding curve (create/buy/sell)",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -10,9 +10,14 @@
       "import": "./src/index.js",
       "types": "./src/index.d.ts"
     },
+    "./server": {
+      "require": "./src/server.js",
+      "import": "./src/server.js"
+    },
     "./react": {
       "require": "./src/react/index.js",
-      "import": "./src/react/index.js"
+      "import": "./src/react/index.js",
+      "types": "./src/react/index.d.ts"
     }
   },
   "files": [
@@ -24,6 +29,7 @@
   "engines": {
     "node": ">=18"
   },
+  "sideEffects": false,
   "dependencies": {
     "@mysten/bcs": "^1.6.4",
     "@mysten/sui": "^1.36.0",
@@ -33,10 +39,14 @@
     "@tanstack/react-query": "^5.45.1",
     "@mysten/dapp-kit": "^0.17.4",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "eslint": "^8.57.0"
   },
   "scripts": {
-    "start": "node -e \"console.log('@kappa/sdk: library only')\""
+    "start": "node -e \"console.log('@kappa/sdk: library only')\"",
+    "lint": "eslint .",
+    "test": "node --test",
+    "prepublishOnly": "npm run lint && npm test"
   },
   "keywords": [
     "sui",
