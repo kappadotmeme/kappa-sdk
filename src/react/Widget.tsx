@@ -503,19 +503,25 @@ function WalletControls() {
           Connect
         </button>
         {open && (
-          <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 6, background: 'var(--kappa-panel)', border: '1px solid var(--kappa-border)', borderRadius: 10, boxShadow: '0 6px 16px rgba(0,0,0,0.35)', zIndex: 9999, width: 'max-content', minWidth: 120, maxWidth: 220, overflow: 'hidden' }}>
-            {(wallets || []).map((w, i) => (
-              <button
-                key={w.name}
-                onClick={() => connect({ wallet: w })}
-                onMouseEnter={() => setHoverIdx(i)}
-                onMouseLeave={() => setHoverIdx(null)}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, background: hoverIdx===i ? 'var(--kappa-chip-bg)' : 'transparent', color: 'var(--kappa-text)', border: 'none', cursor: 'pointer', padding: '8px 12px', width: '100%', textAlign: 'left', transition: 'background 120ms ease', whiteSpace: 'nowrap' }}
-              >
-                {w.icon && <img src={w.icon} alt={w.name} style={{ width: 18, height: 18 }} />}
-                <span style={{ fontSize: 13 }}>{w.name}</span>
-              </button>
-            ))}
+          <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 6, background: 'var(--kappa-panel)', border: '1px solid var(--kappa-border)', borderRadius: 10, boxShadow: '0 6px 16px rgba(0,0,0,0.35)', zIndex: 9999, width: 'max-content', minWidth: 140, maxWidth: 260, overflow: 'hidden' }}>
+            {(wallets || []).length > 0 ? (
+              (wallets || []).map((w, i) => (
+                <button
+                  key={w.name}
+                  onClick={() => connect({ wallet: w })}
+                  onMouseEnter={() => setHoverIdx(i)}
+                  onMouseLeave={() => setHoverIdx(null)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, background: hoverIdx===i ? 'var(--kappa-chip-bg)' : 'transparent', color: 'var(--kappa-text)', border: 'none', cursor: 'pointer', padding: '10px 14px', width: '100%', textAlign: 'left', transition: 'background 120ms ease', whiteSpace: 'nowrap' }}
+                >
+                  {w.icon && <img src={w.icon} alt={w.name} style={{ width: 18, height: 18 }} />}
+                  <span style={{ fontSize: 13 }}>{w.name}</span>
+                </button>
+              ))
+            ) : (
+              <div style={{ padding: '10px 12px', color: 'var(--kappa-text)', fontSize: 12 }}>
+                No wallets found. Install a wallet to continue.
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -532,12 +538,12 @@ function WalletControls() {
         {addressShort}
       </button>
       {open && (
-        <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 6, background: 'var(--kappa-panel)', border: '1px solid var(--kappa-border)', borderRadius: 10, boxShadow: '0 6px 16px rgba(0,0,0,0.35)', zIndex: 9999, width: 'max-content', minWidth: 120, maxWidth: 200, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 6, background: 'var(--kappa-panel)', border: '1px solid var(--kappa-border)', borderRadius: 10, boxShadow: '0 6px 16px rgba(0,0,0,0.35)', zIndex: 9999, width: 'max-content', minWidth: 140, maxWidth: 240, overflow: 'hidden' }}>
           <button
             onClick={() => disconnect()}
             onMouseEnter={() => setHoverDisconnect(true)}
             onMouseLeave={() => setHoverDisconnect(false)}
-            style={{ display: 'block', background: hoverDisconnect ? 'var(--kappa-chip-bg)' : 'transparent', color: 'var(--kappa-text)', border: 'none', cursor: 'pointer', padding: '8px 12px', width: '100%', textAlign: 'center', transition: 'background 120ms ease', whiteSpace: 'nowrap' }}
+            style={{ display: 'block', background: hoverDisconnect ? 'var(--kappa-chip-bg)' : 'transparent', color: 'var(--kappa-text)', border: 'none', cursor: 'pointer', padding: '10px 14px', width: '100%', textAlign: 'center', transition: 'background 120ms ease', whiteSpace: 'nowrap' }}
           >
             Disconnect
           </button>
