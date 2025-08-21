@@ -23,6 +23,7 @@
   "files": [
     "src",
     "kappa.js",
+    "kappa-trade.js",
     "math.js",
     "move-bytecode"
   ],
