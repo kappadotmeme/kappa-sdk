@@ -58,4 +58,9 @@
   ],
   "author": "Kappa Protocol",
   "license": "MIT"
+  ,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kappa-developer/kappa-sdk"
+  }
 }
