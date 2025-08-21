@@ -994,19 +994,17 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
   const headerLogo = (logoUrl && logoUrl.length > 0) ? logoUrl : defaultLogoDataUri;
   const headerName = projectName || 'Kappa';
   return (
-    <div style={{ width: 440, background: 'var(--kappa-bg)', borderRadius: 16, padding: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.45)', border: '1px solid var(--kappa-border)', position: 'relative', overflow: 'hidden', ...(themeVars as any) }}>
+    <div className="kappa-root" style={{ width: 440, background: 'var(--kappa-bg)', borderRadius: 16, padding: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.45)', border: '1px solid var(--kappa-border)', position: 'relative', overflow: 'hidden', ...(themeVars as any), fontFamily: 'ui-sans-serif, -apple-system, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, \'Noto Sans\', \'Liberation Sans\', sans-serif, \'Apple Color Emoji\', \'Segoe UI Emoji\'' }}>
       <style>{`
-        /* Consistent font across widget */
-        .kappa-root, .kappa-root * {
-          font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-        }
+        .kappa-root input, .kappa-root button, .kappa-root select, .kappa-root textarea { font-family: inherit; }
+        .kappa-root label, .kappa-root span, .kappa-root p, .kappa-root div { font-family: inherit; }
         .kappa-dropdown { scrollbar-width: thin; scrollbar-color: rgba(229,231,235,0.4) transparent; }
         .kappa-dropdown::-webkit-scrollbar { width: 4px; }
         .kappa-dropdown::-webkit-scrollbar-track { background: transparent; }
         .kappa-dropdown::-webkit-scrollbar-thumb { background: rgba(229,231,235,0.4); border-radius: 6px; }
         .kappa-dropdown::-webkit-scrollbar-thumb:hover { background: rgba(229,231,235,0.55); }
       `}</style>
-      <div className="kappa-root" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <img src={headerLogo} alt="logo" style={{ width: 22, height: 22, borderRadius: 4 }} />
           <div style={{ width: 1, height: 16, background: 'var(--kappa-border)', opacity: 0.8 }} />
