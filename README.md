@@ -5,7 +5,13 @@ SDK for creating and trading tokens on Kappa’s Sui bonding curve. Exposes crea
 ## Install
 
 ```bash
-npm install @kappa/sdk @mysten/sui
+npm install kappa-sdk @mysten/sui
+```
+
+For the React widget in a Next/React app:
+
+```bash
+npm install kappa-sdk @tanstack/react-query @mysten/dapp-kit @mysten/sui react react-dom
 ```
 
 ## Quickstart (Node)
@@ -62,6 +68,46 @@ const coins = await listCoins();
 - listCoins({ apiBaseUrl?, apiKey?, signal?, timeoutMs? })
   - Fetches coin list from https://api.kappa.fun/v1/coins/. x-api-key is optional.
 
+### HTTP API schema
+
+- Base URL: `https://api.kappa.fun`
+
+- GET `/v1/coins?nameOrSymbol={q}`
+  - **Query**: `nameOrSymbol` (string; case-insensitive)
+  - **Response**: `{ data: Coin[] }`
+
+- GET `/v1/coins/trending`
+  - **Response**: `{ data: Coin[] }`
+
+Type: `Coin` (fields are sourced from multiple backends; some are optional)
+
+- `contractAddress` | `coinType` | `contract`: canonical coin type (e.g., `0x...::Module::TOKEN`)
+- `symbol`: string (e.g., `PEPE`)
+- `name`: string (e.g., `Pepe Coin`)
+- `avatarUrl` | `icon` | `avatar` | `logo` | `image` | `img` | `iconUrl`: image URL (pick any present; `ipfs://` may appear)
+- Bonding/curve identifier (one of):
+  - `bondingContractAddress` | `bondingAddress` | `bondingContract` | `bonding` | `bonding_object` | `bondingObject`
+  - `curve` | `curveId` | `curveAddress` | `curve_object` | `curveObject`
+- Migration indicators (if present, treat as migrated and exclude for bonding-curve trading):
+  - `pairAddress` | `pairContractAddress` | `pair` | `pair_object` | `pairObject` | `poolAddress` | `lpAddress`
+
+Example response (truncated):
+
+```json
+{
+  "data": [
+    {
+      "contractAddress": "0x...::My_Coin::MY_COIN",
+      "symbol": "MYC",
+      "name": "My Coin",
+      "avatarUrl": "https://.../myc.png",
+      "bondingContractAddress": "0x...",
+      "curveId": "0x..."
+    }
+  ]
+}
+```
+
 ## React Web Widget
 
 Two ready-to-use React components power an embeddable buy/sell widget on Sui:
@@ -72,7 +118,7 @@ Two ready-to-use React components power an embeddable buy/sell widget on Sui:
 Import (CommonJS):
 
 ```js
-const { WidgetStandalone, WidgetEmbedded } = require('@kappa/sdk');
+const { WidgetStandalone, WidgetEmbedded } = require('kappa-sdk');
 ```
 
 Import (ESM):
@@ -104,7 +150,7 @@ import { WidgetStandalone } from 'kappa-sdk/react';
 ```tsx
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createNetworkConfig, SuiClientProvider, WalletProvider } from '@mysten/dapp-kit';
-import { WidgetEmbedded } from '@kappa/sdk';
+import { WidgetEmbedded } from 'kappa-sdk';
 
 const { networkConfig } = createNetworkConfig({ mainnet: { url: 'https://fullnode.mainnet.sui.io:443' } });
 const queryClient = new QueryClient();
@@ -132,6 +178,7 @@ If your app imports the widget from the SDK (outside your `app/` directory), Nex
 const nextConfig = {
   experimental: { externalDir: true },
   transpilePackages: [
+    'kappa-sdk',
     '@mysten/dapp-kit',
     '@mysten/sui',
     '@tanstack/react-query',
@@ -194,13 +241,13 @@ Pass either:
 ## Browser vs server
 
 - Do not use custodial private keys in the browser. Prefer wallet adapters.
-- Token creation (bytecode publish) should run server-side. Import from `@kappa/sdk/server` only.
+- Token creation (bytecode publish) should run server-side. Import from `kappa-sdk/server` only.
 
 ### Server-only entry quickstart
 
 ```js
 // Node only
-const { createToken } = require('@kappa/sdk/server');
+const { createToken } = require('kappa-sdk/server');
 ```
 
 ## Types
@@ -210,7 +257,7 @@ TypeScript declarations are provided at src/index.d.ts.
 ## File Structure
 
 ```
-partner-sdk/
+kappa-sdk/
 ├── src/                # SDK entry and modules
 │   ├── index.js
 │   ├── index.d.ts
@@ -218,6 +265,7 @@ partner-sdk/
 │   ├── deploy.js
 │   └── trade.js
 ├── kappa.js            # On-chain functions, client injection helpers
+├── kappa-trade.js      # Web3 trade helpers used by the widget
 ├── math.js             # Bonding curve math (re-exported)
 ├── src/react/         # React widget (Widget.tsx) and re-exports
 └── move-bytecode/     # WASM for Move bytecode editing (token creation)
@@ -241,4 +289,4 @@ Release steps:
 3. Tag the commit, e.g. `git tag v1.3.0 && git push --tags`.
 4. The `Release` workflow will publish to npm with provenance.
 
-Example consumers can then install `@kappa/sdk@^1.3.0` and import `@kappa/sdk/react`.
+Example consumers can then install `kappa-sdk@^1.3.x` and import `kappa-sdk/react`.
