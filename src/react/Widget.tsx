@@ -23,7 +23,7 @@ const inputStyle: React.CSSProperties = {
   border: '1px solid var(--kappa-border)',
   background: 'var(--kappa-input-bg)',
   color: 'var(--kappa-text)',
-  fontSize: 18,
+  fontSize: 16,
   outline: 'none',
   boxSizing: 'border-box',
 };
@@ -208,7 +208,7 @@ function ContractInput(props: {
         onChange={(e) => { if (!locked) { setContract(e.target.value); setShowSearch(true); } }}
         onFocus={() => { if (!locked) setShowSearch(true); }}
         onBlur={() => { if (!locked) setTimeout(() => setShowSearch(false), 100); }}
-        placeholder={showCA ? '' : "type a coin name/symbol or contract address"}
+        placeholder={showCA ? '' : "Insert name, symbol or contract address"}
         title={contract}
         style={{ ...inputStyle, paddingRight: (tokenSymbol || tokenName) ? 220 : 10, paddingLeft: showCA ? 170 : 10, opacity: locked ? 0.85 : 1 }}
         disabled={!!locked}
@@ -1007,7 +1007,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
       <style>{`
         .kappa-root input, .kappa-root button, .kappa-root select, .kappa-root textarea { font-family: inherit !important; }
         /* Prevent iOS auto-zoom on inputs */
-        .kappa-root input, .kappa-root select, .kappa-root textarea { font-size: 18px; }
+        .kappa-root input, .kappa-root select, .kappa-root textarea { font-size: 16px; }
         .kappa-root label, .kappa-root span, .kappa-root p, .kappa-root div { font-family: inherit !important; }
         .kappa-dropdown { scrollbar-width: thin; scrollbar-color: rgba(229,231,235,0.4) transparent; }
         .kappa-dropdown::-webkit-scrollbar { width: 4px; }
