@@ -11,8 +11,8 @@ npm install @kappa/sdk @mysten/sui
 ## Quickstart (Node)
 
 ```js
-const { initKappa, buyTokens, sellTokens, listCoins } = require('@kappa/sdk');
-const { createToken } = require('@kappa/sdk/server'); // server-only
+const { initKappa, buyTokens, sellTokens, listCoins } = require('kappa-sdk');
+const { createToken } = require('kappa-sdk/server'); // server-only
 const { SuiClient, getFullnodeUrl, Ed25519Keypair } = require('@mysten/sui');
 
 const client = new SuiClient({ url: getFullnodeUrl('mainnet') });
@@ -78,7 +78,7 @@ const { WidgetStandalone, WidgetEmbedded } = require('@kappa/sdk');
 Import (ESM):
 
 ```js
-import { WidgetStandalone, WidgetEmbedded } from '@kappa/sdk';
+import { WidgetStandalone, WidgetEmbedded } from 'kappa-sdk';
 ```
 
 ### Standalone usage (Next.js page)
@@ -96,7 +96,7 @@ export default function Page() {
 You can also import explicitly from the `react` subpath:
 
 ```js
-import { WidgetStandalone } from '@kappa/sdk/react';
+import { WidgetStandalone } from 'kappa-sdk/react';
 ```
 
 ### Embedded usage (reuse host providers)
