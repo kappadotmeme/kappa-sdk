@@ -15,7 +15,9 @@ let globalPauseStatusObjectId = "0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684
 let poolsId = "0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d0";
 let lpBurnManger = "0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845";
 
-const setSuiClient = (customClient) => { client = customClient; };
+const setSuiClient = (customClient) => {
+    client = customClient;
+};
 const setNetworkConfig = (cfg = {}) => {
     if (cfg.bondingContract) bondingContract = cfg.bondingContract;
     if (cfg.CONFIG) CONFIG = cfg.CONFIG;
@@ -23,19 +25,28 @@ const setNetworkConfig = (cfg = {}) => {
     if (cfg.poolsId) poolsId = cfg.poolsId;
     if (cfg.lpBurnManger) lpBurnManger = cfg.lpBurnManger;
 };
-const setLogger = (fn) => { logger = typeof fn === 'function' ? fn : null; };
-const log = (...args) => { if (logger) { try { logger(...args); } catch {} } };
+const setLogger = (fn) => {
+    logger = typeof fn === "function" ? fn : null;
+};
+const log = (...args) => {
+    if (logger) {
+        try {
+            logger(...args);
+        } catch {}
+    }
+};
 
 const buyWeb3 = async (ADMIN_CREDENTIAL, token) => {
     try {
         log("buyWeb3...");
-        if (!ADMIN_CREDENTIAL) throw new Error('WALLET_NOT_CONNECTED');
-        const isWallet = ADMIN_CREDENTIAL && typeof ADMIN_CREDENTIAL.signAndExecuteTransaction === 'function';
-        const adminKeypair = !isWallet && ADMIN_CREDENTIAL instanceof Uint8Array
-            ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL)
-            : ADMIN_CREDENTIAL;
+        if (!ADMIN_CREDENTIAL) throw new Error("WALLET_NOT_CONNECTED");
+        const isWallet = ADMIN_CREDENTIAL && typeof ADMIN_CREDENTIAL.signAndExecuteTransaction === "function";
+        const adminKeypair =
+            !isWallet && ADMIN_CREDENTIAL instanceof Uint8Array
+                ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL)
+                : ADMIN_CREDENTIAL;
         if (!isWallet && !(ADMIN_CREDENTIAL instanceof Uint8Array)) {
-            throw new Error('INVALID_SIGNER');
+            throw new Error("INVALID_SIGNER");
         }
         const tx = new Transaction();
 
@@ -55,7 +66,7 @@ const buyWeb3 = async (ADMIN_CREDENTIAL, token) => {
         ]);
 
         tx.moveCall({
-            target: `${bondingContract}::kappa_fun::buy`,
+            target: `${bondingContract}::kappadotmeme::buy`,
             arguments: [
                 tx.object(globalPauseStatusObjectId),
                 tx.object(poolsId),
@@ -73,33 +84,39 @@ const buyWeb3 = async (ADMIN_CREDENTIAL, token) => {
 
         const resData = isWallet
             ? await ADMIN_CREDENTIAL.signAndExecuteTransaction({
-                transaction: tx,
-                chain: 'sui:mainnet',
-                options: { showRawEffects: true, showEffects: true, showObjectChanges: true },
+                  transaction: tx,
+                  chain: "sui:mainnet",
+                  options: { showRawEffects: true, showEffects: true, showObjectChanges: true },
               })
             : await client.signAndExecuteTransaction({
-                signer: adminKeypair,
-                transaction: tx,
-                options: { showRawEffects: true, showEffects: true, showObjectChanges: true },
+                  signer: adminKeypair,
+                  transaction: tx,
+                  options: { showRawEffects: true, showEffects: true, showObjectChanges: true },
               });
 
         log("buyWeb3 success", resData?.digest);
-        return { success: true, digest: resData?.digest, effects: resData?.effects, objectChanges: resData?.objectChanges };
+        return {
+            success: true,
+            digest: resData?.digest,
+            effects: resData?.effects,
+            objectChanges: resData?.objectChanges,
+        };
     } catch (err) {
-        log('buyWeb3 error', err?.message || err);
+        log("buyWeb3 error", err?.message || err);
         return { success: false, error: String(err?.message || err) };
     }
 };
 
 const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
     try {
-        if (!ADMIN_CREDENTIAL) throw new Error('WALLET_NOT_CONNECTED');
-        const isWallet = ADMIN_CREDENTIAL && typeof ADMIN_CREDENTIAL.signAndExecuteTransaction === 'function';
-        const adminKeypair = !isWallet && ADMIN_CREDENTIAL instanceof Uint8Array
-            ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL)
-            : ADMIN_CREDENTIAL;
+        if (!ADMIN_CREDENTIAL) throw new Error("WALLET_NOT_CONNECTED");
+        const isWallet = ADMIN_CREDENTIAL && typeof ADMIN_CREDENTIAL.signAndExecuteTransaction === "function";
+        const adminKeypair =
+            !isWallet && ADMIN_CREDENTIAL instanceof Uint8Array
+                ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL)
+                : ADMIN_CREDENTIAL;
         if (!isWallet && !(ADMIN_CREDENTIAL instanceof Uint8Array)) {
-            throw new Error('INVALID_SIGNER');
+            throw new Error("INVALID_SIGNER");
         }
         log("sellWeb3...");
         const tx = new Transaction();
@@ -109,7 +126,10 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
         const typeArgument = `${publishedObject.packageId}::${formattedName}::${formattedName.toUpperCase()}`;
 
         let allCoins = [];
-        let temp, page = 0, hasNext = true, owner = isWallet ? ADMIN_CREDENTIAL.address : adminKeypair.toSuiAddress();
+        let temp,
+            page = 0,
+            hasNext = true,
+            owner = isWallet ? ADMIN_CREDENTIAL.address : adminKeypair.toSuiAddress();
         while (hasNext && page < 30) {
             temp = await client.getCoins({
                 owner,
@@ -121,7 +141,7 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
             page++;
         }
 
-        const selectedCoins = allCoins.filter(item => Number(item.balance) > 0);
+        const selectedCoins = allCoins.filter((item) => Number(item.balance) > 0);
         if (!selectedCoins.length) {
             throw new Error("No coins with positive balance found for sell.");
         }
@@ -129,7 +149,7 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
         if (selectedCoins.length > 1) {
             tx.mergeCoins(
                 selectedCoins[0].coinObjectId,
-                selectedCoins.slice(1, 301).map(item => item.coinObjectId)
+                selectedCoins.slice(1, 301).map((item) => item.coinObjectId)
             );
         }
 
@@ -140,12 +160,13 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
         const is_exact_out = true;
 
         const [coin] = tx.moveCall({
-            target: `${bondingContract}::kappa_fun::sell_`,
+            target: `${bondingContract}::kappadotmeme::sell_`,
             arguments: [
                 tx.object(CONFIG),
                 kappa_coin,
                 tx.pure.bool(is_exact_out),
                 tx.pure.u64(minSui),
+                tx.object("0x6"),
             ],
             typeArguments: [typeArgument],
         });
@@ -154,18 +175,23 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
 
         const resData = isWallet
             ? await ADMIN_CREDENTIAL.signAndExecuteTransaction({
-                transaction: tx,
-                chain: 'sui:mainnet',
-                options: { showRawEffects: true, showEffects: true, showObjectChanges: true },
+                  transaction: tx,
+                  chain: "sui:mainnet",
+                  options: { showRawEffects: true, showEffects: true, showObjectChanges: true },
               })
             : await client.signAndExecuteTransaction({
-                signer: adminKeypair,
-                transaction: tx,
-                options: { showRawEffects: true, showEffects: true, showObjectChanges: true },
+                  signer: adminKeypair,
+                  transaction: tx,
+                  options: { showRawEffects: true, showEffects: true, showObjectChanges: true },
               });
 
         log("sellWeb3 success", resData?.digest);
-        return { success: true, digest: resData?.digest, effects: resData?.effects, objectChanges: resData?.objectChanges };
+        return {
+            success: true,
+            digest: resData?.digest,
+            effects: resData?.effects,
+            objectChanges: resData?.objectChanges,
+        };
     } catch (err) {
         log("sellWeb3 error:", err?.message || err);
         return { success: false, error: String(err?.message || err) };
@@ -173,5 +199,3 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
 };
 
 module.exports = { buyWeb3, sellWeb3, setSuiClient, setNetworkConfig, setLogger };
-
-

@@ -25,7 +25,9 @@ let poolsId = "0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d
 let lpBurnManger = "0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845";
 
 // Allow SDK users to inject their own client and/or network constants
-const setSuiClient = (customClient) => { client = customClient; };
+const setSuiClient = (customClient) => {
+    client = customClient;
+};
 const setNetworkConfig = (cfg = {}) => {
     if (cfg.bondingContract) bondingContract = cfg.bondingContract;
     if (cfg.CONFIG) CONFIG = cfg.CONFIG;
@@ -33,9 +35,17 @@ const setNetworkConfig = (cfg = {}) => {
     if (cfg.poolsId) poolsId = cfg.poolsId;
     if (cfg.lpBurnManger) lpBurnManger = cfg.lpBurnManger;
 };
-const setLogger = (fn) => { logger = typeof fn === 'function' ? fn : null; };
+const setLogger = (fn) => {
+    logger = typeof fn === "function" ? fn : null;
+};
 
-const log = (...args) => { if (logger) { try { logger(...args); } catch {} } };
+const log = (...args) => {
+    if (logger) {
+        try {
+            logger(...args);
+        } catch {}
+    }
+};
 
 /**
  * Updates the Move bytecode template for a custom coin with provided token data.
@@ -110,9 +120,8 @@ const updateTemplate = (tokenData) => {
  */
 const createCoinWeb3 = async (ADMIN_CREDENTIAL, token) => {
     try {
-        const adminKeypair = ADMIN_CREDENTIAL instanceof Uint8Array
-            ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL)
-            : ADMIN_CREDENTIAL; // assume signer/keypair compatible
+        const adminKeypair =
+            ADMIN_CREDENTIAL instanceof Uint8Array ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL) : ADMIN_CREDENTIAL; // assume signer/keypair compatible
 
         const tx = new Transaction();
         const [upgradeCap] = tx.publish({
@@ -132,9 +141,9 @@ const createCoinWeb3 = async (ADMIN_CREDENTIAL, token) => {
         });
 
         const objectChanges = resData?.objectChanges || [];
-        const publishedObject = objectChanges.find(item => item?.type === "published");
-        const treasuryCapObject = objectChanges.find(item => item?.objectType?.includes("TreasuryCap"));
-        const coinMetadataObject = objectChanges.find(item => item?.objectType?.includes("CoinMetadata"));
+        const publishedObject = objectChanges.find((item) => item?.type === "published");
+        const treasuryCapObject = objectChanges.find((item) => item?.objectType?.includes("TreasuryCap"));
+        const coinMetadataObject = objectChanges.find((item) => item?.objectType?.includes("CoinMetadata"));
 
         log("publishedObject success", publishedObject);
         log("treasuryCapObject success", treasuryCapObject);
@@ -151,7 +160,7 @@ const createCoinWeb3 = async (ADMIN_CREDENTIAL, token) => {
             publishedObject,
         };
     } catch (err) {
-        log('createCoinWeb3 error', err?.message || err);
+        log("createCoinWeb3 error", err?.message || err);
         return { success: false, error: String(err?.message || err) };
     }
 };
@@ -182,11 +191,10 @@ const createCoinWeb3 = async (ADMIN_CREDENTIAL, token) => {
  */
 const createCurveWeb3 = async (ADMIN_CREDENTIAL, token) => {
     try {
-        const adminKeypair = ADMIN_CREDENTIAL instanceof Uint8Array
-            ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL)
-            : ADMIN_CREDENTIAL;
+        const adminKeypair =
+            ADMIN_CREDENTIAL instanceof Uint8Array ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL) : ADMIN_CREDENTIAL;
 
-        log("createCurveWeb3...", token?.name || 'token');
+        log("createCurveWeb3...", token?.name || "token");
         const tx = new Transaction();
 
         const { treasuryCapObject, coinMetadataObject, publishedObject } = token;
@@ -198,12 +206,10 @@ const createCurveWeb3 = async (ADMIN_CREDENTIAL, token) => {
         }
 
         const formattedName = token.name.replaceAll(" ", "_");
-        const typeArguments = [
-            `${publishedObject.packageId}::${formattedName}::${formattedName.toUpperCase()}`,
-        ];
+        const typeArguments = [`${publishedObject.packageId}::${formattedName}::${formattedName.toUpperCase()}`];
 
         const maxTx = token.maxTx !== "false";
-        
+
         // Create comprehensive metadata matching the platform's format
         const metadata = JSON.stringify({
             website: token.website || "",
@@ -213,7 +219,7 @@ const createCurveWeb3 = async (ADMIN_CREDENTIAL, token) => {
         });
 
         tx.moveCall({
-            target: `${bondingContract}::kappa_fun::create`,
+            target: `${bondingContract}::kappadotmeme::create`,
             arguments: [
                 tx.object(CONFIG),
                 tx.object(globalPauseStatusObjectId),
@@ -238,9 +244,14 @@ const createCurveWeb3 = async (ADMIN_CREDENTIAL, token) => {
         });
 
         log("createCurveWeb3 success", resData?.digest);
-        return { success: true, digest: resData?.digest, effects: resData?.effects, objectChanges: resData?.objectChanges };
+        return {
+            success: true,
+            digest: resData?.digest,
+            effects: resData?.effects,
+            objectChanges: resData?.objectChanges,
+        };
     } catch (err) {
-        log('createCurveWeb3 error', err?.message || err);
+        log("createCurveWeb3 error", err?.message || err);
         return { success: false, error: String(err?.message || err) };
     }
 };
@@ -266,18 +277,15 @@ const createCurveWeb3 = async (ADMIN_CREDENTIAL, token) => {
  */
 const firstBuyWeb3 = async (ADMIN_CREDENTIAL, token) => {
     try {
-        const adminKeypair = ADMIN_CREDENTIAL instanceof Uint8Array
-            ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL)
-            : ADMIN_CREDENTIAL;
+        const adminKeypair =
+            ADMIN_CREDENTIAL instanceof Uint8Array ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL) : ADMIN_CREDENTIAL;
         log("firstBuyWeb3...");
         const tx = new Transaction();
         const { publishedObject } = token;
 
         // Use replaceAll for consistency with other functions
         const formattedName = token.name.replaceAll(" ", "_");
-        const typeArguments = [
-            `${publishedObject.packageId}::${formattedName}::${formattedName.toUpperCase()}`,
-        ];
+        const typeArguments = [`${publishedObject.packageId}::${formattedName}::${formattedName.toUpperCase()}`];
 
         // Use Math.floor for integer values, fallback to 0 if undefined
         const sui_for_buy = Math.floor(Number(token.sui) || 0);
@@ -285,7 +293,7 @@ const firstBuyWeb3 = async (ADMIN_CREDENTIAL, token) => {
 
         const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(sui_for_buy)]);
         tx.moveCall({
-            target: `${bondingContract}::kappa_fun::first_buy`,
+            target: `${bondingContract}::kappadotmeme::first_buy`,
             arguments: [
                 tx.object(CONFIG),
                 coin,
@@ -307,9 +315,14 @@ const firstBuyWeb3 = async (ADMIN_CREDENTIAL, token) => {
         });
 
         log("firstBuyWeb3 success", resData?.digest);
-        return { success: true, digest: resData?.digest, effects: resData?.effects, objectChanges: resData?.objectChanges };
+        return {
+            success: true,
+            digest: resData?.digest,
+            effects: resData?.effects,
+            objectChanges: resData?.objectChanges,
+        };
     } catch (err) {
-        log('firstBuyWeb3 error', err?.message || err);
+        log("firstBuyWeb3 error", err?.message || err);
         return { success: false, error: String(err?.message || err) };
     }
 };
@@ -338,9 +351,8 @@ const buyWeb3 = async (ADMIN_CREDENTIAL, token) => {
     try {
         log("buyWeb3...");
 
-        const adminKeypair = ADMIN_CREDENTIAL instanceof Uint8Array
-            ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL)
-            : ADMIN_CREDENTIAL;
+        const adminKeypair =
+            ADMIN_CREDENTIAL instanceof Uint8Array ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL) : ADMIN_CREDENTIAL;
         const tx = new Transaction();
 
         // Consistent formatting for type arguments
@@ -363,7 +375,7 @@ const buyWeb3 = async (ADMIN_CREDENTIAL, token) => {
         ]);
 
         tx.moveCall({
-            target: `${bondingContract}::kappa_fun::buy`,
+            target: `${bondingContract}::kappadotmeme::buy`,
             arguments: [
                 tx.object(globalPauseStatusObjectId),
                 tx.object(poolsId),
@@ -390,9 +402,14 @@ const buyWeb3 = async (ADMIN_CREDENTIAL, token) => {
         });
 
         log("buyWeb3 success", resData?.digest);
-        return { success: true, digest: resData?.digest, effects: resData?.effects, objectChanges: resData?.objectChanges };
+        return {
+            success: true,
+            digest: resData?.digest,
+            effects: resData?.effects,
+            objectChanges: resData?.objectChanges,
+        };
     } catch (err) {
-        log('buyWeb3 error', err?.message || err);
+        log("buyWeb3 error", err?.message || err);
         return { success: false, error: String(err?.message || err) };
     }
 };
@@ -420,9 +437,8 @@ const buyWeb3 = async (ADMIN_CREDENTIAL, token) => {
  */
 const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
     try {
-        const adminKeypair = ADMIN_CREDENTIAL instanceof Uint8Array
-            ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL)
-            : ADMIN_CREDENTIAL;
+        const adminKeypair =
+            ADMIN_CREDENTIAL instanceof Uint8Array ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL) : ADMIN_CREDENTIAL;
         log("sellWeb3...");
         const tx = new Transaction();
 
@@ -432,7 +448,10 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
 
         // Efficiently fetch all coin objects by paginating, with a hard safety limit
         let allCoins = [];
-        let temp, page = 0, hasNext = true, owner = adminKeypair.toSuiAddress();
+        let temp,
+            page = 0,
+            hasNext = true,
+            owner = adminKeypair.toSuiAddress();
         while (hasNext && page < 30) {
             temp = await client.getCoins({
                 owner,
@@ -445,7 +464,7 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
         }
 
         // Filter coins with positive balance
-        const selectedCoins = allCoins.filter(item => Number(item.balance) > 0);
+        const selectedCoins = allCoins.filter((item) => Number(item.balance) > 0);
         if (!selectedCoins.length) {
             throw new Error("No coins with positive balance found for sell.");
         }
@@ -454,7 +473,7 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
         if (selectedCoins.length > 1) {
             tx.mergeCoins(
                 selectedCoins[0].coinObjectId,
-                selectedCoins.slice(1, 301).map(item => item.coinObjectId)
+                selectedCoins.slice(1, 301).map((item) => item.coinObjectId)
             );
         }
 
@@ -466,13 +485,8 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
         const is_exact_out = true;
 
         const [coin] = tx.moveCall({
-            target: `${bondingContract}::kappa_fun::sell_`,
-            arguments: [
-                tx.object(CONFIG),
-                kappa_coin,
-                tx.pure.bool(is_exact_out),
-                tx.pure.u64(minSui),
-            ],
+            target: `${bondingContract}::kappadotmeme::sell_`,
+            arguments: [tx.object(CONFIG), kappa_coin, tx.pure.bool(is_exact_out), tx.pure.u64(minSui)],
             typeArguments: [typeArgument],
         });
 
@@ -489,11 +503,25 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
         });
 
         log("sellWeb3 success", resData?.digest);
-        return { success: true, digest: resData?.digest, effects: resData?.effects, objectChanges: resData?.objectChanges };
+        return {
+            success: true,
+            digest: resData?.digest,
+            effects: resData?.effects,
+            objectChanges: resData?.objectChanges,
+        };
     } catch (err) {
         log("sellWeb3 error:", err?.message || err);
         return { success: false, error: String(err?.message || err) };
     }
 };
 
-module.exports = { createCoinWeb3, createCurveWeb3, firstBuyWeb3, buyWeb3, sellWeb3, setSuiClient, setNetworkConfig, setLogger };
+module.exports = {
+    createCoinWeb3,
+    createCurveWeb3,
+    firstBuyWeb3,
+    buyWeb3,
+    sellWeb3,
+    setSuiClient,
+    setNetworkConfig,
+    setLogger,
+};
