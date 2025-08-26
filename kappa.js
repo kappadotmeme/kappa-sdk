@@ -486,7 +486,13 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
 
         const [coin] = tx.moveCall({
             target: `${bondingContract}::kappadotmeme::sell_`,
-            arguments: [tx.object(CONFIG), kappa_coin, tx.pure.bool(is_exact_out), tx.pure.u64(minSui)],
+            arguments: [
+                tx.object(CONFIG),
+                kappa_coin,
+                tx.pure.bool(is_exact_out),
+                tx.pure.u64(minSui),
+                tx.object("0x6"),
+            ],
             typeArguments: [typeArgument],
         });
 
