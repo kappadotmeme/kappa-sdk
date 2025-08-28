@@ -17,10 +17,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "baseUrl": ".",
-    "paths": {
-      "kappa-create/react": ["../../src/react/index.js"],
-      "kappa-create": ["../../src/index.js"]
-    },
+    "paths": {},
     "plugins": [
       {
         "name": "next"

@@ -5,7 +5,6 @@ const nextConfig = {
     externalDir: true,
   },
   transpilePackages: [
-    'kappa-create',
     '@mysten/dapp-kit',
     '@mysten/sui',
     '@tanstack/react-query',
@@ -15,8 +14,6 @@ const nextConfig = {
     // Local alias to use SDK sources without publishing
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
-      'kappa-create/react': path.resolve(__dirname, '../../src/react'),
-      'kappa-create': path.resolve(__dirname, '../../src'),
     };
     // Handle WASM files
     config.experiments = {
