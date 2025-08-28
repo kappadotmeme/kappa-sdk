@@ -1,7 +1,7 @@
 {
-  "name": "kappa-sdk",
-  "version": "1.3.17",
-  "description": "SDK for creating and trading tokens on Kappa's Sui bonding curve (create/buy/sell)",
+  "name": "kappa-create",
+  "version": "2.0.0",
+  "description": "Complete SDK and React components for creating and trading tokens on Sui with Kappa Protocol. Includes customizable DeployerWidget and TradeWidget with theming support.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "exports": {
@@ -25,23 +25,31 @@
     "kappa.js",
     "kappa-trade.js",
     "math.js",
-    "move-bytecode"
+    "move-bytecode",
+    "DEPLOYER_INTEGRATION.md",
+    "README.md"
   ],
   "engines": {
     "node": ">=18"
   },
   "sideEffects": false,
   "dependencies": {
-    "@mysten/bcs": "^1.6.4",
+    "@mysten/bcs": "^1.7.0",
     "@mysten/sui": "^1.36.0",
     "dotenv": "^16.6.1"
   },
   "devDependencies": {
-    "@tanstack/react-query": "^5.45.1",
     "@mysten/dapp-kit": "^0.17.4",
+    "@tanstack/react-query": "^5.45.1",
+    "eslint": "^8.57.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "eslint": "^8.57.0"
+    "react-dom": "^18.2.0"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "@tanstack/react-query": ">=5",
+    "@mysten/dapp-kit": ">=0.17.0"
   },
   "scripts": {
     "start": "node -e \"console.log('kappa-sdk: library only')\"",
@@ -55,12 +63,22 @@
     "token",
     "bonding-curve",
     "kappa",
-    "sdk"
+    "sdk",
+    "react",
+    "widget",
+    "deployer",
+    "defi",
+    "web3",
+    "dapp"
   ],
   "author": "Kappa Protocol",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kappadotmeme/kappa-sdk"
-  }
+    "url": "https://github.com/kappa-labs/kappa-create.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kappa-labs/kappa-create/issues"
+  },
+  "homepage": "https://kappa.meme"
 }

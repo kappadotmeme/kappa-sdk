@@ -1,41 +1,89 @@
-# Kappa Partner SDK (Sui)
+# Kappa Create SDK (Sui)
 
-SDK for creating and trading tokens on Kappa’s Sui bonding curve. Exposes create/buy/sell and quoting math. The coin listing API is open for now; x-api-key is optional.
+Complete SDK and React components for creating and trading tokens on Sui with Kappa Protocol. Includes customizable DeployerWidget and TradeWidget with full theming support.
+
+## Features
+
+- 🚀 **Token Creation**: Deploy tokens with bonding curves on Sui
+- 💱 **Trading SDK**: Buy/sell tokens programmatically  
+- 🎨 **React Widgets**: Pre-built, customizable UI components
+- 🎯 **Third-party Support**: Use your own Sui modules
+- 🌈 **Full Theming**: Match your brand identity
+- 📦 **TypeScript Ready**: Full type definitions included
 
 ## Install
 
 ```bash
-npm install kappa-sdk @mysten/sui
+npm install kappa-create @mysten/sui @mysten/bcs
 ```
 
-For the React widget in a Next/React app:
+For React widgets in a Next/React app:
 
 ```bash
-npm install kappa-sdk @tanstack/react-query @mysten/dapp-kit @mysten/sui react react-dom
+npm install kappa-create @tanstack/react-query @mysten/dapp-kit @mysten/sui react react-dom
 ```
 
-## Quickstart (Node)
+## Quick Start
+
+### React Widgets
+
+#### Trade Widget
+```jsx
+import { WidgetStandalone } from 'kappa-create/react';
+
+function App() {
+  return (
+    <WidgetStandalone 
+      defaultContract="0xabc...::my_token::MY_TOKEN"
+      theme={{ '--kappa-primary': '#ff6b35' }}
+      logoUrl="/logo.png"
+      projectName="My DEX"
+    />
+  );
+}
+```
+
+#### Deployer Widget
+```jsx
+import { DeployerWidgetStandalone } from 'kappa-create/react';
+
+function App() {
+  return (
+    <DeployerWidgetStandalone 
+      onSuccess={(coinAddress) => {
+        console.log('Token deployed:', coinAddress);
+      }}
+      theme={{ '--kappa-primary': '#007bff' }}
+      projectName="My Platform"
+    />
+  );
+}
+```
+
+### SDK Usage (Node.js)
 
 ```js
-const { initKappa, buyTokens, sellTokens, listCoins } = require('kappa-sdk');
-const { createToken } = require('kappa-sdk/server'); // server-only
+const { initKappa, buyTokens, sellTokens } = require('kappa-create');
+const { createToken } = require('kappa-create/server'); // server-only
 const { SuiClient, getFullnodeUrl, Ed25519Keypair } = require('@mysten/sui');
 
 const client = new SuiClient({ url: getFullnodeUrl('mainnet') });
 initKappa({ client, logger: console.log });
 
-// Your signer: either a Keypair or a Uint8Array secret key (server-side only)
+// Your signer
 const signer = Ed25519Keypair.fromSecretKey(/* Uint8Array secret key */);
 
-// Create + launch (optional first buy) — server-only
+// Create token (server-only)
 await createToken({
   signer,
-  name: 'My Coin', symbol: 'MYC', description: '...', icon: 'https://...',
-  maxTx: false,
+  name: 'My Coin', 
+  symbol: 'MYC', 
+  description: 'My awesome token',
+  icon: 'https://example.com/icon.png',
   firstBuy: { suiInMist: 100_000_000, minTokensOut: 0 },
 });
 
-// Buy
+// Buy tokens
 await buyTokens({
   signer,
   contract: '0x...::My_Coin::MY_COIN',
@@ -43,287 +91,199 @@ await buyTokens({
   minTokensOut: 0,
 });
 
-// Sell
+// Sell tokens
 await sellTokens({
   signer,
   contract: '0x...::My_Coin::MY_COIN',
   tokensIn: 1_000_000_000,
   minSuiOut: 0,
 });
-
-// Discovery (API key optional)
-const coins = await listCoins();
 ```
 
-## API
+## Third-Party Module Integration
 
-- initKappa({ client?, networkConfig?, logger? })
-  - Inject your SuiClient, optional network constants, and optional logger.
-- createToken({ signer|signerPrivateKey, name, symbol, description, icon, website?, twitter?, telegram?, tags?, maxTx?, firstBuy? })
-  - Returns { success, digest, effects, objectChanges, treasuryCapObject, coinMetadataObject, publishedObject, curve }.
-- buyTokens({ signer|signerPrivateKey, contract|packageId+name, suiInMist, minTokensOut? })
-  - Returns { success, digest, effects, objectChanges }.
-- sellTokens({ signer|signerPrivateKey, contract|packageId+name, tokensIn, minSuiOut? })
-  - Returns { success, digest, effects, objectChanges }.
-- listCoins({ apiBaseUrl?, apiKey?, signal?, timeoutMs? })
-  - Fetches coin list from https://api.kappa.fun/v1/coins/. x-api-key is optional.
+Use your own Sui modules with custom configuration:
 
-### HTTP API schema
+```jsx
+import { DeployerWidgetStandalone } from 'kappa-create/react';
 
-- Base URL: `https://api.kappa.fun`
+const myModuleConfig = {
+  bondingContract: "0x1234...abcd",  // Your package ID
+  CONFIG: "0x5678...efgh",           // Your CONFIG object
+  globalPauseStatusObjectId: "0x9abc...ijkl",
+  poolsId: "0xdef0...mnop",
+  moduleName: "my_custom_module",    // Your module name
+};
 
-- GET `/v1/coins?nameOrSymbol={q}`
-  - **Query**: `nameOrSymbol` (string; case-insensitive)
-  - **Response**: `{ data: Coin[] }`
+<DeployerWidgetStandalone 
+  network={myModuleConfig}
+  projectName="My Protocol"
+  onSuccess={(address) => console.log(address)}
+/>
+```
 
-- GET `/v1/coins/trending`
-  - **Response**: `{ data: Coin[] }`
+## Widget Theming
 
-Type: `Coin` (fields are sourced from multiple backends; some are optional)
+Customize widgets to match your brand:
 
-- `contractAddress` | `coinType` | `contract`: canonical coin type (e.g., `0x...::Module::TOKEN`)
-- `symbol`: string (e.g., `PEPE`)
-- `name`: string (e.g., `Pepe Coin`)
-- `avatarUrl` | `icon` | `avatar` | `logo` | `image` | `img` | `iconUrl`: image URL (pick any present; `ipfs://` may appear)
-- Bonding/curve identifier (one of):
-  - `bondingContractAddress` | `bondingAddress` | `bondingContract` | `bonding` | `bonding_object` | `bondingObject`
-  - `curve` | `curveId` | `curveAddress` | `curve_object` | `curveObject`
-- Migration indicators (if present, treat as migrated and exclude for bonding-curve trading):
-  - `pairAddress` | `pairContractAddress` | `pair` | `pair_object` | `pairObject` | `poolAddress` | `lpAddress`
+```jsx
+const customTheme = {
+  '--kappa-bg': '#1a1b23',
+  '--kappa-panel': '#252631',
+  '--kappa-input-bg': '#1f2029',
+  '--kappa-border': '#3a3b47',
+  '--kappa-text': '#ffffff',
+  '--kappa-muted': '#a0a0a0',
+  '--kappa-accent': '#00d4ff',
+  '--kappa-primary': '#007bff',
+  '--kappa-text-on-primary': '#ffffff',
+  '--kappa-success': '#28a745',
+  '--kappa-error': '#dc3545',
+};
 
-Example response (truncated):
+<WidgetStandalone theme={customTheme} />
+```
 
-```json
-{
-  "data": [
-    {
-      "contractAddress": "0x...::My_Coin::MY_COIN",
-      "symbol": "MYC",
-      "name": "My Coin",
-      "avatarUrl": "https://.../myc.png",
-      "bondingContractAddress": "0x...",
-      "curveId": "0x..."
-    }
-  ]
+## Widget Variants
+
+### Standalone
+Includes all required providers:
+```jsx
+import { WidgetStandalone, DeployerWidgetStandalone } from 'kappa-create/react';
+```
+
+### Embedded
+For apps with existing wallet providers:
+```jsx
+import { WidgetEmbedded, DeployerWidgetEmbedded } from 'kappa-create/react';
+```
+
+### Integrated
+Maximum integration with existing infrastructure:
+```jsx
+import { DeployerWidgetIntegrated } from 'kappa-create/react';
+```
+
+## API Reference
+
+### Widget Props
+
+#### Trade Widget
+```typescript
+interface WidgetProps {
+  theme?: Partial<WidgetTheme>;
+  defaultContract?: string;
+  lockContract?: boolean;
+  logoUrl?: string;
+  projectName?: string;
 }
 ```
 
-## React Web Widget
-
-Two ready-to-use React components power an embeddable buy/sell widget on Sui:
-
-- `WidgetStandalone`: includes its own providers (`QueryClientProvider`, `SuiClientProvider`, `WalletProvider`).
-- `WidgetEmbedded`: uses providers from the host app (bring your own).
-
-Import (CommonJS):
-
-```js
-const { WidgetStandalone, WidgetEmbedded } = require('kappa-sdk/react');
+#### Deployer Widget
+```typescript
+interface DeployerWidgetProps {
+  network?: ModuleConfig;
+  onSuccess?: (coinAddress: string) => void;
+  defaultDevBuySui?: string;
+  theme?: Partial<WidgetTheme>;
+  maxWidth?: number;
+  logoUrl?: string;
+  projectName?: string;
+}
 ```
 
-Import (ESM):
+### SDK Functions
 
-```js
-import { WidgetStandalone, WidgetEmbedded } from 'kappa-sdk/react';
-```
+#### initKappa(options)
+Initialize the SDK with a Sui client.
 
-### Standalone usage (plug-and-play)
+#### createToken(params) 
+Create and launch a new token (server-only).
 
-Minimal Next.js page:
+#### buyTokens(params)
+Buy tokens from a bonding curve.
 
-```tsx
-import { WidgetStandalone } from 'kappa-sdk/react';
+#### sellTokens(params)
+Sell tokens back to a bonding curve.
 
-export default function Page() {
+#### listCoins(options)
+List trending/all coins from Kappa API.
+
+#### quoteBuy(contract, suiInMist)
+Get quote for buying tokens.
+
+#### quoteSell(contract, tokensIn)
+Get quote for selling tokens.
+
+## Examples
+
+### Next.js Integration
+```jsx
+// pages/launch.tsx
+import { DeployerWidgetStandalone } from 'kappa-create/react';
+
+export default function LaunchPage() {
   return (
-    <div style={{ display: 'grid', placeItems: 'center', minHeight: '100vh', padding: 24 }}>
-      <WidgetStandalone />
+    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
+      <h1>Launch Your Token</h1>
+      <DeployerWidgetStandalone 
+        onSuccess={(address) => {
+          router.push(`/token/${address}`);
+        }}
+      />
     </div>
   );
 }
 ```
 
-Optional props (branding, theming, defaults):
+### Custom Wallet Integration
+```jsx
+import { DeployerWidgetEmbedded } from 'kappa-create/react';
+import { WalletProvider } from '@mysten/dapp-kit';
 
-```tsx
-<WidgetStandalone
-  projectName="Kappa"
-  logoUrl="https://your.cdn/logo.png"
-  theme={{ '--kappa-primary': '#8b5cf6' }}
-  defaultContract="0x...::My_Coin::MY_COIN"   // preselect a token
-  lockContract={false}                         // true disables search/changes
-/>
-```
-
-### Integrated usage (reuse your app providers)
-
-```tsx
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createNetworkConfig, SuiClientProvider, WalletProvider } from '@mysten/dapp-kit';
-import { WidgetEmbedded } from 'kappa-sdk/react';
-
-const { networkConfig } = createNetworkConfig({ mainnet: { url: 'https://fullnode.mainnet.sui.io:443' } });
-const queryClient = new QueryClient();
-
-export default function App() {
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <SuiClientProvider networks={networkConfig} defaultNetwork="mainnet">
-        <WalletProvider autoConnect>
-          <WidgetEmbedded
-            projectName="Kappa"
-            defaultContract="0x...::My_Coin::MY_COIN"
-          />
-        </WalletProvider>
-      </SuiClientProvider>
-    </QueryClientProvider>
+    <WalletProvider>
+      <DeployerWidgetEmbedded 
+        network={customConfig}
+        theme={customTheme}
+      />
+    </WalletProvider>
   );
 }
 ```
 
-### Default token examples
+## TypeScript Support
 
-- Preload a default token but allow users to change it:
+Full TypeScript definitions included:
 
-```tsx
-<WidgetStandalone defaultContract="0x...::My_Coin::MY_COIN" />
+```typescript
+import { 
+  DeployerWidgetStandalone, 
+  DeployerWidgetProps,
+  ModuleConfig,
+  WidgetTheme 
+} from 'kappa-create/react';
 ```
 
-- Lock the widget to a single token (no search/input):
+## Documentation
 
-```tsx
-<WidgetEmbedded defaultContract="0x...::My_Coin::MY_COIN" lockContract />
-```
+- [Deployer Widget Integration Guide](./DEPLOYER_INTEGRATION.md)
+- [API Documentation](https://docs.kappa.meme)
+- [Example App](./examples/web-widget)
 
-### Props reference
+## Requirements
 
-All widget props are optional:
-
-- `projectName?: string` – label shown in the top-left of the widget
-- `logoUrl?: string` – custom logo image URL
-- `theme?: Record<'--kappa-*', string>` – override CSS variables (see Theming below)
-- `defaultContract?: string` – preselected coin type `0x...::Module::TOKEN`
-- `lockContract?: boolean` – when true, disables search/editing of the token field
-
-### Next.js notes
-
-If your app imports the widget from the SDK (outside your `app/` directory), Next may require these settings:
-
-```js
-// next.config.js
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  experimental: { externalDir: true },
-  transpilePackages: [
-    'kappa-sdk',
-    '@mysten/dapp-kit',
-    '@mysten/sui',
-    '@tanstack/react-query',
-  ],
-};
-export default nextConfig;
-```
-
-### Widget features
-
-- Token search with dropdown (by symbol/name), avatar preview, and contract address abbreviation
-- Excludes migrated tokens (pair/pool addresses detected)
-- Buy/Sell tabs, numeric-only inputs, quick-select chips, slippage presets
-- Slippage icon button and settings panel with presets
-- Balance chip with SUI or token balance; SUI loads immediately on wallet connect
-- Theming via CSS variables; pass a `theme` prop to override `--kappa-*` tokens
-- Wallet connect UI with dropdown, hover effects, and click-outside
-- Transaction modal with blurred backdrop, amount summary, Suivision link, and close
-
-### Theming
-
-All colors are driven by CSS variables on the widget root. Override any subset:
-
-```tsx
-<WidgetStandalone
-  theme={{
-    '--kappa-bg': '#111318',
-    '--kappa-primary': '#8b5cf6',
-    '--kappa-accent': '#7aa6cc',
-  }}
-/>
-```
-
-Available tokens include:
-
-`--kappa-bg`, `--kappa-panel`, `--kappa-input-bg`, `--kappa-border`, `--kappa-text`, `--kappa-muted`, `--kappa-accent`, `--kappa-primary`, `--kappa-text-on-primary`, `--kappa-success`, `--kappa-chip-bg`, `--kappa-chip-border`, `--kappa-status-ok-bg`, `--kappa-status-ok-border`, `--kappa-status-err-bg`, `--kappa-status-err-border`, `--kappa-tab-active-bg`, `--kappa-error`, `--kappa-avatar-bg`.
-
-## Math helpers
-
-Re-exported from math.js for pre-trade quoting:
-- firstBuyMath(sui_in_mist)
-- buyMath(curveState, sui_in_mist)
-- sellMath(curveState, tokens_in)
-- calculateSuiForTokens(curveState, desiredTokens)
-- calculateSuiForFirstBuy(desiredTokens)
-- calculatePriceImpact(curveState, suiAmount)
-- simulateCurveAfterDevBuy(devBuySuiAmount)
-- calculateSuiForBundledPurchase(tokenAmount, devBuySuiAmount)
-
-## Network config
-
-Defaults are for mainnet. Override via initKappa({ networkConfig }).
-
-## Signers
-
-Pass either:
-- A Uint8Array secret key (server-side only), or
-- A Keypair-like signer with signAndExecuteTransaction (e.g., Ed25519Keypair).
-
-## Browser vs server
-
-- Do not use custodial private keys in the browser. Prefer wallet adapters.
-- Token creation (bytecode publish) should run server-side. Import from `kappa-sdk/server` only.
-
-### Server-only entry quickstart
-
-```js
-// Node only
-const { createToken } = require('kappa-sdk/server');
-```
-
-## Types
-
-TypeScript declarations are provided at src/index.d.ts.
-
-## File Structure
-
-```
-kappa-sdk/
-├── src/                # SDK entry and modules
-│   ├── index.js
-│   ├── index.d.ts
-│   ├── api.js
-│   ├── deploy.js
-│   └── trade.js
-├── kappa.js            # On-chain functions, client injection helpers
-├── kappa-trade.js      # Web3 trade helpers used by the widget
-├── math.js             # Bonding curve math (re-exported)
-├── src/react/         # React widget (Widget.tsx) and re-exports
-└── move-bytecode/     # WASM for Move bytecode editing (token creation)
-```
+- Node.js 16+
+- React 18+ (for widgets)
+- Sui wallet (for Web3 features)
 
 ## License
 
-MIT 
+MIT
 
-## Releases
+## Support
 
-Automated npm publish on semver tags via GitHub Actions.
-
-Prereqs:
-- Add `NPM_TOKEN` (automation token) to repo secrets.
-- Ensure `package.json` version is updated.
-
-Release steps:
-1. Merge your changes to `main` (CI must be green).
-2. Bump version in `package.json` (or use your chosen versioning tool).
-3. Tag the commit, e.g. `git tag v1.3.0 && git push --tags`.
-4. The `Release` workflow will publish to npm with provenance.
-
-Example consumers can then install `kappa-sdk@^1.3.x` and import `kappa-sdk/react`.
+- GitHub: https://github.com/kappa-labs/kappa-create
+- Discord: https://discord.gg/kappa
+- Website: https://kappa.meme

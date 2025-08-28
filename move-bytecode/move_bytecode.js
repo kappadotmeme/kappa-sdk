@@ -2,7 +2,32 @@
 let imports = {};
 imports['__wbindgen_placeholder__'] = module.exports;
 let wasm;
-const { TextEncoder, TextDecoder } = require(`util`);
+
+// Browser-compatible TextEncoder/TextDecoder handling
+let TextEncoder, TextDecoder;
+if (typeof window !== 'undefined' && window.TextEncoder && window.TextDecoder) {
+    // Browser environment
+    TextEncoder = window.TextEncoder;
+    TextDecoder = window.TextDecoder;
+} else if (typeof globalThis !== 'undefined' && globalThis.TextEncoder && globalThis.TextDecoder) {
+    // Modern environment
+    TextEncoder = globalThis.TextEncoder;
+    TextDecoder = globalThis.TextDecoder;
+} else if (typeof global !== 'undefined' && global.TextEncoder && global.TextDecoder) {
+    // Node.js with polyfills
+    TextEncoder = global.TextEncoder;
+    TextDecoder = global.TextDecoder;
+} else {
+    // Node.js environment - require from util
+    try {
+        const util = require('util');
+        TextEncoder = util.TextEncoder;
+        TextDecoder = util.TextDecoder;
+    } catch (e) {
+        // If all else fails, throw a meaningful error
+        throw new Error('TextEncoder/TextDecoder not available in this environment');
+    }
+}
 
 let WASM_VECTOR_LEN = 0;
 
@@ -15,7 +40,8 @@ function getUint8ArrayMemory0() {
     return cachedUint8ArrayMemory0;
 }
 
-let cachedTextEncoder = new TextEncoder('utf-8');
+// Create TextEncoder instance - browser doesn't accept 'utf-8' parameter
+let cachedTextEncoder = typeof window !== 'undefined' ? new TextEncoder() : new TextEncoder('utf-8');
 
 const encodeString = (typeof cachedTextEncoder.encodeInto === 'function'
     ? function (arg, view) {
@@ -162,7 +188,10 @@ function debugString(val) {
     return className;
 }
 
-let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
+// Create TextDecoder instance - browser version has slightly different options
+let cachedTextDecoder = typeof window !== 'undefined' 
+    ? new TextDecoder() 
+    : new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
 
 cachedTextDecoder.decode();
 
@@ -617,13 +646,76 @@ module.exports.__wbindgen_throw = function(arg0, arg1) {
     throw new Error(getStringFromWasm0(arg0, arg1));
 };
 
-const path = require('path').join(__dirname, 'move_bytecode.wasm');
-const bytes = require('fs').readFileSync(path);
+// Browser-compatible WASM loading
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined' || (typeof globalThis !== 'undefined' && globalThis.window);
 
-const wasmModule = new WebAssembly.Module(bytes);
-const wasmInstance = new WebAssembly.Instance(wasmModule, imports);
-wasm = wasmInstance.exports;
-module.exports.__wasm = wasm;
-
-wasm.__wbindgen_start();
+if (!isBrowser) {
+    // Node.js environment - use fs to read the file synchronously
+    try {
+        const path = require('path').join(__dirname, 'move_bytecode.wasm');
+        const fs = require('fs');
+        const bytes = fs.readFileSync(path);
+        
+        const wasmModule = new WebAssembly.Module(bytes);
+        const wasmInstance = new WebAssembly.Instance(wasmModule, imports);
+        wasm = wasmInstance.exports;
+        module.exports.__wasm = wasm;
+        
+        wasm.__wbindgen_start();
+    } catch (e) {
+        console.error('Failed to load WASM in Node.js environment:', e);
+        throw e;
+    }
+} else {
+    // Browser environment - WASM needs to be loaded differently
+    // We'll provide a function to initialize the WASM asynchronously
+    console.warn('Browser environment detected. WASM must be initialized asynchronously.');
+    
+    // Store the original function definitions
+    const originalExports = {
+        deserialize: exports.deserialize,
+        serialize: exports.serialize,
+        update_identifiers: exports.update_identifiers,
+        update_constants: exports.update_constants,
+        get_constants: exports.get_constants,
+        version: exports.version
+    };
+    
+    // Provide an async initialization function
+    module.exports.initWasm = async function(wasmBytes) {
+        try {
+            if (!wasmBytes) {
+                throw new Error('WASM bytes must be provided for browser initialization');
+            }
+            
+            const wasmModule = await WebAssembly.compile(wasmBytes);
+            const wasmInstance = await WebAssembly.instantiate(wasmModule, imports);
+            wasm = wasmInstance.exports;
+            module.exports.__wasm = wasm;
+            
+            wasm.__wbindgen_start();
+            
+            // Restore the original function exports now that WASM is initialized
+            Object.keys(originalExports).forEach(name => {
+                if (originalExports[name]) {
+                    module.exports[name] = originalExports[name];
+                }
+            });
+            
+            return true;
+        } catch (e) {
+            console.error('Failed to initialize WASM:', e);
+            throw e;
+        }
+    };
+    
+    // Throw error if trying to use WASM before initialization
+    const methodNames = ['deserialize', 'serialize', 'update_identifiers', 'update_constants', 'get_constants'];
+    methodNames.forEach(name => {
+        module.exports[name] = function() {
+            throw new Error(`WASM not initialized. Call initWasm() first in browser environment.`);
+        };
+    });
+}
 

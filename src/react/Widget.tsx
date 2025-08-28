@@ -187,9 +187,12 @@ function ContractInput(props: {
   setShowSearch: (v: boolean) => void;
   onSelectResult: (item: any) => void;
   isSearching: boolean;
+  inputFocused: boolean;
+  setInputFocused: (v: boolean) => void;
+  setHasUserInteracted: (v: boolean) => void;
   locked?: boolean;
 }) {
-  const { contract, setContract, tokenSymbol, tokenName, tokenAvatarUrl, onClear, searchResults, showSearch, setShowSearch, onSelectResult, isSearching, locked } = props;
+  const { contract, setContract, tokenSymbol, tokenName, tokenAvatarUrl, onClear, searchResults, showSearch, setShowSearch, onSelectResult, isSearching, inputFocused, setInputFocused, setHasUserInteracted, locked } = props;
   const rootRef = useRef<HTMLDivElement | null>(null);
   const showCA = !!contract && contract.includes('::');
   useEffect(() => {
@@ -205,9 +208,9 @@ function ContractInput(props: {
     <div ref={rootRef} style={{ position: 'relative' }}>
       <input
         value={showCA ? '' : contract}
-        onChange={(e) => { if (!locked) { setContract(e.target.value); setShowSearch(true); } }}
-        onFocus={() => { if (!locked) setShowSearch(true); }}
-        onBlur={() => { if (!locked) setTimeout(() => setShowSearch(false), 100); }}
+        onChange={(e) => { if (!locked) { setContract(e.target.value); } }}
+        onFocus={() => { if (!locked) { setInputFocused(true); setHasUserInteracted(true); } }}
+        onBlur={() => { if (!locked) { setInputFocused(false); setShowSearch(false); } }}
         placeholder={showCA ? '' : "Insert name, symbol or contract address"}
         title={contract}
         style={{ ...inputStyle, paddingRight: (tokenSymbol || tokenName) ? 220 : 10, paddingLeft: showCA ? 170 : 10, opacity: locked ? 0.85 : 1 }}
@@ -236,7 +239,7 @@ function ContractInput(props: {
           <button onClick={onClear} title="Clear" style={{ border: 'none', background: 'transparent', color: '#9ca3af', cursor: 'pointer', fontSize: 14 }}>🗑</button>
         )}
       </div>
-      {!locked && showSearch && (
+      {!locked && showSearch && inputFocused && searchResults.length > 0 && (
         <div className="kappa-dropdown" style={{ position: 'absolute', left: 0, right: 0, top: '100%', marginTop: 6, background: 'var(--kappa-panel)', border: '1px solid var(--kappa-border)', borderRadius: 10, maxHeight: 262, overflowY: 'auto', zIndex: 5, boxShadow: '0 6px 16px rgba(0,0,0,0.35)', scrollbarWidth: 'thin' }}>
           {(!contract || String(contract).trim()==='') && (
             <div style={{ position: 'sticky', top: 0, background: 'var(--kappa-panel)', padding: '8px 12px', borderBottom: '1px solid var(--kappa-border)', color: '#9ca3af', fontSize: 12, zIndex: 1 }}>
@@ -312,6 +315,9 @@ function TradePanelView(props: {
   setShowSearch: (v: boolean) => void;
   onSelectResult: (item: any) => void;
   isSearching: boolean;
+  inputFocused: boolean;
+  setInputFocused: (v: boolean) => void;
+  setHasUserInteracted: (v: boolean) => void;
   mode: 'buy' | 'sell';
   setMode: (m: 'buy' | 'sell') => void;
   suiBalance: number;
@@ -339,7 +345,7 @@ function TradePanelView(props: {
 }) {
   const {
     contract, setContract, tokenSymbol, tokenName, tokenAvatarUrl, clearContract,
-    searchResults, showSearch, setShowSearch, onSelectResult, isSearching,
+    searchResults, showSearch, setShowSearch, onSelectResult, isSearching, inputFocused, setInputFocused, setHasUserInteracted,
     mode, setMode,
     suiBalance, tokenBalance, setView, maxBuys, maxSells, handleQuick,
     amountProps, youReceive, onPrimary, primaryLabel, statusText, hasError, isPrimaryDisabled, locked
@@ -384,6 +390,9 @@ function TradePanelView(props: {
           setShowSearch={setShowSearch}
           onSelectResult={onSelectResult}
           isSearching={isSearching}
+          inputFocused={inputFocused}
+          setInputFocused={setInputFocused}
+          setHasUserInteracted={setHasUserInteracted}
           locked={locked}
         />
       </div>
@@ -562,9 +571,11 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
   const [view, setView] = useState<'trade' | 'slippage'>('trade');
 
   const [showSearch, setShowSearch] = useState(false);
+  const [inputFocused, setInputFocused] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [dropdownTitle, setDropdownTitle] = useState<string | undefined>(undefined);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
 
   const [suiIn, setSuiIn] = useState('0');
   const [tokensIn, setTokensIn] = useState('0');
@@ -678,10 +689,15 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
         setTokenName('');
         setIsVerified(false);
         if (!contract || !contract.includes('::')) {
-          // search mode
-          setShowSearch(true);
+          // Don't show search/trending unless user has actually interacted with the input
+          if (!inputFocused || !hasUserInteracted) {
+            setShowSearch(false);
+            setSearchResults([]);
+            return;
+          }
           // Empty input: show trending list instead of "No results"
-          if (!contract) {
+          if (!contract && inputFocused && hasUserInteracted) {
+            setShowSearch(true);
             setIsSearching(true);
             try {
               let json: any = null;
@@ -706,7 +722,14 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
             }
             return;
           }
-          setIsSearching(true);
+          if (contract && inputFocused && hasUserInteracted) {
+            setShowSearch(true);
+            setIsSearching(true);
+          } else {
+            setShowSearch(false);
+            setSearchResults([]);
+            return;
+          }
           try {
             const res = await fetch('https://api.kappa.fun/v1/coins?nameOrSymbol=' + contract.trim().toLowerCase());
             const json = await res.json();
@@ -824,7 +847,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
     }
     load();
     return () => { abort = true; };
-  }, [contract, account?.address, client, suiClientHook]);
+  }, [contract, account?.address, client, suiClientHook, inputFocused, hasUserInteracted]);
 
   // Quotes
   useEffect(() => {
@@ -1082,6 +1105,9 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
               setShowSearch(false);
             }}
             isSearching={isSearching}
+            inputFocused={inputFocused}
+            setInputFocused={setInputFocused}
+            setHasUserInteracted={setHasUserInteracted}
             mode={mode}
             setMode={setMode}
             suiBalance={suiBalance}

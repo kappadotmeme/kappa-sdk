@@ -62,6 +62,15 @@ module.exports = {
     get WidgetEmbedded() {
         try { return require('./react').WidgetEmbedded; } catch { return undefined; }
     },
+    get DeployerWidgetStandalone() {
+        try { return require('./react').DeployerWidgetStandalone; } catch { return undefined; }
+    },
+    get DeployerWidgetEmbedded() {
+        try { return require('./react').DeployerWidgetEmbedded; } catch { return undefined; }
+    },
+    get DeployerWidgetIntegrated() {
+        try { return require('./react').DeployerWidgetIntegrated; } catch { return undefined; }
+    },
 };
 
 

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kappa Deployer Widget - Third Party Integration Example</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #0a0a0a;
+      color: #ffffff;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: #38A1D0;
+      margin-bottom: 40px;
+    }
+    .integration-example {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    .integration-example h2 {
+      color: #38A1D0;
+      margin-top: 0;
+    }
+    .code-block {
+      background: #0a0a0a;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 15px;
+      overflow-x: auto;
+      margin: 15px 0;
+    }
+    .code-block code {
+      color: #61dafb;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+    .widget-container {
+      margin: 30px 0;
+      display: flex;
+      justify-content: center;
+    }
+    .note {
+      background: #1e3a5f;
+      border-left: 4px solid #38A1D0;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Kappa Deployer Widget - Integration Examples</h1>
+
+    <div class="integration-example">
+      <h2>1. Basic HTML Integration (CDN)</h2>
+      <p>The simplest way to integrate the Deployer Widget in a plain HTML page:</p>
+      
+      <div class="code-block">
+        <code>
+&lt;!-- Include React and the Widget --&gt;<br>
+&lt;script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"&gt;&lt;/script&gt;<br>
+&lt;script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"&gt;&lt;/script&gt;<br>
+&lt;script src="https://unpkg.com/kappa-sdk@latest/dist/deployer-widget.min.js"&gt;&lt;/script&gt;<br>
+<br>
+&lt;!-- Container for the widget --&gt;<br>
+&lt;div id="deployer-widget"&gt;&lt;/div&gt;<br>
+<br>
+&lt;script&gt;<br>
+  const widget = KappaDeployer.DeployerWidgetStandalone({<br>
+    network: {<br>
+      bondingContract: '0x860ca3287542b1eedc5880732b290d49f40f8dc3ad5365a4efb2692e533f3de9',<br>
+      CONFIG: '0x3e87697f5a0fa4f53c4121cec630f2e3399c47e66198339a895ad26e9ecb388a'<br>
+    },<br>
+    onSuccess: function(coinAddress) {<br>
+      console.log('Token created:', coinAddress);<br>
+      window.location.href = 'https://kappa.fun/coin/' + coinAddress;<br>
+    },<br>
+    defaultDevBuySui: '0.1',<br>
+    projectName: 'My Project'<br>
+  });<br>
+  <br>
+  ReactDOM.render(widget, document.getElementById('deployer-widget'));<br>
+&lt;/script&gt;
+        </code>
+      </div>
+    </div>
+
+    <div class="integration-example">
+      <h2>2. React App Integration (NPM)</h2>
+      <p>For React applications using npm/yarn:</p>
+      
+      <div class="code-block">
+        <code>
+// Install the package<br>
+npm install kappa-sdk<br>
+<br>
+// In your React component<br>
+import { DeployerWidgetStandalone } from 'kappa-sdk/react';<br>
+<br>
+function App() {<br>
+  return (<br>
+    &lt;DeployerWidgetStandalone<br>
+      network={{<br>
+        bondingContract: '0x860ca3287542b1eedc5880732b290d49f40f8dc3ad5365a4efb2692e533f3de9',<br>
+        CONFIG: '0x3e87697f5a0fa4f53c4121cec630f2e3399c47e66198339a895ad26e9ecb388a'<br>
+      }}<br>
+      onSuccess={(coinAddress) =&gt; {<br>
+        console.log('Token created:', coinAddress);<br>
+      }}<br>
+      defaultDevBuySui="0.1"<br>
+      logoUrl="/logo.png"<br>
+      projectName="My DeFi Project"<br>
+    /&gt;<br>
+  );<br>
+}
+        </code>
+      </div>
+    </div>
+
+    <div class="integration-example">
+      <h2>3. Next.js Integration</h2>
+      <p>For Next.js applications with SSR:</p>
+      
+      <div class="code-block">
+        <code>
+// Use dynamic import to avoid SSR issues<br>
+import dynamic from 'next/dynamic';<br>
+<br>
+const DeployerWidget = dynamic(<br>
+  () =&gt; import('kappa-sdk/react').then(mod =&gt; mod.DeployerWidgetStandalone),<br>
+  { ssr: false }<br>
+);<br>
+<br>
+export default function TokenLauncher() {<br>
+  return (<br>
+    &lt;DeployerWidget<br>
+      network={{<br>
+        bondingContract: '0x860ca3287542b1eedc5880732b290d49f40f8dc3ad5365a4efb2692e533f3de9',<br>
+        CONFIG: '0x3e87697f5a0fa4f53c4121cec630f2e3399c47e66198339a895ad26e9ecb388a'<br>
+      }}<br>
+      onSuccess={(coinAddress) =&gt; {<br>
+        router.push(`/token/${coinAddress}`);<br>
+      }}<br>
+    /&gt;<br>
+  );<br>
+}
+        </code>
+      </div>
+    </div>
+
+    <div class="integration-example">
+      <h2>4. Custom Themed Integration</h2>
+      <p>Customize the widget appearance to match your brand:</p>
+      
+      <div class="code-block">
+        <code>
+&lt;DeployerWidgetStandalone<br>
+  network={{<br>
+    bondingContract: '0x860ca3287542b1eedc5880732b290d49f40f8dc3ad5365a4efb2692e533f3de9',<br>
+    CONFIG: '0x3e87697f5a0fa4f53c4121cec630f2e3399c47e66198339a895ad26e9ecb388a'<br>
+  }}<br>
+  theme={{<br>
+    '--kappa-bg': '#1a1a2e',<br>
+    '--kappa-panel': '#16213e',<br>
+    '--kappa-border': '#0f3460',<br>
+    '--kappa-text': '#ffffff',<br>
+    '--kappa-primary': '#e94560',<br>
+    '--kappa-success': '#00d4aa',<br>
+    '--kappa-accent': '#533483'<br>
+  }}<br>
+  logoUrl="https://yoursite.com/logo.png"<br>
+  projectName="Your Brand"<br>
+  defaultDevBuySui="0.5"<br>
+  maxWidth={600}<br>
+/&gt;
+        </code>
+      </div>
+    </div>
+
+    <div class="note">
+      <h3>Important Notes:</h3>
+      <ul>
+        <li>The widget requires a Web3 wallet (Sui Wallet, Suiet, etc.) to be installed</li>
+        <li>Make sure to use the correct network configuration for mainnet or testnet</li>
+        <li>The <code>onSuccess</code> callback receives the full coin address that can be used to redirect users</li>
+        <li>All styling is contained within the widget and won't affect your app's styles</li>
+        <li>The widget is fully responsive and works on mobile devices</li>
+      </ul>
+    </div>
+
+    <div class="integration-example">
+      <h2>5. TypeScript Integration</h2>
+      <p>Full TypeScript support with type definitions:</p>
+      
+      <div class="code-block">
+        <code>
+import { <br>
+  DeployerWidgetStandalone,<br>
+  DeployerWidgetProps <br>
+} from 'kappa-sdk/react';<br>
+<br>
+const widgetConfig: DeployerWidgetProps = {<br>
+  network: {<br>
+    bondingContract: '0x860ca3287542b1eedc5880732b290d49f40f8dc3ad5365a4efb2692e533f3de9',<br>
+    CONFIG: '0x3e87697f5a0fa4f53c4121cec630f2e3399c47e66198339a895ad26e9ecb388a'<br>
+  },<br>
+  onSuccess: (coinAddress: string): void =&gt; {<br>
+    console.log('Created token:', coinAddress);<br>
+  },<br>
+  defaultDevBuySui: '0.1',<br>
+  maxWidth: 500,<br>
+  theme: {<br>
+    '--kappa-primary': '#2563eb'<br>
+  }<br>
+};<br>
+<br>
+function App(): JSX.Element {<br>
+  return &lt;DeployerWidgetStandalone {...widgetConfig} /&gt;;<br>
+}
+        </code>
+      </div>
+    </div>
+
+    <div class="widget-container">
+      <div id="live-example"></div>
+    </div>
+  </div>
+</body>
+</html>
