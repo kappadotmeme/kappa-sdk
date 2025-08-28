@@ -12,6 +12,11 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      # Needed to create GitHub Releases
+      # (softprops/action-gh-release uses contents: write)
+      # We elevate to write for this job only.
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,6 +31,13 @@ jobs:
         run: npm run lint
       - name: Test
         run: npm test
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish
         run: npm publish --provenance --access public
         env:
