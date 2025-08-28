@@ -74,9 +74,31 @@ const updateTemplate = async (tokenData) => {
         // In browser environment, we need to initialize WASM first
         if (typeof window !== 'undefined' && wasm.initWasm && !wasm.__wasm) {
             console.log('[kappa.js] Initializing WASM for browser environment...');
-            // Load WASM from public directory
-            const wasmResponse = await fetch('/move_bytecode.wasm');
-            const wasmBytes = await wasmResponse.arrayBuffer();
+            // Try several strategies to locate the WASM bytes when consumed from npm
+            const loadWasmBytes = async () => {
+                const candidates = [];
+                // App-provided override via global for frameworks that need a custom path
+                try { if (typeof globalThis !== 'undefined' && globalThis.KAPPA_WASM_URL) candidates.push(String(globalThis.KAPPA_WASM_URL)); } catch {}
+                // Common public-root paths for apps that copy the asset
+                candidates.push('/move_bytecode.wasm');
+                candidates.push('/move-bytecode/move_bytecode.wasm');
+                // Attempt each candidate
+                for (const url of candidates) {
+                    try {
+                        const resp = await fetch(url);
+                        if (resp && resp.ok) {
+                            const bytes = await resp.arrayBuffer();
+                            // Heuristic: first 4 bytes should be \x00asm
+                            const view = new Uint8Array(bytes, 0, 4);
+                            if (view[0] === 0x00 && view[1] === 0x61 && view[2] === 0x73 && view[3] === 0x6d) {
+                                return bytes;
+                            }
+                        }
+                    } catch {}
+                }
+                throw new Error('move_bytecode.wasm not found. Ensure your app serves the wasm or set window.KAPPA_WASM_URL to its URL.');
+            };
+            const wasmBytes = await loadWasmBytes();
             await wasm.initWasm(wasmBytes);
             console.log('[kappa.js] WASM initialized successfully');
         }
