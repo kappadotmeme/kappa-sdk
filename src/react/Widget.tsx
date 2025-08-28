@@ -236,7 +236,14 @@ function ContractInput(props: {
           </span>
         )}
         {(tokenSymbol || tokenName) && !locked && (
-          <button onClick={onClear} title="Clear" style={{ border: 'none', background: 'transparent', color: '#9ca3af', cursor: 'pointer', fontSize: 14 }}>🗑</button>
+          <button
+            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            onClick={() => { onClear(); setShowSearch(false); setInputFocused(false); }}
+            title="Clear"
+            style={{ border: 'none', background: 'transparent', color: '#9ca3af', cursor: 'pointer', fontSize: 14 }}
+          >
+            🗑
+          </button>
         )}
       </div>
       {!locked && showSearch && inputFocused && searchResults.length > 0 && (
