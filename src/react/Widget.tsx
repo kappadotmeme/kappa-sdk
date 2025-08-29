@@ -837,14 +837,14 @@ export function WidgetEmbedded(props: {
                   console.log('[Widget] Factory configuration:', factoryData);
                   
                   // Determine module name based on factory address
-                  // Default Kappa module: 0x9329aacc5381a7c6e419a22b7813361c4efc46cf20846f8247bf4a7bd352857c
-                  // Partner module (Patara): 0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6
+                  // Default Kappa module: 0x7073eb9242244485f7244695448bc2c0c4c3467468683fc288d3ef5e51f4e9dc
+                  // Partner module (Patara): 0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37
                   let moduleName = 'kappadotmeme'; // default
                   const factoryAddr = factoryData.address || factoryData.packageId || '';
-                  if (factoryAddr === '0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6') {
+                  if (factoryAddr === '0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37') {
                     moduleName = 'kappadotmeme_partner';
                     console.log('[Widget] Detected partner module (Patara) from factory address');
-                  } else if (factoryAddr === '0x9329aacc5381a7c6e419a22b7813361c4efc46cf20846f8247bf4a7bd352857c') {
+                  } else if (factoryAddr === '0x7073eb9242244485f7244695448bc2c0c4c3467468683fc288d3ef5e51f4e9dc') {
                     moduleName = 'kappadotmeme';
                     console.log('[Widget] Detected default Kappa module from factory address');
                   } else if (factoryData.moduleName) {
@@ -908,10 +908,10 @@ export function WidgetEmbedded(props: {
                 // Determine module name based on factory address
                 let moduleName = 'kappadotmeme'; // default
                 const factoryAddr = factoryData.address || factoryData.packageId || '';
-                if (factoryAddr === '0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6') {
+                if (factoryAddr === '0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37') {
                   moduleName = 'kappadotmeme_partner';
                   console.log('[Widget] Detected partner module (Patara) from factory address');
-                } else if (factoryAddr === '0x9329aacc5381a7c6e419a22b7813361c4efc46cf20846f8247bf4a7bd352857c') {
+                } else if (factoryAddr === '0x7073eb9242244485f7244695448bc2c0c4c3467468683fc288d3ef5e51f4e9dc') {
                   moduleName = 'kappadotmeme';
                   console.log('[Widget] Detected default Kappa module from factory address');
                 } else if (factoryData.moduleName) {
@@ -1273,6 +1273,9 @@ export function WidgetEmbedded(props: {
         .kappa-dropdown::-webkit-scrollbar-track { background: transparent; }
         .kappa-dropdown::-webkit-scrollbar-thumb { background: rgba(229,231,235,0.4); border-radius: 6px; }
         .kappa-dropdown::-webkit-scrollbar-thumb:hover { background: rgba(229,231,235,0.55); }
+        @media (max-width: 500px) {
+          .kappa-root { box-sizing: border-box; width: calc(100vw - 10px) !important; max-width: none !important; margin-left: 5px !important; margin-right: 5px !important; }
+        }
         @media (max-width: 430px) {
           .kappa-root { padding: 10px !important; border-radius: 12px; max-width: 430px !important; }
           .kappa-header-name { font-size: 16px !important; }

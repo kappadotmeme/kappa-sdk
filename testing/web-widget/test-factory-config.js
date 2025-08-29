@@ -9,13 +9,13 @@ const TEST_TOKENS = [
   {
     name: 'Default Module Token (HAT)',
     address: '0xcd732158b567038db304f073d1780ad0e892cd3aa3892a56b2b5abe5596e799a::Hat::HAT',
-    expectedFactory: '0x9329aacc5381a7c6e419a22b7813361c4efc46cf20846f8247bf4a7bd352857c',
+    expectedFactory: '0x7073eb9242244485f7244695448bc2c0c4c3467468683fc288d3ef5e51f4e9dc',
     expectedModule: 'kappadotmeme'
   },
   {
     name: 'Partner Module Token (Orange Hand)', 
     address: '0xaf81b0eaf5ab0e8c9362a067fb0d97aa2de374904081c071d73755155718242c::Orange_Hand::ORANGE_HAND',
-    expectedFactory: '0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6',
+    expectedFactory: '0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37',
     expectedModule: 'kappadotmeme_partner'
   }
 ];
@@ -61,7 +61,7 @@ async function testFactoryConfig() {
           
           // Determine module name
           let moduleName = 'kappadotmeme';
-          if (factory.address === '0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6') {
+          if (factory.address === '0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37') {
             moduleName = 'kappadotmeme_partner';
           }
           

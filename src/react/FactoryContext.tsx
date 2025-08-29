@@ -79,8 +79,8 @@ export const FactoryProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const defaultConfig: FactoryConfig = {
         name: 'Kappa',
         address: factoryAddress,
-        packageId: '0x9329aacc5381a7c6e419a22b7813361c4efc46cf20846f8247bf4a7bd352857c',
-        configAddress: '0x51246bdee8ba0ba1ffacc1d8cd41b2b39eb4630beddcdcc4c50287bd4d791a6c',
+        packageId: '0x7073eb9242244485f7244695448bc2c0c4c3467468683fc288d3ef5e51f4e9dc',
+        configAddress: '0xe8e412e0c5ed22611707a9cbf78a174106dbf957a313c3deb7477db848c8bf4c',
         pauseStatusAddress: '0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f',
         poolsAddress: '0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d0',
         lpBurnManagerAddress: '0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845',

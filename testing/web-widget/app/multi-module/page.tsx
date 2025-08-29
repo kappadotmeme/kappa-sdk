@@ -9,13 +9,13 @@ const MODULE_EXAMPLES = [
   {
     name: 'Kappa Module Token',
     contract: '0xcd732158b567038db304f073d1780ad0e892cd3aa3892a56b2b5abe5596e799a::Hat::HAT',
-    factory: '0x9329aacc5381a7c6e419a22b7813361c4efc46cf20846f8247bf4a7bd352857c',
+    factory: '0x7073eb9242244485f7244695448bc2c0c4c3467468683fc288d3ef5e51f4e9dc',
     description: 'Default Kappa factory'
   },
   {
     name: 'Patara Module Token',
     contract: '0x[example]::Token::TOKEN', // Replace with actual Patara token
-    factory: '0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6',
+    factory: '0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37',
     description: 'Partner Patara factory'
   }
 ];

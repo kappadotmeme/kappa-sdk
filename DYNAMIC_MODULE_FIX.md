@@ -84,7 +84,7 @@ Your API must return:
 {
   "data": {
     "address": "0xdef456::PartnerToken::PTOKEN",
-    "factoryAddress": "0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6",
+    "factoryAddress": "0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37",
     "name": "Partner Token",
     "symbol": "PTOKEN"
   }
@@ -96,8 +96,8 @@ Your API must return:
 {
   "data": {
     "name": "Patara",
-    "address": "0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6",
-    "configAddress": "0xad40a309c9172ccd67463faeedf3515509a1d89a6c8966336366c3f988016df8",
+    "address": "0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37",
+    "configAddress": "0x9b0fb19055c8b77f76203635ef6c4b4dac9928031d42c7e42131491adc3f87ae",
     "pauseStatusAddress": "0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f",
     "poolsAddress": "0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d0",
     "lpBurnManagerAddress": "0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845",

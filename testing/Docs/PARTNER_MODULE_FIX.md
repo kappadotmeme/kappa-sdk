@@ -11,8 +11,8 @@ The API returns factory configuration without the `moduleName` field:
 ```json
 {
   "name": "Patara",
-  "address": "0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6",
-  "configAddress": "0xad40a309c9172ccd67463faeedf3515509a1d89a6c8966336366c3f988016df8",
+  "address": "0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37",
+  "configAddress": "0x9b0fb19055c8b77f76203635ef6c4b4dac9928031d42c7e42131491adc3f87ae",
   // ... but no moduleName field!
 }
 ```
@@ -29,9 +29,9 @@ Added logic to determine `moduleName` based on factory address:
 let moduleName = 'kappadotmeme'; // default
 const factoryAddr = factoryData.address || factoryData.packageId || '';
 
-if (factoryAddr === '0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6') {
+if (factoryAddr === '0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37') {
   moduleName = 'kappadotmeme_partner';  // Partner module (Patara)
-} else if (factoryAddr === '0x9329aacc5381a7c6e419a22b7813361c4efc46cf20846f8247bf4a7bd352857c') {
+} else if (factoryAddr === '0x7073eb9242244485f7244695448bc2c0c4c3467468683fc288d3ef5e51f4e9dc') {
   moduleName = 'kappadotmeme';  // Default Kappa module
 }
 ```
@@ -58,13 +58,13 @@ if (item?.factoryAddress && !foundFactoryAddress) {
 ## Module Configurations
 
 ### Default Kappa Module
-- **Package ID**: `0x9329aacc5381a7c6e419a22b7813361c4efc46cf20846f8247bf4a7bd352857c`
-- **Config ID**: `0x51246bdee8ba0ba1ffacc1d8cd41b2b39eb4630beddcdcc4c50287bd4d791a6c`
+- **Package ID**: `0x7073eb9242244485f7244695448bc2c0c4c3467468683fc288d3ef5e51f4e9dc`
+- **Config ID**: `0xe8e412e0c5ed22611707a9cbf78a174106dbf957a313c3deb7477db848c8bf4c`
 - **Module Name**: `kappadotmeme`
 
 ### Partner Module (Patara)
-- **Package ID**: `0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6`
-- **Config ID**: `0xad40a309c9172ccd67463faeedf3515509a1d89a6c8966336366c3f988016df8`
+- **Package ID**: `0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37`
+- **Config ID**: `0x9b0fb19055c8b77f76203635ef6c4b4dac9928031d42c7e42131491adc3f87ae`
 - **Module Name**: `kappadotmeme_partner`
 
 ## Testing

@@ -52,8 +52,8 @@ export interface ModuleConfig {
 
 // Default Kappa module configuration
 const defaultModuleConfig: ModuleConfig = {
-  bondingContract: "0x9329aacc5381a7c6e419a22b7813361c4efc46cf20846f8247bf4a7bd352857c",
-  CONFIG: "0x51246bdee8ba0ba1ffacc1d8cd41b2b39eb4630beddcdcc4c50287bd4d791a6c",
+  bondingContract: "0x7073eb9242244485f7244695448bc2c0c4c3467468683fc288d3ef5e51f4e9dc",
+  CONFIG: "0xe8e412e0c5ed22611707a9cbf78a174106dbf957a313c3deb7477db848c8bf4c",
   globalPauseStatusObjectId: "0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f",
   poolsId: "0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d0",
   lpBurnManger: "0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845",
@@ -668,6 +668,9 @@ function DeployerInner(props: {
         /* Prevent iOS auto-zoom on inputs */
         .kappa-root input, .kappa-root select, .kappa-root textarea { font-size: 16px; }
         .kappa-root label, .kappa-root span, .kappa-root p, .kappa-root div { font-family: inherit !important; }
+        @media (max-width: 500px) {
+          .kappa-root { box-sizing: border-box; width: calc(100vw - 10px) !important; max-width: none !important; margin-left: 5px !important; margin-right: 5px !important; }
+        }
         @media (max-width: 480px) {
           .kappa-root { padding: 16px !important; border-radius: 12px !important; }
         }
@@ -729,7 +732,7 @@ function DeployerInner(props: {
         <div style={{ marginTop: 10, marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
             <label style={label}>Tags (optional)</label>
-            <div style={{ fontSize: 11, color: '#7aa6cc', border: '1px solid #274057', background: '#151c26', borderRadius: 6, padding: '2px 6px' }}>{tags.length}/4 used</div>
+            <div style={{ fontSize: 11, color: 'var(--kappa-text)', border: '1px solid var(--kappa-border)', background: 'var(--kappa-input-bg)', borderRadius: 6, padding: '2px 6px' }}>{tags.length}/4 used</div>
           </div>
           <input
             style={{ ...input, paddingRight: 76 }}
@@ -756,7 +759,7 @@ function DeployerInner(props: {
           {tags.length > 0 && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
               {tags.map((t, i) => (
-                <span key={t+String(i)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 8px', borderRadius: 8, border: '1px solid #274057', background: '#151c26', color: '#7aa6cc', fontSize: 12 }}>
+                <span key={t+String(i)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 8px', borderRadius: 8, border: '1px solid var(--kappa-border)', background: 'var(--kappa-input-bg)', color: 'var(--kappa-text)', fontSize: 12 }}>
                   #{t}
                   <button
                     type="button"
@@ -765,7 +768,7 @@ function DeployerInner(props: {
                       setTags(next);
                       setCoinData((s:any)=>({ ...s, tags: next }));
                     }}
-                    style={{ border: 'none', background: 'transparent', color: '#9ca3af', cursor: 'pointer', fontSize: 14 }}
+                    style={{ border: 'none', background: 'transparent', color: 'var(--kappa-muted)', cursor: 'pointer', fontSize: 14 }}
                     title="Remove"
                   >×</button>
                 </span>
@@ -776,7 +779,7 @@ function DeployerInner(props: {
 
         {/* Optional: Max Buy Toggle */}
         <div style={{ marginTop: 6, marginBottom: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #2a2f3a', background: '#0b0f16', borderRadius: 10, padding: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--kappa-border)', background: 'var(--kappa-bg)', borderRadius: 10, padding: 10 }}>
             <div>
               <div style={{ fontSize: 12, color: '#e5e7eb', marginBottom: 2 }}>Enable Max Buy Limit</div>
               <div style={{ fontSize: 11, color: '#9ca3af' }}>Prevents large single purchases</div>
@@ -787,7 +790,7 @@ function DeployerInner(props: {
               style={{ position: 'relative', width: 48, height: 26, borderRadius: 26, border: `2px solid ${coinData.hasMaxBuy ? '#2563eb' : '#4A4A4A'}`, background: coinData.hasMaxBuy ? '#2563eb' : '#2A2A2A', cursor: 'pointer' }}
               aria-pressed={coinData.hasMaxBuy}
             >
-              <span style={{ position: 'absolute', top: 2, left: coinData.hasMaxBuy ? 26 : 2, width: 20, height: 20, borderRadius: 20, background: '#fff', transition: 'left 160ms ease' }} />
+              <span style={{ position: 'absolute', top: 1, left: coinData.hasMaxBuy ? 24 : 2, width: 20, height: 20, borderRadius: 20, background: '#fff', transition: 'left 160ms ease' }} />
             </button>
           </div>
         </div>

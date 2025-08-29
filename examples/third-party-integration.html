@@ -80,8 +80,8 @@
 &lt;script&gt;<br>
   const widget = KappaDeployer.DeployerWidgetStandalone({<br>
     network: {<br>
-      bondingContract: '0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6',<br>
-      CONFIG: '0xad40a309c9172ccd67463faeedf3515509a1d89a6c8966336366c3f988016df8'<br>
+      bondingContract: '0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37',<br>
+      CONFIG: '0x9b0fb19055c8b77f76203635ef6c4b4dac9928031d42c7e42131491adc3f87ae'<br>
     },<br>
     onSuccess: function(coinAddress) {<br>
       console.log('Token created:', coinAddress);<br>
@@ -113,8 +113,8 @@ function App() {<br>
   return (<br>
     &lt;DeployerWidgetStandalone<br>
       network={{<br>
-        bondingContract: '0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6',<br>
-        CONFIG: '0xad40a309c9172ccd67463faeedf3515509a1d89a6c8966336366c3f988016df8'<br>
+        bondingContract: '0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37',<br>
+        CONFIG: '0x9b0fb19055c8b77f76203635ef6c4b4dac9928031d42c7e42131491adc3f87ae'<br>
       }}<br>
       onSuccess={(coinAddress) =&gt; {<br>
         console.log('Token created:', coinAddress);<br>
@@ -147,8 +147,8 @@ export default function TokenLauncher() {<br>
   return (<br>
     &lt;DeployerWidget<br>
       network={{<br>
-        bondingContract: '0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6',<br>
-        CONFIG: '0xad40a309c9172ccd67463faeedf3515509a1d89a6c8966336366c3f988016df8'<br>
+        bondingContract: '0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37',<br>
+        CONFIG: '0x9b0fb19055c8b77f76203635ef6c4b4dac9928031d42c7e42131491adc3f87ae'<br>
       }}<br>
       onSuccess={(coinAddress) =&gt; {<br>
         router.push(`/token/${coinAddress}`);<br>
@@ -168,8 +168,8 @@ export default function TokenLauncher() {<br>
         <code>
 &lt;DeployerWidgetStandalone<br>
   network={{<br>
-    bondingContract: '0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6',<br>
-    CONFIG: '0xad40a309c9172ccd67463faeedf3515509a1d89a6c8966336366c3f988016df8'<br>
+    bondingContract: '0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37',<br>
+    CONFIG: '0x9b0fb19055c8b77f76203635ef6c4b4dac9928031d42c7e42131491adc3f87ae'<br>
   }}<br>
   theme={{<br>
     '--kappa-bg': '#1a1a2e',<br>
@@ -213,8 +213,8 @@ import { <br>
 <br>
 const widgetConfig: DeployerWidgetProps = {<br>
   network: {<br>
-    bondingContract: '0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6',<br>
-    CONFIG: '0xad40a309c9172ccd67463faeedf3515509a1d89a6c8966336366c3f988016df8'<br>
+    bondingContract: '0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37',<br>
+    CONFIG: '0x9b0fb19055c8b77f76203635ef6c4b4dac9928031d42c7e42131491adc3f87ae'<br>
   },<br>
   onSuccess: (coinAddress: string): void =&gt; {<br>
     console.log('Created token:', coinAddress);<br>
