@@ -16,6 +16,8 @@ export interface WidgetProps {
   lockContract?: boolean;
   logoUrl?: string;
   projectName?: string;
+  apiBase?: string;
+  network?: ModuleConfig;
 }
 
 export declare function WidgetStandalone(props?: WidgetProps): JSX.Element;
@@ -34,6 +36,26 @@ export interface DeployerWidgetProps {
 export declare function DeployerWidgetStandalone(props?: DeployerWidgetProps): JSX.Element;
 export declare function DeployerWidgetEmbedded(props?: DeployerWidgetProps): JSX.Element;
 export declare function DeployerWidgetIntegrated(props?: DeployerWidgetProps): JSX.Element;
+
+// Hooks
+export interface UseModuleConfigResult {
+  config: ModuleConfig | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+}
+
+export declare function useModuleConfig(
+  factoryAddress: string | undefined,
+  apiBase: string
+): UseModuleConfigResult;
+
+export declare function preloadFactoryConfigs(
+  tokens: Array<{ factoryAddress?: string }>,
+  apiBase: string
+): Promise<void>;
+
+export declare function clearModuleConfigCache(): void;
 
 // Re-export the default export
 declare const _default: typeof DeployerWidgetStandalone;

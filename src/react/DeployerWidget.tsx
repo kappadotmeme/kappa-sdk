@@ -52,8 +52,8 @@ export interface ModuleConfig {
 
 // Default Kappa module configuration
 const defaultModuleConfig: ModuleConfig = {
-  bondingContract: "0x32fb837874e2d42a77b77a058e170024daadc54245b29b5b8a684b0540010fbb",
-  CONFIG: "0x93fbfbbe2f65326332a68ee930c069f8e3816f03c8a9f978ec5ce9c82cdae4b0",
+  bondingContract: "0x9329aacc5381a7c6e419a22b7813361c4efc46cf20846f8247bf4a7bd352857c",
+  CONFIG: "0x51246bdee8ba0ba1ffacc1d8cd41b2b39eb4630beddcdcc4c50287bd4d791a6c",
   globalPauseStatusObjectId: "0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f",
   poolsId: "0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d0",
   lpBurnManger: "0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845",
@@ -284,6 +284,7 @@ function DeployerInner(props: {
   const [errors, setErrors] = useState<any>({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [devBuy, setDevBuy] = useState<string>(props.defaultDevBuySui || '5');
+  const [devBuyError, setDevBuyError] = useState<string>('');
   const [publishing, setPublishing] = useState(false);
   const [status, setStatus] = useState<string>('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -557,12 +558,14 @@ function DeployerInner(props: {
       await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
       
       setStatus('Executing first buy…');
-      const suiAmount = Math.floor(Math.max(0, Number(devBuy) || 0) * 1e9);
+      const devBuyNum = Number(devBuy) || 0;
       
-      // Partner module requires minimum 0.1 SUI for first buy
-      if (suiAmount < 100000000) {
-        throw new Error('Partner module requires minimum 0.1 SUI for first buy');
+      // Enforce minimum 0.1 SUI for first buy
+      if (devBuyNum < 0.1) {
+        throw new Error('Minimum dev buy is 0.1 SUI');
       }
+      
+      const suiAmount = Math.floor(devBuyNum * 1e9);
       
       // Execute first buy using the SDK
       // Import firstBuyMath from math module
@@ -653,13 +656,13 @@ function DeployerInner(props: {
     }
   };
 
-  const disabled = !account || !isFormValid || publishing || !devBuy || Number(devBuy) <= 0;
+  const disabled = !account || !isFormValid || publishing || !devBuy || Number(devBuy) < 0.1 || !!devBuyError;
   
   // Apply theme
   const themeVars = { ...defaultTheme, ...(theme || {}) } as Record<string, string>;
 
   return (
-    <div className="kappa-root" style={{ width: '100%', maxWidth: (props.maxWidth ?? 500), background: 'var(--kappa-bg)', borderRadius: 16, padding: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.45)', border: '1px solid var(--kappa-border)', position: 'relative', overflow: 'visible', color: 'var(--kappa-text)', boxSizing: 'border-box', ...themeVars as any, fontFamily: 'ui-sans-serif, -apple-system, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, \'Noto Sans\', \'Liberation Sans\', sans-serif, \'Apple Color Emoji\', \'Segoe UI Emoji\'' }}>
+    <div className="kappa-root" style={{ width: '100%', maxWidth: (props.maxWidth ?? 500), background: 'var(--kappa-bg)', borderRadius: 16, padding: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.45)', border: '1px solid var(--kappa-border)', position: 'relative', overflow: 'hidden', color: 'var(--kappa-text)', boxSizing: 'border-box', ...themeVars as any, fontFamily: 'ui-sans-serif, -apple-system, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, \'Noto Sans\', \'Liberation Sans\', sans-serif, \'Apple Color Emoji\', \'Segoe UI Emoji\'' }}>
       <style>{`
         .kappa-root input, .kappa-root button, .kappa-root select, .kappa-root textarea { font-family: inherit !important; }
         /* Prevent iOS auto-zoom on inputs */
@@ -794,8 +797,27 @@ function DeployerInner(props: {
         <h3 style={{ margin: '0 0 16px 0', color: 'var(--kappa-text)', fontSize: 14, fontWeight: 600 }}>Initial Purchase</h3>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ flex: 1 }}>
-            <label style={label}>Dev Buy Amount (SUI)</label>
-            <input style={input} type="number" min={0} value={devBuy} onChange={(e)=>setDevBuy(e.target.value)} />
+            <label style={label}>Dev Buy Amount (SUI) - Minimum 0.1 SUI</label>
+            <input 
+              style={{...input, borderColor: devBuyError ? '#f87171' : 'var(--kappa-border)'}} 
+              type="number" 
+              min={0.1}
+              step={0.1}
+              value={devBuy} 
+              onChange={(e) => {
+                const value = e.target.value;
+                setDevBuy(value);
+                // Validate minimum 0.1 SUI
+                if (value && Number(value) < 0.1) {
+                  setDevBuyError('Minimum dev buy is 0.1 SUI');
+                } else {
+                  setDevBuyError('');
+                }
+              }} 
+            />
+            {devBuyError && (
+              <div style={{ marginTop: 4, fontSize: 12, color: '#f87171' }}>{devBuyError}</div>
+            )}
           </div>
           <div style={{ fontSize: 12, color: '#9ca3af', marginLeft: 16, marginTop: 20 }}>Free + gas only</div>
         </div>
@@ -823,7 +845,8 @@ function DeployerInner(props: {
           placeItems: 'center', 
           zIndex: 50, 
           backdropFilter: 'blur(6px)', 
-          WebkitBackdropFilter: 'blur(6px)' 
+          WebkitBackdropFilter: 'blur(6px)',
+          borderRadius: 16
         }}>
           <div style={{ 
             width: '100%', 

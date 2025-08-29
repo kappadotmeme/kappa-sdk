@@ -1,5 +1,7 @@
 "use client";
-import { DeployerWidgetStandalone } from 'kappa-create/react';
+// Import from local source instead of NPM package
+import { DeployerWidgetStandalone } from '../../../../src/react/DeployerWidget';
+import { API_BASE } from '../../config/api';
 
 export default function Page() {
   return (

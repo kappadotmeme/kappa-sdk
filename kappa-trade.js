@@ -9,26 +9,39 @@ const createSuiClient = () => {
 let client = createSuiClient();
 let logger = null;
 
-let bondingContract = "0xa3c9483dcc4d9b96f83df045eecc327d567006ab3bcaeeec8c0ded313698e46a";
-let CONFIG = "0x6cf2bc0c72ab45b9957448994bbba7de6567fdba921cedd749bbf57f152fc812";
+let bondingContract = "0x9329aacc5381a7c6e419a22b7813361c4efc46cf20846f8247bf4a7bd352857c";
+let CONFIG = "0x51246bdee8ba0ba1ffacc1d8cd41b2b39eb4630beddcdcc4c50287bd4d791a6c";
 let globalPauseStatusObjectId = "0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f";
 let poolsId = "0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d0";
 let lpBurnManger = "0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845";
+let moduleName = "kappadotmeme"; // Default module name
 
 const setSuiClient = (customClient) => {
     client = customClient;
 };
 const setNetworkConfig = (cfg = {}) => {
+    console.log('[kappa-trade] setNetworkConfig called with:', cfg);
     if (cfg.bondingContract) bondingContract = cfg.bondingContract;
     if (cfg.CONFIG) CONFIG = cfg.CONFIG;
     if (cfg.globalPauseStatusObjectId) globalPauseStatusObjectId = cfg.globalPauseStatusObjectId;
     if (cfg.poolsId) poolsId = cfg.poolsId;
     if (cfg.lpBurnManger) lpBurnManger = cfg.lpBurnManger;
+    if (cfg.moduleName) moduleName = cfg.moduleName;
+    console.log('[kappa-trade] Network config updated:', {
+        bondingContract,
+        CONFIG,
+        globalPauseStatusObjectId,
+        poolsId,
+        lpBurnManger,
+        moduleName
+    });
 };
 const setLogger = (fn) => {
     logger = typeof fn === "function" ? fn : null;
 };
 const log = (...args) => {
+    // Always log to console for debugging
+    console.log('[kappa-trade]', ...args);
     if (logger) {
         try {
             logger(...args);
@@ -50,38 +63,107 @@ const buyWeb3 = async (ADMIN_CREDENTIAL, token) => {
         }
         const tx = new Transaction();
 
-        const formattedName = token.name.replaceAll(" ", "_");
-        const typeArgument = `${token.publishedObject.packageId}::${formattedName}::${formattedName.toUpperCase()}`;
+        // Support both old format (name) and new format (moduleName, typeName)
+        let typeArgument;
+        if (token.moduleName && token.typeName) {
+            typeArgument = `${token.publishedObject.packageId}::${token.moduleName}::${token.typeName}`;
+        } else {
+            const formattedName = token.name.replaceAll(" ", "_");
+            typeArgument = `${token.publishedObject.packageId}::${formattedName}::${formattedName.toUpperCase()}`;
+        }
         const typeArguments = [typeArgument];
+        log("buyWeb3 typeArgument:", typeArgument);
 
         const suiForBuy = Math.max(0, Math.floor(Number(token.sui) || 0));
+        // Note: min_tokens from widget already has slippage applied, multiply by 0.9 for additional safety
         const maxTokens = Math.max(0, Math.floor((Number(token.min_tokens) || 0) * 0.9));
 
+        log("Amounts:", { suiForBuy, maxTokens, originalMinTokens: token.min_tokens });
+        
         const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(suiForBuy)]);
 
         const tokenAType = "0x2::sui::SUI";
-        const [tokenAMetadata, tokenBMetadata] = await Promise.all([
-            client.getCoinMetadata({ coinType: tokenAType }),
-            client.getCoinMetadata({ coinType: typeArgument }),
-        ]);
+        log("Fetching metadata for:", tokenAType, "and", typeArgument);
+        
+        let tokenAMetadata, tokenBMetadata;
+        try {
+            const tokenAMeta = await client.getCoinMetadata({ coinType: tokenAType });
+            const tokenBMeta = await client.getCoinMetadata({ coinType: typeArgument });
+            
+            tokenAMetadata = tokenAMeta?.id;
+            tokenBMetadata = tokenBMeta?.id;
+            
+            log("Metadata fetched:", {
+                tokenA: tokenAMetadata,
+                tokenB: tokenBMetadata,
+                tokenAFull: tokenAMeta,
+                tokenBFull: tokenBMeta
+            });
+            
+            if (!tokenAMetadata) {
+                throw new Error("SUI metadata ID not found");
+            }
+            if (!tokenBMetadata) {
+                throw new Error(`Token metadata ID not found for ${typeArgument}`);
+            }
+        } catch (metadataError) {
+            log("Error fetching metadata:", metadataError);
+            throw new Error("Failed to fetch coin metadata: " + metadataError.message);
+        }
 
-        tx.moveCall({
-            target: `${bondingContract}::kappadotmeme::buy`,
-            arguments: [
-                tx.object(globalPauseStatusObjectId),
-                tx.object(poolsId),
-                tx.object(lpBurnManger),
-                tx.object(tokenAMetadata.id),
-                tx.object(tokenBMetadata.id),
-                tx.object(CONFIG),
-                coin,
-                tx.pure.bool(true),
-                tx.pure.u64(maxTokens),
-                tx.object("0x6"),
-            ],
-            typeArguments,
+        log("Transaction parameters:", {
+            bondingContract,
+            globalPauseStatusObjectId,
+            poolsId,
+            lpBurnManger,
+            CONFIG,
+            tokenAMetadata: tokenAMetadata,
+            tokenBMetadata: tokenBMetadata,
+            suiForBuy,
+            maxTokens,
+            typeArgument
         });
 
+        // The module for the buy function is always the configured module (kappadotmeme), not the token module
+        const moveCallTarget = `${bondingContract}::${moduleName}::buy`;
+        const isExactOut = true; // This should be true based on web3ts.md
+        
+        log("Move call target:", moveCallTarget);
+        log("Move call arguments:", {
+            globalPauseStatusObjectId,
+            poolsId,
+            lpBurnManger,
+            tokenAMetadataId: tokenAMetadata,
+            tokenBMetadataId: tokenBMetadata,
+            CONFIG,
+            isExactOut,
+            maxTokens,
+            typeArgument
+        });
+        
+        try {
+            tx.moveCall({
+                target: moveCallTarget,
+                arguments: [
+                    tx.object(globalPauseStatusObjectId),
+                    tx.object(poolsId),
+                    tx.object(lpBurnManger),
+                    tx.object(tokenAMetadata),  // Already just the ID string
+                    tx.object(tokenBMetadata),  // Already just the ID string
+                    tx.object(CONFIG),
+                    coin,
+                    tx.pure.bool(isExactOut),
+                    tx.pure.u64(maxTokens),
+                    tx.object("0x6"),
+                ],
+                typeArguments,
+            });
+        } catch (moveCallError) {
+            log("Error building move call:", moveCallError);
+            throw moveCallError;
+        }
+
+        log("Attempting to sign and execute transaction...");
         const resData = isWallet
             ? await ADMIN_CREDENTIAL.signAndExecuteTransaction({
                   transaction: tx,
@@ -102,7 +184,8 @@ const buyWeb3 = async (ADMIN_CREDENTIAL, token) => {
             objectChanges: resData?.objectChanges,
         };
     } catch (err) {
-        log("buyWeb3 error", err?.message || err);
+        log("buyWeb3 error:", err?.message || err);
+        log("Error stack:", err?.stack);
         return { success: false, error: String(err?.message || err) };
     }
 };
@@ -122,8 +205,15 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
         const tx = new Transaction();
 
         const { publishedObject } = token;
-        const formattedName = token.name.replaceAll(" ", "_");
-        const typeArgument = `${publishedObject.packageId}::${formattedName}::${formattedName.toUpperCase()}`;
+        // Support both old format (name) and new format (moduleName, typeName)
+        let typeArgument;
+        if (token.moduleName && token.typeName) {
+            typeArgument = `${publishedObject.packageId}::${token.moduleName}::${token.typeName}`;
+        } else {
+            const formattedName = token.name.replaceAll(" ", "_");
+            typeArgument = `${publishedObject.packageId}::${formattedName}::${formattedName.toUpperCase()}`;
+        }
+        log("sellWeb3 typeArgument:", typeArgument);
 
         let allCoins = [];
         let temp,
@@ -159,8 +249,14 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
         const [kappa_coin] = tx.splitCoins(selectedCoins[0].coinObjectId, [sellAmount]);
         const is_exact_out = true;
 
+        // The module for the sell function is always the configured module (kappadotmeme), not the token module
+        const moveCallTarget = `${bondingContract}::${moduleName}::sell_`;
+        log("Sell move call target:", moveCallTarget);
+        log("Sell typeArgument:", typeArgument);
+        log("Sell amounts:", { sellAmount: sellAmount.toString(), minSui });
+        
         const [coin] = tx.moveCall({
-            target: `${bondingContract}::kappadotmeme::sell_`,
+            target: moveCallTarget,
             arguments: [
                 tx.object(CONFIG),
                 kappa_coin,

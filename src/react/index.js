@@ -2,6 +2,7 @@
 module.exports = {
   ...require('./Widget.tsx'),
   ...require('./DeployerWidget.tsx'),
+  ...require('./hooks/useModuleConfig.ts'),
 };
 
 

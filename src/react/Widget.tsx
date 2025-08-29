@@ -257,7 +257,7 @@ function ContractInput(props: {
             <div style={{ padding: 10, color: '#9ca3af', fontSize: 12 }}>Searching…</div>
           ) : searchResults && searchResults.length > 0 ? (
             searchResults.map((item: any) => (
-              <button key={String(item.contractAddress || item.coinType || item.contract || item.id || item.name || item.symbol)}
+              <button key={String(item.guid || item.contractAddress || item.address || item.coinType || item.contract || item.id || item.name || item.symbol)}
                 onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onSelectResult(item); }}
                 style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', padding: '10px 12px', background: 'transparent', color: '#e5e7eb', border: 'none', cursor: 'pointer', gap: 10 }}
               >
@@ -269,7 +269,7 @@ function ContractInput(props: {
                 <span style={{ color: '#e5e7eb', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   ${String(item.symbol || '').toUpperCase()} {String(item.name || '') ? '| ' + String(item.name) : ''}
                 </span>
-                <span style={{ color: '#6b7280', fontSize: 12 }}>{abbreviateContract(String(item.contractAddress || item.coinType || item.contract || ''))}</span>
+                <span style={{ color: '#6b7280', fontSize: 12 }}>{abbreviateContract(String(item.address || item.contractAddress || item.coinType || item.contract || ''))}</span>
               </button>
             ))
           ) : (
@@ -467,7 +467,7 @@ function TransactionModal(props: {
   const statusText = loading ? 'Submitting…' : (error ? `Failed: ${error}` : 'Submitted');
   const explorer = digest ? `https://suivision.xyz/txblock/${digest}?network=mainnet` : '';
   return (
-    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)', display: 'grid', placeItems: 'center', zIndex: 50, backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}>
+    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)', display: 'grid', placeItems: 'center', zIndex: 50, backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', borderRadius: 16 }}>
       <div style={{ width: '100%', maxWidth: 360, background: 'var(--kappa-panel)', border: '1px solid var(--kappa-border)', borderRadius: 12, padding: 16, color: 'var(--kappa-text)', boxShadow: '0 10px 30px rgba(0,0,0,0.45)' }}>
         <h3 style={{ marginTop: 0, marginBottom: 8 }}>Transaction</h3>
         <div style={{ fontSize: 13, marginBottom: 8 }}>
@@ -570,8 +570,23 @@ function WalletControls() {
   );
 }
 
-export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defaultTheme, string>>, defaultContract?: string, lockContract?: boolean, logoUrl?: string, projectName?: string }) {
-  const { theme, defaultContract, lockContract, logoUrl, projectName } = props || {} as any;
+export function WidgetEmbedded(props: { 
+  theme?: Partial<Record<keyof typeof defaultTheme, string>>, 
+  defaultContract?: string, 
+  lockContract?: boolean, 
+  logoUrl?: string, 
+  projectName?: string, 
+  apiBase?: string,
+  network?: {
+    bondingContract?: string,
+    CONFIG?: string,
+    globalPauseStatusObjectId?: string,
+    poolsId?: string,
+    lpBurnManger?: string,
+    moduleName?: string,
+  }
+}) {
+  const { theme, defaultContract, lockContract, logoUrl, projectName, apiBase = 'https://api.kappa.fun', network } = props || {} as any;
   const [contract, setContract] = useState('');
   const [mode, setMode] = useState<'buy' | 'sell'>('buy');
   const [slippage, setSlippage] = useState('1');
@@ -608,6 +623,10 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
 
   const [suiBalance, setSuiBalance] = useState<number>(0);
   const [tokenBalance, setTokenBalance] = useState<number>(0);
+  
+  // Dynamic module configuration
+  const [dynamicModuleConfig, setDynamicModuleConfig] = useState<any>(null);
+  const [factoryAddress, setFactoryAddress] = useState<string | null>(null);
   // initialize default contract if provided
   useEffect(() => {
     if (defaultContract && !contract) {
@@ -698,30 +717,43 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
         if (!contract || !contract.includes('::')) {
           // Don't show search/trending unless user has actually interacted with the input
           if (!inputFocused || !hasUserInteracted) {
+            // console.log('[Widget] Not showing search - inputFocused:', inputFocused, 'hasUserInteracted:', hasUserInteracted);
             setShowSearch(false);
             setSearchResults([]);
             return;
           }
           // Empty input: show trending list instead of "No results"
           if (!contract && inputFocused && hasUserInteracted) {
+            console.log('[Widget] Fetching trending coins from:', `${apiBase}/v1/coins/trending?page=1&size=50`);
             setShowSearch(true);
             setIsSearching(true);
             try {
               let json: any = null;
               try {
-                const res = await fetch('https://api.kappa.fun/v1/coins/trending');
+                const res = await fetch(`${apiBase}/v1/coins/trending?page=1&size=50`);
                 json = await res.json();
+                console.log('[Widget] Trending response:', json);
               } catch {
-                const res2 = await fetch('https://api.kappa.fun/v1/coin/trending');
+                const res2 = await fetch(`${apiBase}/v1/coin/trending`);
                 json = await res2.json();
               }
-              const all: any[] = (json?.data || []) as any[];
+              // New API structure: data.coins array with "address" field
+              const all: any[] = (json?.data?.coins || json?.data || []) as any[];
               const isMigratedCoin = (item: any): boolean => {
                 const fields = [item?.pairAddress, item?.pairContractAddress, item?.pair, item?.pair_object, item?.pairObject, item?.poolAddress, item?.lpAddress];
                 return fields.some((v) => !!(typeof v === 'string' ? v.trim() : v));
               };
-              const list = all.filter((c) => !isMigratedCoin(c));
+              // Normalize to use "address" as the standard contract identifier
+              const normalizedList = all.map((c: any) => ({
+                ...c,
+                contractAddress: c.address || c.contractAddress,  // Use address as primary
+                coinType: c.address || c.coinType,
+                contract: c.address || c.contract,
+              }));
+              const list = normalizedList.filter((c) => !isMigratedCoin(c));
+              console.log('[Widget] Normalized trending list:', list.slice(0, 3));
               setSearchResults(list.slice(0, 100));
+              console.log('[Widget] Set search results, count:', list.length);
             } catch {
               setSearchResults([]);
             } finally {
@@ -730,6 +762,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
             return;
           }
           if (contract && inputFocused && hasUserInteracted) {
+            console.log('[Widget] Searching for:', contract, 'from:', `${apiBase}/v1/coins?nameOrSymbol=${contract.trim().toLowerCase()}`);
             setShowSearch(true);
             setIsSearching(true);
           } else {
@@ -738,24 +771,35 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
             return;
           }
           try {
-            const res = await fetch('https://api.kappa.fun/v1/coins?nameOrSymbol=' + contract.trim().toLowerCase());
+            const res = await fetch(`${apiBase}/v1/coins?nameOrSymbol=` + contract.trim().toLowerCase());
             const json = await res.json();
-            const all: any[] = (json?.data || []) as any[];
+            console.log('[Widget] Search response:', json);
+            // New API structure: data.coins array with "address" field
+            const all: any[] = (json?.data?.coins || json?.data || []) as any[];
             const isMigratedCoin = (item: any): boolean => {
               const fields = [item?.pairAddress, item?.pairContractAddress, item?.pair, item?.pair_object, item?.pairObject, item?.poolAddress, item?.lpAddress];
               return fields.some((v) => !!(typeof v === 'string' ? v.trim() : v));
             };
-            const list = (all || []).filter((c) => !isMigratedCoin(c));
+            // Normalize to use "address" as the standard contract identifier
+            const normalizedAll = all.map((c: any) => ({
+              ...c,
+              contractAddress: c.address || c.contractAddress,  // Use address as primary
+              coinType: c.address || c.coinType,
+              contract: c.address || c.contract,
+            }));
+            const list = (normalizedAll || []).filter((c) => !isMigratedCoin(c));
             const qStr = contract.trim().toLowerCase();
             const bySymbol = list.filter((c) => String(c.symbol || '').toLowerCase().includes(qStr));
             const byName = list.filter((c) => String(c.name || '').toLowerCase().includes(qStr));
             const merged: any[] = [];
             const seen = new Set<string>();
             for (const it of bySymbol.concat(byName)) {
-              const key = String(it.contractAddress || it.coinType || it.contract || it.guid || '');
+              const key = String(it.contractAddress || it.coinType || it.contract || it.address || it.guid || '');
               if (!seen.has(key)) { seen.add(key); merged.push(it); }
             }
+            console.log('[Widget] Search results merged:', merged.slice(0, 3));
             setSearchResults(merged.slice(0, 100));
+            console.log('[Widget] Set search results for query, count:', merged.length);
           } catch {
             setSearchResults([]);
           } finally {
@@ -765,13 +809,132 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
         }
         const normalized = contract.trim();
         const [pkg, mod, sym] = normalized.split('::');
-        const res = await fetch('https://api.kappa.fun/v1/coins/trending');
+        
+        // First, try to fetch specific token metadata to get factory address
+        let tokenMetadata: any = null;
+        let foundFactoryAddress: string | null = null;
+        
+        try {
+          console.log('[Widget] Fetching token metadata for:', normalized);
+          const metaRes = await fetch(`${apiBase}/v1/coins/${encodeURIComponent(normalized)}`);
+          if (metaRes.ok) {
+            const metaJson = await metaRes.json();
+            tokenMetadata = metaJson?.data || metaJson;
+            console.log('[Widget] Token metadata:', tokenMetadata);
+            
+            // Store factory address if available
+            if (tokenMetadata?.factoryAddress) {
+              foundFactoryAddress = tokenMetadata.factoryAddress;
+              setFactoryAddress(tokenMetadata.factoryAddress);
+              console.log('[Widget] Token factory address from metadata:', tokenMetadata.factoryAddress);
+              
+              // Fetch factory configuration
+              try {
+                const factoryRes = await fetch(`${apiBase}/v1/coins/factories/${tokenMetadata.factoryAddress}`);
+                if (factoryRes.ok) {
+                  const factoryJson = await factoryRes.json();
+                  const factoryData = factoryJson?.data?.factory || factoryJson?.data || factoryJson;
+                  console.log('[Widget] Factory configuration:', factoryData);
+                  
+                  // Determine module name based on factory address
+                  // Default Kappa module: 0x9329aacc5381a7c6e419a22b7813361c4efc46cf20846f8247bf4a7bd352857c
+                  // Partner module (Patara): 0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6
+                  let moduleName = 'kappadotmeme'; // default
+                  const factoryAddr = factoryData.address || factoryData.packageId || '';
+                  if (factoryAddr === '0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6') {
+                    moduleName = 'kappadotmeme_partner';
+                    console.log('[Widget] Detected partner module (Patara) from factory address');
+                  } else if (factoryAddr === '0x9329aacc5381a7c6e419a22b7813361c4efc46cf20846f8247bf4a7bd352857c') {
+                    moduleName = 'kappadotmeme';
+                    console.log('[Widget] Detected default Kappa module from factory address');
+                  } else if (factoryData.moduleName) {
+                    moduleName = factoryData.moduleName;
+                    console.log('[Widget] Using moduleName from API:', moduleName);
+                  }
+                  
+                  const moduleConfig = {
+                    bondingContract: factoryData.address || factoryData.packageId,
+                    CONFIG: factoryData.configAddress || factoryData.configId,
+                    globalPauseStatusObjectId: factoryData.pauseStatusAddress || factoryData.pauseStatusObjectId || '0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f',
+                    poolsId: factoryData.poolsAddress || factoryData.poolsId || '0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d0',
+                    lpBurnManger: factoryData.lpBurnManagerAddress || factoryData.lpBurnManger || '0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845',
+                    moduleName: moduleName,
+                  };
+                  
+                  setDynamicModuleConfig(moduleConfig);
+                  console.log('[Widget] Set dynamic module config:', moduleConfig);
+                }
+              } catch (factoryErr) {
+                console.error('[Widget] Error fetching factory config:', factoryErr);
+              }
+            }
+          }
+        } catch (metaErr) {
+          console.warn('[Widget] Could not fetch token metadata:', metaErr);
+        }
+        
+        // Continue with existing trending fetch logic
+        const res = await fetch(`${apiBase}/v1/coins/trending?page=1&size=50`);
         const json = await res.json();
-        const listAll = (json?.data || []) as any[];
-        const list = listAll.filter((c) => !([c?.pairAddress, c?.pairContractAddress, c?.pair, c?.pair_object, c?.pairObject, c?.poolAddress, c?.lpAddress].some((v: any) => !!(typeof v === 'string' ? v.trim() : v))));
-        let item = list.find((c: any) => (c.contractAddress || '').toLowerCase() === normalized.toLowerCase());
+        // New API structure: data.coins array with "address" field
+        const listAll = (json?.data?.coins || json?.data || []) as any[];
+        // Normalize to use "address" as the standard contract identifier
+        const normalizedListAll = listAll.map((c: any) => ({
+          ...c,
+          contractAddress: c.address || c.contractAddress,  // Use address as primary
+          coinType: c.address || c.coinType,
+        }));
+        const list = normalizedListAll.filter((c) => !([c?.pairAddress, c?.pairContractAddress, c?.pair, c?.pair_object, c?.pairObject, c?.poolAddress, c?.lpAddress].some((v: any) => !!(typeof v === 'string' ? v.trim() : v))));
+        let item = list.find((c: any) => (c.contractAddress || c.address || '').toLowerCase() === normalized.toLowerCase());
         if (!item && pkg) {
           item = list.find((c: any) => (c.contractAddress || '').toLowerCase().startsWith(`${pkg}::`));
+        }
+        
+        // If we found the item and don't have a factory address yet, use the one from trending
+        if (item?.factoryAddress && !foundFactoryAddress) {
+          foundFactoryAddress = item.factoryAddress;
+          setFactoryAddress(item.factoryAddress);
+          console.log('[Widget] Token factory address from trending:', item.factoryAddress);
+          
+          // Try to fetch factory configuration if we haven't already
+          if (!dynamicModuleConfig && item.factoryAddress) {
+            try {
+              const factoryRes = await fetch(`${apiBase}/v1/coins/factories/${item.factoryAddress}`);
+              if (factoryRes.ok) {
+                const factoryJson = await factoryRes.json();
+                const factoryData = factoryJson?.data?.factory || factoryJson?.data || factoryJson;
+                console.log('[Widget] Factory configuration from trending item:', factoryData);
+                
+                // Determine module name based on factory address
+                let moduleName = 'kappadotmeme'; // default
+                const factoryAddr = factoryData.address || factoryData.packageId || '';
+                if (factoryAddr === '0x044a2ea3a2f8b93fad8cf84e5e68af9f304c975235f57c85c774bf88fa7999f6') {
+                  moduleName = 'kappadotmeme_partner';
+                  console.log('[Widget] Detected partner module (Patara) from factory address');
+                } else if (factoryAddr === '0x9329aacc5381a7c6e419a22b7813361c4efc46cf20846f8247bf4a7bd352857c') {
+                  moduleName = 'kappadotmeme';
+                  console.log('[Widget] Detected default Kappa module from factory address');
+                } else if (factoryData.moduleName) {
+                  moduleName = factoryData.moduleName;
+                  console.log('[Widget] Using moduleName from API:', moduleName);
+                }
+                
+                const moduleConfig = {
+                  bondingContract: factoryData.address || factoryData.packageId,
+                  CONFIG: factoryData.configAddress || factoryData.configId,
+                  globalPauseStatusObjectId: factoryData.pauseStatusAddress || factoryData.pauseStatusObjectId || '0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f',
+                  poolsId: factoryData.poolsAddress || factoryData.poolsId || '0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d0',
+                  lpBurnManger: factoryData.lpBurnManagerAddress || factoryData.lpBurnManger || '0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845',
+                  moduleName: moduleName,
+                };
+                
+                setDynamicModuleConfig(moduleConfig);
+                console.log('[Widget] Set dynamic module config from trending:', moduleConfig);
+              }
+            } catch (factoryErr) {
+              console.error('[Widget] Error fetching factory config from trending:', factoryErr);
+            }
+          }
         }
         // If still not found, try matching by symbol or name as a last resort
         if (!item && (sym || mod)) {
@@ -822,15 +985,18 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
         setIsVerified(!!item);
         {
           const candidateIds = [
+            item?.curveAddress,           // New API uses this field
             item?.bondingContractAddress,
             item?.bondingAddress,
             item?.bondingContract,
+            item?.bondingCurveObjectId,
+            item?.bondingObjectId,
+            item?.curveObjectId,
             item?.bonding,
             item?.bonding_object,
             item?.bondingObject,
             item?.curve,
             item?.curveId,
-            item?.curveAddress,
             item?.curve_object,
             item?.curveObject,
           ];
@@ -854,7 +1020,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
     }
     load();
     return () => { abort = true; };
-  }, [contract, account?.address, client, suiClientHook, inputFocused, hasUserInteracted]);
+  }, [contract, account?.address, client, suiClientHook, inputFocused, hasUserInteracted, apiBase]);
 
   // Quotes
   useEffect(() => {
@@ -936,6 +1102,9 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
     setStatusText('Ready to trade');
     setHasError(false);
     setIsPrimaryDisabled(false);
+    // Clear dynamic module config
+    setDynamicModuleConfig(null);
+    setFactoryAddress(null);
   };
 
   const onBuy = async () => {
@@ -945,17 +1114,47 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
       const tradeMod = await import('../../kappa-trade.js');
       const trade = (tradeMod as any).default || tradeMod as any;
       trade.setSuiClient(client);
-      const [pkg, mod] = contract.split('::');
+      
+      // Use dynamic module config if available, otherwise fall back to prop
+      const configToUse = dynamicModuleConfig || network;
+      if (configToUse && trade.setNetworkConfig) {
+        console.log('[Widget] Setting network config (dynamic or prop):', configToUse);
+        console.log('[Widget] Factory address:', factoryAddress);
+        trade.setNetworkConfig(configToUse);
+      } else {
+        console.log('[Widget] No network config available, using defaults');
+      }
+      
+      const [pkg, mod, typeName] = contract.split('::');
       const slip = Math.max(0, Math.min(100, Number(slippage) || 0));
       const minOut = Math.floor(Math.max(0, quoteTokens) * (1 - slip / 100));
-      const res = await (trade as any).buyWeb3(signer as any, {
+      
+      const tradeParams = {
         publishedObject: { packageId: pkg },
-        name: (mod || '').replaceAll('_', ' '),
+        name: (mod || '').replaceAll('_', ' '), // This is what the trade module uses to construct type argument
         sui: Math.floor(parseFloat(suiIn) * 1e9),
         min_tokens: minOut,
+        // Add these for better type argument construction if needed
+        moduleName: mod || '',
+        typeName: typeName || '',
+      };
+      
+      console.log('[Widget] Buy params:', {
+        contract,
+        packageId: pkg,
+        moduleName: mod,
+        typeName,
+        suiAmount: tradeParams.sui,
+        minTokens: tradeParams.min_tokens,
+        slippage: slip + '%'
       });
+      
+      const res = await (trade as any).buyWeb3(signer as any, tradeParams);
       if (res?.success) { setTxDigest(res?.digest || null); } else { setTxError(res?.error || 'unknown error'); }
-    } catch (e: any) { alert('Buy failed: ' + (e?.message || String(e))); }
+    } catch (e: any) { 
+      console.error('[Widget] Buy error:', e);
+      alert('Buy failed: ' + (e?.message || String(e))); 
+    }
     finally { setTxLoading(false); }
   };
 
@@ -966,17 +1165,47 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
       const tradeMod = await import('../../kappa-trade.js');
       const trade = (tradeMod as any).default || tradeMod as any;
       trade.setSuiClient(client);
-      const [pkg, mod] = contract.split('::');
+      
+      // Use dynamic module config if available, otherwise fall back to prop
+      const configToUse = dynamicModuleConfig || network;
+      if (configToUse && trade.setNetworkConfig) {
+        console.log('[Widget] Setting network config for sell (dynamic or prop):', configToUse);
+        console.log('[Widget] Factory address:', factoryAddress);
+        trade.setNetworkConfig(configToUse);
+      } else {
+        console.log('[Widget] No network config available, using defaults');
+      }
+      
+      const [pkg, mod, typeName] = contract.split('::');
       const slip = Math.max(0, Math.min(100, Number(slippage) || 0));
       const minSui = Math.floor(Math.max(0, quoteSui) * (1 - slip / 100));
-      const res = await (trade as any).sellWeb3(signer as any, {
+      
+      const tradeParams = {
         publishedObject: { packageId: pkg },
-        name: (mod || '').replaceAll('_', ' '),
+        name: (mod || '').replaceAll('_', ' '), // This is what the trade module uses to construct type argument
         sell_token: String(Math.floor(parseFloat(tokensIn))),
         min_sui: minSui,
+        // Add these for better type argument construction if needed
+        moduleName: mod || '',
+        typeName: typeName || '',
+      };
+      
+      console.log('[Widget] Sell params:', {
+        contract,
+        packageId: pkg,
+        moduleName: mod,
+        typeName,
+        sellAmount: tradeParams.sell_token,
+        minSui: tradeParams.min_sui,
+        slippage: slip + '%'
       });
+      
+      const res = await (trade as any).sellWeb3(signer as any, tradeParams);
       if (res?.success) { setTxDigest(res?.digest || null); } else { setTxError(res?.error || 'unknown error'); }
-    } catch (e: any) { alert('Sell failed: ' + (e?.message || String(e))); }
+    } catch (e: any) { 
+      console.error('[Widget] Sell error:', e);
+      alert('Sell failed: ' + (e?.message || String(e))); 
+    }
     finally { setTxLoading(false); }
   };
 
@@ -1033,7 +1262,7 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
   const headerLogo = (logoUrl && logoUrl.length > 0) ? logoUrl : defaultLogoDataUri;
   const headerName = projectName || 'Kappa';
   return (
-    <div className="kappa-root" style={{ width: '100%', maxWidth: 440, background: 'var(--kappa-bg)', borderRadius: 16, padding: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.45)', border: '1px solid var(--kappa-border)', position: 'relative', overflow: 'visible', ...(themeVars as any), fontFamily: 'ui-sans-serif, -apple-system, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, \'Noto Sans\', \'Liberation Sans\', sans-serif, \'Apple Color Emoji\', \'Segoe UI Emoji\'' }}>
+    <div className="kappa-root" style={{ width: '100%', maxWidth: 440, background: 'var(--kappa-bg)', borderRadius: 16, padding: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.45)', border: '1px solid var(--kappa-border)', position: 'relative', overflow: 'hidden', ...(themeVars as any), fontFamily: 'ui-sans-serif, -apple-system, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, \'Noto Sans\', \'Liberation Sans\', sans-serif, \'Apple Color Emoji\', \'Segoe UI Emoji\'' }}>
       <style>{`
         .kappa-root input, .kappa-root button, .kappa-root select, .kappa-root textarea { font-family: inherit !important; }
         /* Prevent iOS auto-zoom on inputs */
@@ -1081,36 +1310,42 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
             searchResults={searchResults}
             showSearch={showSearch}
             setShowSearch={setShowSearch}
-            onSelectResult={(item) => {
-              const ca = String(item.contractAddress || item.coinType || item.contract || '')
-                .trim();
-              setContract(ca);
-              setTokenSymbol(String(item.symbol || '').toUpperCase());
-              setTokenName(String(item.name || ''));
-              {
-                const avatarCandidates = [
-                  item?.avatarUrl,
-                  item?.icon,
-                  item?.avatar,
-                  item?.logo,
-                  item?.image,
-                  item?.img,
-                  item?.iconUrl,
-                ];
-                let avatar = avatarCandidates.find((v: any) => typeof v === 'string' && v.trim().length > 0);
-                if (avatar) {
-                  avatar = String(avatar).trim();
-                  if (avatar.startsWith('ipfs://')) {
-                    const cid = avatar.replace('ipfs://', '').replace(/^ipfs\//, '');
-                    setTokenAvatarUrl(`https://ipfs.io/ipfs/${cid}`);
-                  } else if (/^https?:\/\//i.test(avatar)) {
-                    setTokenAvatarUrl(avatar);
+                          onSelectResult={(item) => {
+                // Use address field as primary (new API structure)
+                const ca = String(item.address || item.contractAddress || item.coinType || item.contract || '')
+                  .trim();
+                setContract(ca);
+                setTokenSymbol(String(item.symbol || '').toUpperCase());
+                setTokenName(String(item.name || ''));
+                // Store factory address if available from search result
+                if (item.factoryAddress) {
+                  setFactoryAddress(item.factoryAddress);
+                  console.log('[Widget] Setting factory address from search result:', item.factoryAddress);
+                }
+                {
+                  const avatarCandidates = [
+                    item?.avatarUrl,
+                    item?.icon,
+                    item?.avatar,
+                    item?.logo,
+                    item?.image,
+                    item?.img,
+                    item?.iconUrl,
+                  ];
+                  let avatar = avatarCandidates.find((v: any) => typeof v === 'string' && v.trim().length > 0);
+                  if (avatar) {
+                    avatar = String(avatar).trim();
+                    if (avatar.startsWith('ipfs://')) {
+                      const cid = avatar.replace('ipfs://', '').replace(/^ipfs\//, '');
+                      setTokenAvatarUrl(`https://ipfs.io/ipfs/${cid}`);
+                    } else if (/^https?:\/\//i.test(avatar)) {
+                      setTokenAvatarUrl(avatar);
+                    }
                   }
                 }
-              }
-              setIsVerified(true);
-              setShowSearch(false);
-            }}
+                setIsVerified(true);
+                setShowSearch(false);
+              }}
             isSearching={isSearching}
             inputFocused={inputFocused}
             setInputFocused={setInputFocused}
@@ -1154,7 +1389,22 @@ export function WidgetEmbedded(props: { theme?: Partial<Record<keyof typeof defa
   );
 }
 
-export function WidgetStandalone(props: { theme?: Partial<Record<keyof typeof defaultTheme, string>>, defaultContract?: string, lockContract?: boolean, logoUrl?: string, projectName?: string }) {
+export function WidgetStandalone(props: { 
+  theme?: Partial<Record<keyof typeof defaultTheme, string>>, 
+  defaultContract?: string, 
+  lockContract?: boolean, 
+  logoUrl?: string, 
+  projectName?: string, 
+  apiBase?: string,
+  network?: {
+    bondingContract?: string,
+    CONFIG?: string,
+    globalPauseStatusObjectId?: string,
+    poolsId?: string,
+    lpBurnManger?: string,
+    moduleName?: string,
+  }
+}) {
   const client = useMemo(() => new SuiClient({ url: networkConfig.mainnet.url }), []);
   const queryClient = useMemo(() => new QueryClient(), []);
   return (
