@@ -123,6 +123,74 @@ const myModuleConfig = {
 />
 ```
 
+## Partner Module Integration (Step-by-Step)
+
+Follow these steps to integrate the deployer with your partner module using the NPM package:
+
+1) Install
+```bash
+npm install kappa-create @tanstack/react-query @mysten/dapp-kit @mysten/sui
+```
+
+2) Collect your module IDs (mainnet/testnet as applicable)
+- bondingContract: your factory/package ID
+- CONFIG: your config object ID
+- globalPauseStatusObjectId (optional but recommended)
+- poolsId (optional but recommended)
+- moduleName: the Move module name for your factory (e.g. "kappadotmeme_partner")
+
+3) Use the Standalone widget (includes providers & wallet UI)
+```tsx
+import { DeployerWidgetStandalone } from 'kappa-create/react';
+
+const partnerConfig = {
+  bondingContract: '0xYOUR_FACTORY_PACKAGE_ID',
+  CONFIG: '0xYOUR_CONFIG_ID',
+  globalPauseStatusObjectId: '0xPAUSE_STATUS_ID',
+  poolsId: '0xPOOLS_ID',
+  moduleName: 'your_module_name'
+};
+
+export default function Launch() {
+  return (
+    <DeployerWidgetStandalone
+      network={partnerConfig}
+      projectName="Your Project"
+      defaultDevBuySui="0.5"
+      onSuccess={(coinAddress) => {
+        // Navigate or log the deployed coin address
+        console.log('Deployed:', coinAddress);
+      }}
+    />
+  );
+}
+```
+
+4) Optional: Theme & Branding
+```tsx
+<DeployerWidgetStandalone
+  network={partnerConfig}
+  projectName="Your Project"
+  logoUrl="/logo.png"
+  theme={{
+    '--kappa-bg': '#0f1218',
+    '--kappa-primary': '#2563eb'
+  }}
+/> 
+```
+
+5) Verify
+- Open your page, connect wallet, fill token info, and click "Create coin"
+- Ensure min Dev Buy ≥ 0.1 SUI
+- On success, you’ll receive the full coin type string `package::Name::SYMBOL`
+
+6) Troubleshooting
+- If deployment fails:
+  - Confirm your `bondingContract` and `CONFIG` are correct (no typos)
+  - Ensure your wallet is on the right network
+  - Check browser console for any API/network errors
+  - If using Next.js SSR, use the Standalone variant (client-only) on a client page
+
 If `network` is omitted, the widget uses Kappa mainnet defaults:
 
 - `bondingContract`: `0x9329aacc5381a7c6e419a22b7813361c4efc46cf20846f8247bf4a7bd352857c`
