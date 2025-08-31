@@ -8,7 +8,7 @@ export const API_CONFIG = {
   mode: 'proxy' as 'proxy' | 'direct',
   
   // Toggle this to switch between environments (only for 'direct' mode)
-  useProduction: false, // Set to false for local development
+  useProduction: true, // Set to true to use live API
   
   // API Base URLs
   production: 'https://api.kappa.fun',

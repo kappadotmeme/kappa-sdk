@@ -830,39 +830,34 @@ export function WidgetEmbedded(props: {
               
               // Fetch factory configuration
               try {
-                const factoryRes = await fetch(`${apiBase}/v1/coins/factories/${tokenMetadata.factoryAddress}`);
+                const factoryRes = await fetch(`${apiBase}/v1/coins/factories`);
                 if (factoryRes.ok) {
                   const factoryJson = await factoryRes.json();
-                  const factoryData = factoryJson?.data?.factory || factoryJson?.data || factoryJson;
-                  console.log('[Widget] Factory configuration:', factoryData);
+                  const factories = factoryJson?.data?.factories || [];
+                  console.log('[Widget] Available factories:', factories);
                   
-                  // Determine module name based on factory address
-                  // Default Kappa module: 0x7073eb9242244485f7244695448bc2c0c4c3467468683fc288d3ef5e51f4e9dc
-                  // Partner module (Patara): 0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37
-                  let moduleName = 'kappadotmeme'; // default
-                  const factoryAddr = factoryData.address || factoryData.packageId || '';
-                  if (factoryAddr === '0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37') {
-                    moduleName = 'kappadotmeme_partner';
-                    console.log('[Widget] Detected partner module (Patara) from factory address');
-                  } else if (factoryAddr === '0x7073eb9242244485f7244695448bc2c0c4c3467468683fc288d3ef5e51f4e9dc') {
-                    moduleName = 'kappadotmeme';
-                    console.log('[Widget] Detected default Kappa module from factory address');
-                  } else if (factoryData.moduleName) {
-                    moduleName = factoryData.moduleName;
-                    console.log('[Widget] Using moduleName from API:', moduleName);
+                  // Find the matching factory by packageID
+                  const matchingFactory = factories.find((f: any) => 
+                    f.packageID === tokenMetadata.factoryAddress
+                  );
+                  
+                  if (matchingFactory) {
+                    console.log('[Widget] Found matching factory:', matchingFactory);
+                    
+                    const moduleConfig = {
+                      bondingContract: matchingFactory.packageID,
+                      CONFIG: matchingFactory.configObjectID,
+                      globalPauseStatusObjectId: matchingFactory.pauseStatusObjectID,
+                      poolsId: matchingFactory.poolsObjectID,
+                      lpBurnManger: matchingFactory.lpBurnManagerObjectID,
+                      moduleName: matchingFactory.packageName, // Use packageName from API
+                    };
+                    
+                    setDynamicModuleConfig(moduleConfig);
+                    console.log('[Widget] Set dynamic module config from factory:', moduleConfig);
+                  } else {
+                    console.warn('[Widget] No matching factory found for:', tokenMetadata.factoryAddress);
                   }
-                  
-                  const moduleConfig = {
-                    bondingContract: factoryData.address || factoryData.packageId,
-                    CONFIG: factoryData.configAddress || factoryData.configId,
-                    globalPauseStatusObjectId: factoryData.pauseStatusAddress || factoryData.pauseStatusObjectId || '0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f',
-                    poolsId: factoryData.poolsAddress || factoryData.poolsId || '0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d0',
-                    lpBurnManger: factoryData.lpBurnManagerAddress || factoryData.lpBurnManger || '0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845',
-                    moduleName: moduleName,
-                  };
-                  
-                  setDynamicModuleConfig(moduleConfig);
-                  console.log('[Widget] Set dynamic module config:', moduleConfig);
                 }
               } catch (factoryErr) {
                 console.error('[Widget] Error fetching factory config:', factoryErr);
@@ -899,37 +894,33 @@ export function WidgetEmbedded(props: {
           // Try to fetch factory configuration if we haven't already
           if (!dynamicModuleConfig && item.factoryAddress) {
             try {
-              const factoryRes = await fetch(`${apiBase}/v1/coins/factories/${item.factoryAddress}`);
+              const factoryRes = await fetch(`${apiBase}/v1/coins/factories`);
               if (factoryRes.ok) {
                 const factoryJson = await factoryRes.json();
-                const factoryData = factoryJson?.data?.factory || factoryJson?.data || factoryJson;
-                console.log('[Widget] Factory configuration from trending item:', factoryData);
+                const factories = factoryJson?.data?.factories || [];
                 
-                // Determine module name based on factory address
-                let moduleName = 'kappadotmeme'; // default
-                const factoryAddr = factoryData.address || factoryData.packageId || '';
-                if (factoryAddr === '0xf1ba7eae2494f147cf4a67e8f87b894382ebe9261c5f1cd7c13fdacce82ebc37') {
-                  moduleName = 'kappadotmeme_partner';
-                  console.log('[Widget] Detected partner module (Patara) from factory address');
-                } else if (factoryAddr === '0x7073eb9242244485f7244695448bc2c0c4c3467468683fc288d3ef5e51f4e9dc') {
-                  moduleName = 'kappadotmeme';
-                  console.log('[Widget] Detected default Kappa module from factory address');
-                } else if (factoryData.moduleName) {
-                  moduleName = factoryData.moduleName;
-                  console.log('[Widget] Using moduleName from API:', moduleName);
+                // Find the matching factory by packageID
+                const matchingFactory = factories.find((f: any) => 
+                  f.packageID === item.factoryAddress
+                );
+                
+                if (matchingFactory) {
+                  console.log('[Widget] Found matching factory from trending:', matchingFactory);
+                  
+                  const moduleConfig = {
+                    bondingContract: matchingFactory.packageID,
+                    CONFIG: matchingFactory.configObjectID,
+                    globalPauseStatusObjectId: matchingFactory.pauseStatusObjectID,
+                    poolsId: matchingFactory.poolsObjectID,
+                    lpBurnManger: matchingFactory.lpBurnManagerObjectID,
+                    moduleName: matchingFactory.packageName, // Use packageName from API
+                  };
+                  
+                  setDynamicModuleConfig(moduleConfig);
+                  console.log('[Widget] Set dynamic module config from trending:', moduleConfig);
+                } else {
+                  console.warn('[Widget] No matching factory found for trending item:', item.factoryAddress);
                 }
-                
-                const moduleConfig = {
-                  bondingContract: factoryData.address || factoryData.packageId,
-                  CONFIG: factoryData.configAddress || factoryData.configId,
-                  globalPauseStatusObjectId: factoryData.pauseStatusAddress || factoryData.pauseStatusObjectId || '0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f',
-                  poolsId: factoryData.poolsAddress || factoryData.poolsId || '0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d0',
-                  lpBurnManger: factoryData.lpBurnManagerAddress || factoryData.lpBurnManger || '0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845',
-                  moduleName: moduleName,
-                };
-                
-                setDynamicModuleConfig(moduleConfig);
-                console.log('[Widget] Set dynamic module config from trending:', moduleConfig);
               }
             } catch (factoryErr) {
               console.error('[Widget] Error fetching factory config from trending:', factoryErr);

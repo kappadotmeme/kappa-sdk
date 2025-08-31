@@ -5,6 +5,12 @@ const { Transaction } = require("@mysten/sui/transactions");
 const { SuiClient, getFullnodeUrl } = require("@mysten/sui/client");
 const { Ed25519Keypair } = require("@mysten/sui/keypairs/ed25519");
 const { toB64, fromB64 } = require("@mysten/sui/utils");
+const { 
+    getDefaultFactory, 
+    factoryToNetworkConfig, 
+    getFactoryByPackageId,
+    getFactoryByAlias 
+} = require("./src/factory-config");
 
 /**
  * Creates a SuiClient with optimal RPC endpoint configuration.
@@ -16,24 +22,78 @@ const createSuiClient = () => {
 
 let client = createSuiClient();
 let logger = null; // optional injected logger
+let apiBase = "https://api.kappa.fun";
 
-// Default network config (mainnet)
+// Default network config (mainnet) - will be overridden by API values
 let bondingContract = "0x7073eb9242244485f7244695448bc2c0c4c3467468683fc288d3ef5e51f4e9dc";
 let CONFIG = "0xe8e412e0c5ed22611707a9cbf78a174106dbf957a313c3deb7477db848c8bf4c";
 let globalPauseStatusObjectId = "0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f";
 let poolsId = "0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d0";
 let lpBurnManger = "0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845";
+let moduleName = "kappadotmeme"; // Default module name
+
+// Track if we've loaded from API
+let configLoaded = false;
 
 // Allow SDK users to inject their own client and/or network constants
 const setSuiClient = (customClient) => {
     client = customClient;
 };
+
+const setApiBase = (base) => {
+    apiBase = base;
+    console.log('[kappa.js] API base updated to:', apiBase);
+};
+
 const setNetworkConfig = (cfg = {}) => {
     if (cfg.bondingContract) bondingContract = cfg.bondingContract;
     if (cfg.CONFIG) CONFIG = cfg.CONFIG;
     if (cfg.globalPauseStatusObjectId) globalPauseStatusObjectId = cfg.globalPauseStatusObjectId;
     if (cfg.poolsId) poolsId = cfg.poolsId;
     if (cfg.lpBurnManger) lpBurnManger = cfg.lpBurnManger;
+    if (cfg.moduleName) moduleName = cfg.moduleName;
+    configLoaded = true; // Mark as manually configured
+    console.log('[kappa.js] Network config manually set:', {
+        bondingContract,
+        CONFIG,
+        globalPauseStatusObjectId,
+        poolsId,
+        lpBurnManger,
+        moduleName
+    });
+};
+
+// Auto-load default factory configuration
+const ensureFactoryConfig = async (factoryAlias = null) => {
+    if (configLoaded && !factoryAlias) return; // Skip if already configured and no specific factory requested
+    
+    try {
+        let factory;
+        if (factoryAlias) {
+            console.log('[kappa.js] Loading factory configuration for:', factoryAlias);
+            factory = await getFactoryByAlias(factoryAlias, apiBase);
+        } else {
+            console.log('[kappa.js] Loading default factory configuration from API...');
+            factory = await getDefaultFactory(apiBase);
+        }
+        
+        const config = factoryToNetworkConfig(factory);
+        
+        if (config) {
+            bondingContract = config.bondingContract;
+            CONFIG = config.CONFIG;
+            globalPauseStatusObjectId = config.globalPauseStatusObjectId;
+            poolsId = config.poolsId;
+            lpBurnManger = config.lpBurnManger;
+            moduleName = config.moduleName;
+            configLoaded = true;
+            
+            console.log('[kappa.js] Loaded factory config:', factory.alias, factory.displayName);
+        }
+    } catch (error) {
+        console.error('[kappa.js] Failed to load factory config:', error);
+        // Keep default values
+    }
 };
 const setLogger = (fn) => {
     logger = typeof fn === "function" ? fn : null;
@@ -231,6 +291,12 @@ const createCoinWeb3 = async (ADMIN_CREDENTIAL, token) => {
     console.log('[kappa.js] createCoinWeb3 called');
     console.log('[kappa.js] About to call updateTemplate...');
     try {
+        // Ensure factory config is loaded (use token's factory if specified)
+        if (token.factoryAlias) {
+            await ensureFactoryConfig(token.factoryAlias);
+        } else {
+            await ensureFactoryConfig();
+        }
         const adminKeypair =
             ADMIN_CREDENTIAL instanceof Uint8Array ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL) : ADMIN_CREDENTIAL; // assume signer/keypair compatible
 
@@ -363,6 +429,13 @@ const createCoinWeb3 = async (ADMIN_CREDENTIAL, token) => {
  */
 const createCurveWeb3 = async (ADMIN_CREDENTIAL, token) => {
     try {
+        // Ensure factory config is loaded (use token's factory if specified)
+        if (token.factoryAlias) {
+            await ensureFactoryConfig(token.factoryAlias);
+        } else {
+            await ensureFactoryConfig();
+        }
+        
         const adminKeypair =
             ADMIN_CREDENTIAL instanceof Uint8Array ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL) : ADMIN_CREDENTIAL;
 
@@ -371,11 +444,12 @@ const createCurveWeb3 = async (ADMIN_CREDENTIAL, token) => {
 
         const { treasuryCapObject, coinMetadataObject, publishedObject } = token;
         
-        // Get the global IDs from token or use module defaults
+        // Get the global IDs from token or use current loaded values (from API or manual config)
         const globalPauseStatusObjectIdToUse = token.globalPauseStatusObjectId || globalPauseStatusObjectId;
         const poolsIdToUse = token.poolsId || poolsId;
         const CONFIGToUse = token.CONFIG || CONFIG;
         const bondingContractToUse = token.bondingContract || bondingContract;
+        const moduleNameToUse = token.moduleName || moduleName;
 
         if (process.env.NODE_ENV !== "production") {
             console.log("treasuryCapObject", treasuryCapObject);
@@ -410,14 +484,11 @@ const createCurveWeb3 = async (ADMIN_CREDENTIAL, token) => {
             throw new Error('Missing required object IDs for curve creation');
         }
         
-        // Allow custom module name, default to 'kappadotmeme'
-        const moduleName = token.moduleName || 'kappadotmeme';
-        
-        console.log('Creating curve with module:', moduleName);
-        console.log('Full target:', `${bondingContractToUse}::${moduleName}::create`);
+        console.log('Creating curve with module:', moduleNameToUse);
+        console.log('Full target:', `${bondingContractToUse}::${moduleNameToUse}::create`);
         
         tx.moveCall({
-            target: `${bondingContractToUse}::${moduleName}::create`,
+            target: `${bondingContractToUse}::${moduleNameToUse}::create`,
             arguments: [
                 tx.object(CONFIGToUse),
                 tx.object(globalPauseStatusObjectIdToUse),
@@ -485,15 +556,23 @@ const createCurveWeb3 = async (ADMIN_CREDENTIAL, token) => {
  */
 const firstBuyWeb3 = async (ADMIN_CREDENTIAL, token) => {
     try {
+        // Ensure factory config is loaded (use token's factory if specified)
+        if (token.factoryAlias) {
+            await ensureFactoryConfig(token.factoryAlias);
+        } else {
+            await ensureFactoryConfig();
+        }
+        
         const adminKeypair =
             ADMIN_CREDENTIAL instanceof Uint8Array ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL) : ADMIN_CREDENTIAL;
         log("firstBuyWeb3...");
         const tx = new Transaction();
         const { publishedObject } = token;
 
-        // Get the IDs from token or use module defaults
+        // Get the IDs from token or use current loaded values
         const CONFIGToUse = token.CONFIG || CONFIG;
         const bondingContractToUse = token.bondingContract || bondingContract;
+        const moduleNameToUse = token.moduleName || moduleName;
 
         // Use replaceAll for consistency with other functions
         const formattedName = token.name.replaceAll(" ", "_");
@@ -509,11 +588,8 @@ const firstBuyWeb3 = async (ADMIN_CREDENTIAL, token) => {
 
         const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(sui_for_buy)]);
         
-        // Allow custom module name, default to 'kappadotmeme'
-        const moduleName = token.moduleName || 'kappadotmeme';
-        
-        console.log('First buy with module:', moduleName);
-        console.log('Full target:', `${bondingContractToUse}::${moduleName}::first_buy`);
+        console.log('First buy with module:', moduleNameToUse);
+        console.log('Full target:', `${bondingContractToUse}::${moduleNameToUse}::first_buy`);
         console.log('SUI amount:', sui_for_buy);
         console.log('Max tokens:', max_tokens);
         
@@ -526,7 +602,7 @@ const firstBuyWeb3 = async (ADMIN_CREDENTIAL, token) => {
         console.log('  min_tokens expected:', max_tokens);
         
         tx.moveCall({
-            target: `${bondingContractToUse}::${moduleName}::first_buy`,
+            target: `${bondingContractToUse}::${moduleNameToUse}::first_buy`,
             arguments: [
                 tx.object(CONFIGToUse),
                 coin,
@@ -604,6 +680,13 @@ const firstBuyWeb3 = async (ADMIN_CREDENTIAL, token) => {
 const buyWeb3 = async (ADMIN_CREDENTIAL, token) => {
     try {
         log("buyWeb3...");
+        
+        // Ensure factory config is loaded (use token's factory if specified)
+        if (token.factoryAlias) {
+            await ensureFactoryConfig(token.factoryAlias);
+        } else {
+            await ensureFactoryConfig();
+        }
 
         const adminKeypair =
             ADMIN_CREDENTIAL instanceof Uint8Array ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL) : ADMIN_CREDENTIAL;
@@ -629,7 +712,7 @@ const buyWeb3 = async (ADMIN_CREDENTIAL, token) => {
         ]);
 
         tx.moveCall({
-            target: `${bondingContract}::kappadotmeme::buy`,
+            target: `${bondingContract}::${moduleName}::buy`,
             arguments: [
                 tx.object(globalPauseStatusObjectId),
                 tx.object(poolsId),
@@ -691,6 +774,13 @@ const buyWeb3 = async (ADMIN_CREDENTIAL, token) => {
  */
 const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
     try {
+        // Ensure factory config is loaded (use token's factory if specified)
+        if (token.factoryAlias) {
+            await ensureFactoryConfig(token.factoryAlias);
+        } else {
+            await ensureFactoryConfig();
+        }
+        
         const adminKeypair =
             ADMIN_CREDENTIAL instanceof Uint8Array ? Ed25519Keypair.fromSecretKey(ADMIN_CREDENTIAL) : ADMIN_CREDENTIAL;
         log("sellWeb3...");
@@ -739,7 +829,7 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
         const is_exact_out = true;
 
         const [coin] = tx.moveCall({
-            target: `${bondingContract}::kappadotmeme::sell_`,
+            target: `${bondingContract}::${moduleName}::sell_`,
             arguments: [
                 tx.object(CONFIG),
                 kappa_coin,
@@ -783,5 +873,7 @@ module.exports = {
     sellWeb3,
     setSuiClient,
     setNetworkConfig,
+    setApiBase,
     setLogger,
+    ensureFactoryConfig,
 };

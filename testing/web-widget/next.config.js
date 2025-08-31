@@ -59,9 +59,10 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        // Proxy requests to /api/v1/* to the local API server
+        // Proxy requests to /api/v1/* to the production API server
         source: '/api/v1/:path*',
-        destination: 'http://localhost:4200/v1/:path*',
+        destination: 'https://api.kappa.fun/v1/:path*',
+        // destination: 'http://localhost:4200/v1/:path*',
       },
     ];
   },

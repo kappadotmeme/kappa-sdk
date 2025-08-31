@@ -12,7 +12,7 @@ export const API_CONFIG_PROXY = {
   local: 'http://localhost:4200',
   
   // Proxied API URL (no CORS issues)
-  proxied: '/api', // Will be proxied to localhost:4200
+  proxied: '/api', // Will be proxied to api.kappa.fun
   
   // Get the current API base URL
   getApiBase: function() {
@@ -20,7 +20,7 @@ export const API_CONFIG_PROXY = {
       return this.proxied;
     }
     // If not using proxy, check for production/local
-    const useProduction = false; // Change this to switch between production/local
+    const useProduction = true; // Using production API
     return useProduction ? this.production : this.local;
   }
 };

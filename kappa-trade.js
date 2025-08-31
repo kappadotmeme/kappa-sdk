@@ -1,6 +1,7 @@
 const { Transaction } = require("@mysten/sui/transactions");
 const { SuiClient, getFullnodeUrl } = require("@mysten/sui/client");
 const { Ed25519Keypair } = require("@mysten/sui/keypairs/ed25519");
+const { getTokenNetworkConfig, getDefaultFactory, factoryToNetworkConfig } = require("./src/factory-config");
 
 const createSuiClient = () => {
     return new SuiClient({ url: getFullnodeUrl("mainnet") });
@@ -8,7 +9,9 @@ const createSuiClient = () => {
 
 let client = createSuiClient();
 let logger = null;
+let apiBase = "https://api.kappa.fun";
 
+// Default configuration (will be overridden by API values)
 let bondingContract = "0x7073eb9242244485f7244695448bc2c0c4c3467468683fc288d3ef5e51f4e9dc";
 let CONFIG = "0xe8e412e0c5ed22611707a9cbf78a174106dbf957a313c3deb7477db848c8bf4c";
 let globalPauseStatusObjectId = "0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f";
@@ -16,9 +19,18 @@ let poolsId = "0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d
 let lpBurnManger = "0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845";
 let moduleName = "kappadotmeme"; // Default module name
 
+// Track if we've loaded from API
+let configLoaded = false;
+
 const setSuiClient = (customClient) => {
     client = customClient;
 };
+
+const setApiBase = (base) => {
+    apiBase = base;
+    console.log('[kappa-trade] API base updated to:', apiBase);
+};
+
 const setNetworkConfig = (cfg = {}) => {
     console.log('[kappa-trade] setNetworkConfig called with:', cfg);
     if (cfg.bondingContract) bondingContract = cfg.bondingContract;
@@ -27,6 +39,7 @@ const setNetworkConfig = (cfg = {}) => {
     if (cfg.poolsId) poolsId = cfg.poolsId;
     if (cfg.lpBurnManger) lpBurnManger = cfg.lpBurnManger;
     if (cfg.moduleName) moduleName = cfg.moduleName;
+    configLoaded = true; // Mark as manually configured
     console.log('[kappa-trade] Network config updated:', {
         bondingContract,
         CONFIG,
@@ -35,6 +48,32 @@ const setNetworkConfig = (cfg = {}) => {
         lpBurnManger,
         moduleName
     });
+};
+
+// Auto-load default factory configuration
+const ensureFactoryConfig = async () => {
+    if (configLoaded) return; // Skip if already configured
+    
+    try {
+        console.log('[kappa-trade] Loading default factory configuration from API...');
+        const factory = await getDefaultFactory(apiBase);
+        const config = factoryToNetworkConfig(factory);
+        
+        if (config) {
+            bondingContract = config.bondingContract;
+            CONFIG = config.CONFIG;
+            globalPauseStatusObjectId = config.globalPauseStatusObjectId;
+            poolsId = config.poolsId;
+            lpBurnManger = config.lpBurnManger;
+            moduleName = config.moduleName;
+            configLoaded = true;
+            
+            console.log('[kappa-trade] Loaded factory config:', factory.alias);
+        }
+    } catch (error) {
+        console.error('[kappa-trade] Failed to load factory config:', error);
+        // Keep default values
+    }
 };
 const setLogger = (fn) => {
     logger = typeof fn === "function" ? fn : null;
@@ -53,6 +92,10 @@ const buyWeb3 = async (ADMIN_CREDENTIAL, token) => {
     try {
         log("buyWeb3...");
         if (!ADMIN_CREDENTIAL) throw new Error("WALLET_NOT_CONNECTED");
+        
+        // Ensure factory config is loaded
+        await ensureFactoryConfig();
+        
         const isWallet = ADMIN_CREDENTIAL && typeof ADMIN_CREDENTIAL.signAndExecuteTransaction === "function";
         const adminKeypair =
             !isWallet && ADMIN_CREDENTIAL instanceof Uint8Array
@@ -193,6 +236,10 @@ const buyWeb3 = async (ADMIN_CREDENTIAL, token) => {
 const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
     try {
         if (!ADMIN_CREDENTIAL) throw new Error("WALLET_NOT_CONNECTED");
+        
+        // Ensure factory config is loaded
+        await ensureFactoryConfig();
+        
         const isWallet = ADMIN_CREDENTIAL && typeof ADMIN_CREDENTIAL.signAndExecuteTransaction === "function";
         const adminKeypair =
             !isWallet && ADMIN_CREDENTIAL instanceof Uint8Array
@@ -294,4 +341,4 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
     }
 };
 
-module.exports = { buyWeb3, sellWeb3, setSuiClient, setNetworkConfig, setLogger };
+module.exports = { buyWeb3, sellWeb3, setSuiClient, setNetworkConfig, setApiBase, setLogger, ensureFactoryConfig };
