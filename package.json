@@ -1,6 +1,6 @@
 {
   "name": "kappa-create",
-  "version": "2.0.15",
+  "version": "2.0.16",
   "description": "Complete SDK and React components for creating and trading tokens on Sui with Kappa Protocol. Includes customizable DeployerWidget and TradeWidget with theming support.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
