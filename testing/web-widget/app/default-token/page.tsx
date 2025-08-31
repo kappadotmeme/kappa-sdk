@@ -14,7 +14,6 @@ export default function Page() {
         lockContract
         projectName="KAPPA"
         apiBase="https://api.kappa.fun"  // Direct API URL
-        // No network prop - widget will fetch all configuration from API based on the contract
       />
     </div>
   );

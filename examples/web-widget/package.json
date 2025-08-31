@@ -13,7 +13,7 @@
     "@mysten/dapp-kit": "^0.17.4",
     "@mysten/sui": "^1.36.0",
     "@tanstack/react-query": "^5.0.0",
-    "kappa-create": "^2.0.4",
+    "kappa-create": "^2.0.19",
     "next": "14.2.31",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
