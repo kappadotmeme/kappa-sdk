@@ -737,9 +737,9 @@ export function WidgetEmbedded(props: {
                 const res = await fetch(`${apiBase}/v1/coins/trending?page=1&size=50`);
                 json = await res.json();
                 console.log('[Widget] Trending response:', json);
-              } catch {
-                const res2 = await fetch(`${apiBase}/v1/coin/trending`);
-                json = await res2.json();
+              } catch (err) {
+                console.error('[Widget] Error fetching trending coins:', err);
+                json = { data: { coins: [] } };
               }
               // New API structure: data.coins array with "address" field
               const all: any[] = (json?.data?.coins || json?.data || []) as any[];
