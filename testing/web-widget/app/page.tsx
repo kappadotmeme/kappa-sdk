@@ -18,7 +18,6 @@ export default function Page() {
       <WidgetStandalone 
         projectName="KAPPA" 
         apiBase="https://api.kappa.fun"  // Explicitly use production API
-        network={NETWORK_CONFIG}
       />
     </div>
   );

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget API Test</title>
+</head>
+<body>
+    <h1>Widget API Debug Test</h1>
+    <div id="debug"></div>
+    
+    <script>
+        const debug = document.getElementById('debug');
+        
+        // Test what the widget would detect
+        const isLocalhost = window.location.hostname === 'localhost';
+        const apiBase = isLocalhost ? '/api' : 'https://api.kappa.fun';
+        
+        debug.innerHTML = `
+            <h2>Environment Detection:</h2>
+            <p><strong>Hostname:</strong> ${window.location.hostname}</p>
+            <p><strong>Is Localhost:</strong> ${isLocalhost}</p>
+            <p><strong>API Base Would Be:</strong> ${apiBase}</p>
+            <hr>
+        `;
+        
+        // Test API endpoints
+        async function testEndpoint(url, description) {
+            const resultDiv = document.createElement('div');
+            resultDiv.innerHTML = `<h3>Testing: ${description}</h3><p>URL: ${url}</p>`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                resultDiv.innerHTML += `<p style="color: green;">✅ Success! Status: ${response.status}</p>`;
+                resultDiv.innerHTML += `<pre>${JSON.stringify(data, null, 2).substring(0, 500)}...</pre>`;
+            } catch (error) {
+                resultDiv.innerHTML += `<p style="color: red;">❌ Failed: ${error.message}</p>`;
+            }
+            
+            debug.appendChild(resultDiv);
+        }
+        
+        // Test both proxy and direct endpoints
+        (async () => {
+            if (isLocalhost) {
+                await testEndpoint('/api/v1/coins/trending?page=1&size=50', 'Proxy Endpoint (should work if Next.js proxy configured)');
+            }
+            await testEndpoint('https://api.kappa.fun/v1/coins/trending?page=1&size=50', 'Direct API Endpoint (might fail due to CORS)');
+        })();
+    </script>
+</body>
+</html>
