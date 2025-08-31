@@ -21,20 +21,21 @@ export default function DebugPage() {
     // Test API directly
     const testApi = async () => {
       try {
-        console.log('Testing API at:', API_BASE);
+        const apiUrl = 'https://api.kappa.fun';
+        console.log('Testing API at:', apiUrl);
         
         // Test trending
-        const trendingRes = await fetch(`${API_BASE}/v1/coins/trending?page=1&size=5`);
+        const trendingRes = await fetch(`${apiUrl}/v1/coins/trending?page=1&size=5`);
         const trendingData = await trendingRes.json();
         console.log('Trending response:', trendingData);
         
         // Test search
-        const searchRes = await fetch(`${API_BASE}/v1/coins?nameOrSymbol=a`);
+        const searchRes = await fetch(`${apiUrl}/v1/coins?nameOrSymbol=a`);
         const searchData = await searchRes.json();
         console.log('Search response:', searchData);
         
         setApiTest({
-          apiBase: API_BASE,
+          apiBase: apiUrl,
           trending: {
             status: trendingData?.status,
             coins: trendingData?.data?.coins?.length || 0,
@@ -84,7 +85,7 @@ export default function DebugPage() {
       <div style={{ display: 'flex', marginBottom: 40, width: '100%', justifyContent: 'center' }}>
               <WidgetStandalone 
         projectName="KAPPA DEBUG" 
-        apiBase={API_BASE}
+        apiBase="https://api.kappa.fun"  // Explicitly use production API
         network={NETWORK_CONFIG}
       />
       </div>

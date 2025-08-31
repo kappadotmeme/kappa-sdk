@@ -7,9 +7,9 @@ Complete SDK and React components for creating and trading tokens on Sui with Ka
 
 ## 📚 Docs
 
-- **SDK**: [README_SDK.md](./README_SDK.md)
-- **Trading Widget**: [README_BUY_WIDGET.md](./README_BUY_WIDGET.md)
-- **Deployer Widget**: [README_DEPLOYER.md](./README_DEPLOYER.md)
+- **SDK**: [docs/Read me-SDK.md](./docs/Read%20me-SDK.md)
+- **Trading Widget**: [docs/Read me-BUY_WIDGET.md](./docs/Read%20me-BUY_WIDGET.md)
+- **Deployer Widget**: [docs/Read me-DEPLOYER.md](./docs/Read%20me-DEPLOYER.md)
 
 ## 🚀 Features
 
@@ -94,9 +94,9 @@ await buyTokens({
 
 ## 📚 Documentation
 
-- **[SDK Documentation](./README_SDK.md)** - Programmatic token operations
-- **[Trading Widget Guide](./README_BUY_WIDGET.md)** - Buy/sell interface component
-- **[Deployer Widget Guide](./README_DEPLOYER.md)** - Token creation interface
+- **[SDK Documentation](./docs/Read%20me-SDK.md)** - Programmatic token operations
+- **[Trading Widget Guide](./docs/Read%20me-BUY_WIDGET.md)** - Buy/sell interface component
+- **[Deployer Widget Guide](./docs/Read%20me-DEPLOYER.md)** - Token creation interface
 
 ## 🎨 Customization
 

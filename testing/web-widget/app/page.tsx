@@ -1,7 +1,6 @@
 "use client";
 // Import from local source instead of NPM package
 import { WidgetStandalone } from '../../../src/react/Widget';
-import { API_BASE } from '../config/api';
 
 // Default network configuration - YOUR ACTUAL DEPLOYMENT
 const NETWORK_CONFIG = {
@@ -18,7 +17,7 @@ export default function Page() {
     <div style={{ width: '100%', height: '100vh', background: 'rgb(23, 23, 23)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', paddingTop: '100px', boxSizing: 'border-box', overflow: 'hidden' }}>
       <WidgetStandalone 
         projectName="KAPPA" 
-        apiBase={API_BASE}
+        apiBase="https://api.kappa.fun"  // Explicitly use production API
         network={NETWORK_CONFIG}
       />
     </div>

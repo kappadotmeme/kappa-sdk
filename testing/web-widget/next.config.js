@@ -4,6 +4,14 @@ const nextConfig = {
   experimental: {
     externalDir: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: 'https://api.kappa.fun/v1/:path*',
+      },
+    ];
+  },
   transpilePackages: [
     '@mysten/dapp-kit',
     '@mysten/sui',

@@ -590,7 +590,24 @@ export function WidgetEmbedded(props: {
   }
 }) {
   // Extract props with default API base URL pointing to production Kappa API
-  const { theme, defaultContract, lockContract, logoUrl, projectName, apiBase = DEFAULT_API_BASE, network } = props || {} as any;
+  const { theme, defaultContract, lockContract, logoUrl, projectName, network } = props || {} as any;
+  
+  // Use proxy path when running locally to avoid CORS issues
+  let apiBase = 'https://api.kappa.fun';
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    // Use Next.js proxy to avoid CORS when running locally
+    apiBase = '/api';
+    console.log('[Widget] Running locally, using proxy:', apiBase);
+  } else {
+    console.log('[Widget] Using production API directly:', apiBase);
+  }
+  
+  // Debug logging to ensure correct API is being used
+  if (typeof window !== 'undefined') {
+    console.log('[Widget] Final API Base:', apiBase);
+    console.log('[Widget] Props received:', { defaultContract, lockContract, projectName });
+  }
+  
   const [contract, setContract] = useState('');
   const [mode, setMode] = useState<'buy' | 'sell'>('buy');
   const [slippage, setSlippage] = useState('1');
