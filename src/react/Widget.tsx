@@ -592,34 +592,20 @@ export function WidgetEmbedded(props: {
   // Extract props with default API base URL pointing to production Kappa API
   const { theme, defaultContract, lockContract, logoUrl, projectName, network, apiBase: propsApiBase } = props || {} as any;
   
-  // Determine the best API base to use
-  let apiBase = 'https://api.kappa.fun';
+  // ALWAYS use the proxy path to avoid CORS issues
+  // The proxy should be configured in next.config.js to forward to api.kappa.fun
+  let apiBase = '/api';
   
-  // If apiBase is explicitly provided in props, always use it
+  // Allow override via props if needed
   if (propsApiBase) {
     apiBase = propsApiBase;
     console.log('[Widget] Using provided apiBase:', apiBase);
-  } else if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-    // On localhost, try to use proxy first, but test if it exists
-    apiBase = '/api';
-    console.log('[Widget] Running locally, attempting to use proxy:', apiBase);
-    
-    // Test if proxy is configured by making a quick test request
-    if (typeof window !== 'undefined') {
-      fetch('/api/v1/coins/trending?page=1&size=1')
-        .then(res => {
-          if (!res.ok && res.status === 404) {
-            console.warn('[Widget] Proxy not configured! Add this to your next.config.js:');
-            console.warn('async rewrites() { return [{ source: "/api/v1/:path*", destination: "https://api.kappa.fun/v1/:path*" }]; }');
-            console.warn('[Widget] Falling back to direct API (may have CORS issues)');
-          }
-        })
-        .catch(() => {
-          console.warn('[Widget] Proxy test failed. Make sure next.config.js has the proxy configured.');
-        });
-    }
   } else {
-    console.log('[Widget] Using production API directly:', apiBase);
+    // Always use proxy path for consistent behavior
+    apiBase = '/api';
+    console.log('[Widget] Using proxy path:', apiBase);
+    console.log('[Widget] Make sure your next.config.js has:');
+    console.log('async rewrites() { return [{ source: "/api/v1/:path*", destination: "https://api.kappa.fun/v1/:path*" }]; }');
   }
   
   // Debug logging to ensure correct API is being used
