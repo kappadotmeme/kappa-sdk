@@ -10,7 +10,7 @@ export default function Page() {
         }
         lockContract
         projectName="KAPPA"
-        apiBase="https://api.kappa.fun"  // Explicitly set the API base
+        // apiBase defaults to https://api.kappa.fun
       />
     </div>
   );
