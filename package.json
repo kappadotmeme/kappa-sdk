@@ -18,10 +18,6 @@
       "require": "./src/react/index.js",
       "import": "./src/react/index.js",
       "types": "./src/react/index.d.ts"
-    },
-    "./react/hooks": {
-      "import": "./src/react/hooks/useModuleConfig.ts",
-      "types": "./src/react/hooks/index.d.ts"
     }
   },
   "files": [
