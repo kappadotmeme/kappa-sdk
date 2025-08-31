@@ -5,7 +5,7 @@ export const API_CONFIG = {
   // Choose your API mode:
   // 'proxy' - Use Next.js proxy (no CORS issues, works on any port)
   // 'direct' - Direct API calls (subject to CORS restrictions)
-  mode: 'proxy' as 'proxy' | 'direct',
+  mode: 'direct' as 'proxy' | 'direct',  // Changed to 'direct' to use the production API directly
   
   // Toggle this to switch between environments (only for 'direct' mode)
   useProduction: true, // Set to true to use live API

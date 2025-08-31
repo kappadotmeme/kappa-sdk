@@ -55,17 +55,7 @@ const nextConfig = {
     return config;
   },
   
-  // Proxy API requests to avoid CORS issues
-  async rewrites() {
-    return [
-      {
-        // Proxy requests to /api/v1/* to the production API server
-        source: '/api/v1/:path*',
-        destination: 'https://api.kappa.fun/v1/:path*',
-        // destination: 'http://localhost:4200/v1/:path*',
-      },
-    ];
-  },
+  // No proxy needed - using direct API calls to api.kappa.fun
 };
 
 module.exports = nextConfig;

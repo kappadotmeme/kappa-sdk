@@ -5,6 +5,9 @@ import { SuiClient, getFullnodeUrl } from '@mysten/sui/client';
 import { createNetworkConfig, SuiClientProvider, WalletProvider, useConnectWallet, useCurrentAccount, useDisconnectWallet, useSignAndExecuteTransaction, useSuiClient, useWallets } from '@mysten/dapp-kit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+// Default API base URL for Kappa API
+const DEFAULT_API_BASE = 'https://api.kappa.fun';
+
 const { networkConfig } = createNetworkConfig({
   mainnet: { url: getFullnodeUrl('mainnet') },
 });
@@ -586,7 +589,8 @@ export function WidgetEmbedded(props: {
     moduleName?: string,
   }
 }) {
-  const { theme, defaultContract, lockContract, logoUrl, projectName, apiBase = 'https://api.kappa.fun', network } = props || {} as any;
+  // Extract props with default API base URL pointing to production Kappa API
+  const { theme, defaultContract, lockContract, logoUrl, projectName, apiBase = DEFAULT_API_BASE, network } = props || {} as any;
   const [contract, setContract] = useState('');
   const [mode, setMode] = useState<'buy' | 'sell'>('buy');
   const [slippage, setSlippage] = useState('1');
@@ -1107,9 +1111,11 @@ export function WidgetEmbedded(props: {
       trade.setSuiClient(client);
       
       // Use dynamic module config if available, otherwise fall back to prop
+      // Dynamic config from API takes precedence over static network prop
       const configToUse = dynamicModuleConfig || network;
       if (configToUse && trade.setNetworkConfig) {
-        console.log('[Widget] Setting network config (dynamic or prop):', configToUse);
+        console.log('[Widget] Setting network config:', dynamicModuleConfig ? 'Dynamic from API' : 'Static from prop');
+        console.log('[Widget] Config being used:', configToUse);
         console.log('[Widget] Factory address:', factoryAddress);
         trade.setNetworkConfig(configToUse);
       } else {
@@ -1158,9 +1164,11 @@ export function WidgetEmbedded(props: {
       trade.setSuiClient(client);
       
       // Use dynamic module config if available, otherwise fall back to prop
+      // Dynamic config from API takes precedence over static network prop
       const configToUse = dynamicModuleConfig || network;
       if (configToUse && trade.setNetworkConfig) {
-        console.log('[Widget] Setting network config for sell (dynamic or prop):', configToUse);
+        console.log('[Widget] Setting network config for sell:', dynamicModuleConfig ? 'Dynamic from API' : 'Static from prop');
+        console.log('[Widget] Config being used:', configToUse);
         console.log('[Widget] Factory address:', factoryAddress);
         trade.setNetworkConfig(configToUse);
       } else {
