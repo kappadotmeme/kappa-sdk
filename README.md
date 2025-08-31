@@ -190,9 +190,14 @@ function TradingApp() {
 
 ### More Examples
 
-- Multi-module integration example: [`examples/multi-module-integration.tsx`](./examples/multi-module-integration.tsx)
-- Third-party embed (vanilla HTML): [`examples/third-party-integration.html`](./examples/third-party-integration.html)
-- Full test app with routes and helpers: [`testing/web-widget`](./testing/web-widget)
+- **Full Next.js example app**: [`examples/web-widget/`](./examples/web-widget/)
+  - Basic trading widget
+  - Widget with locked token
+  - Token deployer widget
+- **Testing app with advanced features**: [`testing/web-widget/`](./testing/web-widget/)
+  - Multi-module support
+  - Debug panel
+  - API testing utilities
 
 ## 🛠️ Requirements
 
