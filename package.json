@@ -33,8 +33,7 @@
     "README.md",
     "README_SDK.md",
     "README_BUY_WIDGET.md",
-    "README_DEPLOYER.md",
-    "MULTI_MODULE_ARCHITECTURE.md"
+    "README_DEPLOYER.md"
   ],
   "engines": {
     "node": ">=18"
