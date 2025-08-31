@@ -191,13 +191,48 @@ function TradingApp() {
 ### More Examples
 
 - **Full Next.js example app**: [`examples/web-widget/`](./examples/web-widget/)
-  - Basic trading widget
-  - Widget with locked token
-  - Token deployer widget
-- **Testing app with advanced features**: [`testing/web-widget/`](./testing/web-widget/)
-  - Multi-module support
-  - Debug panel
-  - API testing utilities
+  - Trading widget and deployer widget pages
+
+## ⚙️ Next.js / Vercel Integration
+
+Add a proxy so the widget can call the Kappa API without CORS issues:
+
+```js
+// next.config.js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: { externalDir: true },
+  transpilePackages: [
+    'kappa-create',
+    '@mysten/dapp-kit',
+    '@mysten/sui',
+    '@tanstack/react-query',
+  ],
+  async rewrites() {
+    return [
+      { source: '/api/v1/:path*', destination: 'https://api.kappa.fun/v1/:path*' },
+    ];
+  },
+};
+module.exports = nextConfig;
+```
+
+Use the widget:
+
+```tsx
+import { WidgetStandalone } from 'kappa-create/react';
+
+export default function App() {
+  return (
+    <WidgetStandalone
+      projectName="My DEX"
+      defaultContract="0x...::Token::SYMBOL"
+      // If you need to force the proxy path:
+      // apiBase="/api"
+    />
+  );
+}
+```
 
 ## 🛠️ Requirements
 
