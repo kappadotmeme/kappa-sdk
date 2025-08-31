@@ -207,8 +207,7 @@ MIT
 ## 🤝 Support
 
 - **Documentation**: [https://docs.kappa.fun](https://docs.kappa.fun)
-- **GitHub**: [https://github.com/kappa-labs/kappa-sdk](https://github.com/kappa-labs/kappa-sdk)
-- **Discord**: [https://discord.gg/kappa](https://discord.gg/kappa)
+- **GitHub**: [https://github.com/kappadotmeme/kappa-sdk](https://github.com/kappa-labs/kappa-sdk)
 - **Website**: [https://kappa.fun](https://kappa.fun)
 
 ## 🌟 Built With Kappa
