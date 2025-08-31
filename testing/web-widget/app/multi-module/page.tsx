@@ -26,13 +26,15 @@ export default function MultiModulePage() {
   const [loadingFactories, setLoadingFactories] = useState(true);
   
   // Fetch the module config for the selected factory
-  const { config, loading, error } = useModuleConfig(selectedExample.factory, API_BASE);
+  // Pass /api to use the proxy
+  const { config, loading, error } = useModuleConfig(selectedExample.factory, '/api');
   
   // Fetch all available factories
   useEffect(() => {
     const fetchFactories = async () => {
       try {
-        const res = await fetch(`${API_BASE}/v1/coins/factories?page=1&size=50`);
+        // Use proxy path to avoid CORS
+        const res = await fetch(`/api/v1/coins/factories?page=1&size=50`);
         if (res.ok) {
           const data = await res.json();
           setFactories(data.data?.factories || []);
@@ -168,7 +170,7 @@ export default function MultiModulePage() {
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <WidgetStandalone
           projectName="MULTI-MODULE"
-          apiBase={API_BASE}
+          // No apiBase needed - widget v2.0.25+ uses proxy by default
           defaultContract={selectedExample.contract}
           // Pass the dynamic config
           network={config || undefined}
