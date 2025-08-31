@@ -13,7 +13,7 @@ export default function Page() {
         defaultContract={defaultContract}
         lockContract
         projectName="KAPPA"
-        apiBase="https://api.kappa.fun"  // Direct API URL
+        // No apiBase needed - widget v2.0.25+ uses proxy by default
       />
     </div>
   );
