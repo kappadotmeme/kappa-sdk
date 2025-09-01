@@ -1048,7 +1048,8 @@ export function WidgetEmbedded(props: {
         const buyMath = (mathMod as any).buyMath || (mathMod as any).default?.buyMath;
         const sellMath = (mathMod as any).sellMath || (mathMod as any).default?.sellMath;
         const suiMist = Math.max(0, Math.floor(Number(suiIn) * 1e9));
-        const tokensAmt = Math.max(0, Math.floor(Number(tokensIn)));
+        // Convert human-readable tokensIn to blockchain value for quote calculation
+        const tokensAmt = Math.max(0, Math.floor(Number(tokensIn) * Math.pow(10, tokenDecimals || 9)));
         const usableCurve = normalizeCurveObject(curve) || lastCurveRef.current || null;
         if (usableCurve && suiMist > 0 && typeof buyMath === 'function') {
           const q = buyMath(usableCurve, suiMist);
@@ -1076,7 +1077,7 @@ export function WidgetEmbedded(props: {
       }
     }
     computeQuotes();
-  }, [curve, suiIn, tokensIn]);
+  }, [curve, suiIn, tokensIn, tokenDecimals]);
 
   // Always load SUI balance when wallet connects
   useEffect(() => {
@@ -1101,11 +1102,11 @@ export function WidgetEmbedded(props: {
       else setSuiIn(val);
     } else {
       const bal = tokenBalance;
-      const scale = Math.pow(10, tokenDecimals || 9);
-      if (val === 'MAX') setTokensIn(String(Math.floor(bal*scale)));
-      else if (val === '1/2') setTokensIn(String(Math.floor(bal*scale/2)));
-      else if (val === '1/4') setTokensIn(String(Math.floor(bal*scale/4)));
-      else if (val === '3/4') setTokensIn(String(Math.floor(bal*scale*3/4)));
+      // For selling, use human-readable values in the input field
+      if (val === 'MAX') setTokensIn(String(bal));
+      else if (val === '1/2') setTokensIn(String(bal/2));
+      else if (val === '1/4') setTokensIn(String(bal/4));
+      else if (val === '3/4') setTokensIn(String(bal*3/4));
     }
   };
 
@@ -1203,10 +1204,13 @@ export function WidgetEmbedded(props: {
       const slip = Math.max(0, Math.min(100, Number(slippage) || 0));
       const minSui = Math.floor(Math.max(0, quoteSui) * (1 - slip / 100));
       
+      // Convert human-readable tokensIn to blockchain value
+      const tokensInBlockchain = Math.floor(parseFloat(tokensIn || '0') * Math.pow(10, tokenDecimals || 9));
+      
       const tradeParams = {
         publishedObject: { packageId: pkg },
         name: (mod || '').replaceAll('_', ' '), // This is what the trade module uses to construct type argument
-        sell_token: String(Math.floor(parseFloat(tokensIn))),
+        sell_token: String(tokensInBlockchain),
         min_sui: minSui,
         // Add these for better type argument construction if needed
         moduleName: mod || '',
