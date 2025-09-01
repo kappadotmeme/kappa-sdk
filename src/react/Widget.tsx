@@ -1101,10 +1101,11 @@ export function WidgetEmbedded(props: {
       else setSuiIn(val);
     } else {
       const bal = tokenBalance;
-      if (val === 'MAX') setTokensIn(String(Math.floor(bal*1e9)));
-      else if (val === '1/2') setTokensIn(String(Math.floor(bal*1e9/2)));
-      else if (val === '1/4') setTokensIn(String(Math.floor(bal*1e9/4)));
-      else if (val === '3/4') setTokensIn(String(Math.floor(bal*1e9*3/4)));
+      const scale = Math.pow(10, tokenDecimals || 9);
+      if (val === 'MAX') setTokensIn(String(Math.floor(bal*scale)));
+      else if (val === '1/2') setTokensIn(String(Math.floor(bal*scale/2)));
+      else if (val === '1/4') setTokensIn(String(Math.floor(bal*scale/4)));
+      else if (val === '3/4') setTokensIn(String(Math.floor(bal*scale*3/4)));
     }
   };
 
