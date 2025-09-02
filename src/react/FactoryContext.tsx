@@ -41,25 +41,35 @@ export const FactoryProvider: React.FC<{ children: React.ReactNode }> = ({ child
     console.log('[FactoryContext] Fetching factory config for:', factoryAddress);
     
     try {
-      // Fetch factory configuration
-      const response = await fetch(`${apiBase}/v1/coins/factories/${factoryAddress}`);
+      // Fetch all factories and find the matching one
+      const response = await fetch(`${apiBase}/v1/coins/factories`);
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch factory config: ${response.statusText}`);
+        throw new Error(`Failed to fetch factories: ${response.statusText}`);
       }
       
-      const data = await response.json();
+      const json = await response.json();
+      const factories = json?.data?.factories || [];
+      
+      // Find the matching factory by packageID
+      const factoryData = factories.find((f: any) => 
+        f.packageID === factoryAddress
+      );
+      
+      if (!factoryData) {
+        throw new Error(`No factory found with address: ${factoryAddress}`);
+      }
       
       // Transform API response to our internal format
       const config: FactoryConfig = {
-        name: data.data?.name || 'Unknown',
+        name: factoryData.packageName || 'Unknown',
         address: factoryAddress,
-        packageId: data.data?.address || factoryAddress, // Some APIs might return it as 'address'
-        configAddress: data.data?.configAddress || data.data?.configId,
-        pauseStatusAddress: data.data?.pauseStatusAddress || data.data?.pauseStatusObjectId,
-        poolsAddress: data.data?.poolsAddress || data.data?.poolsId,
-        lpBurnManagerAddress: data.data?.lpBurnManagerAddress || data.data?.lpBurnManger,
-        moduleName: data.data?.moduleName || 'kappadotmeme', // Default module name
+        packageId: factoryData.packageID || factoryAddress,
+        configAddress: factoryData.configObjectID,
+        pauseStatusAddress: factoryData.pauseStatusObjectID,
+        poolsAddress: factoryData.poolsObjectID,
+        lpBurnManagerAddress: factoryData.lpBurnManagerObjectID,
+        moduleName: factoryData.packageName || 'kappadotmeme', // Use packageName from API
         cachedAt: Date.now()
       };
       
