@@ -285,15 +285,15 @@ const sellWeb3 = async (ADMIN_CREDENTIAL, token) => {
 
         if (selectedCoins.length > 1) {
             tx.mergeCoins(
-                selectedCoins[0].coinObjectId,
-                selectedCoins.slice(1, 301).map((item) => item.coinObjectId)
+                tx.object(selectedCoins[0].coinObjectId),
+                selectedCoins.slice(1, 301).map((item) => tx.object(item.coinObjectId))
             );
         }
 
         const sellAmount = BigInt(token.sell_token || 0);
         const minSui = Math.floor(Number(token.min_sui) || 0);
 
-        const [kappa_coin] = tx.splitCoins(selectedCoins[0].coinObjectId, [sellAmount]);
+        const [kappa_coin] = tx.splitCoins(tx.object(selectedCoins[0].coinObjectId), [tx.pure.u64(sellAmount)]);
         const is_exact_out = true;
 
         // The module for the sell function is always the configured module (kappadotmeme), not the token module
