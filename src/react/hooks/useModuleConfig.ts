@@ -51,9 +51,9 @@ export function useModuleConfig(factoryAddress: string | undefined, apiBase: str
         return;
       }
 
-      // 2) Remote API as fallback - fetch all factories and find the matching one
-      console.log('[useModuleConfig] Fetching factories to find config for:', factoryAddress);
-      const response = await fetch(`${apiBase}/v1/coins/factories`);
+      // 2) Remote API as fallback - fetch specific factory by address
+      console.log('[useModuleConfig] Fetching config for factory:', factoryAddress);
+      const response = await fetch(`${apiBase}/v1/coins/factories/${factoryAddress}`);
       
       if (!response.ok) {
         // If factory endpoint fails, use default Kappa config
@@ -71,35 +71,17 @@ export function useModuleConfig(factoryAddress: string | undefined, apiBase: str
       }
 
       const data = await response.json();
-      const factories = data?.data?.factories || [];
-      
-      // Find the matching factory by packageID
-      const factoryData = factories.find((f: any) => 
-        f.packageID === factoryAddress
-      );
-      
-      if (!factoryData) {
-        console.warn('[useModuleConfig] No matching factory found, using default config');
-        const defaultConfig: ModuleConfig = {
-          bondingContract: '0x7073eb9242244485f7244695448bc2c0c4c3467468683fc288d3ef5e51f4e9dc',
-          CONFIG: '0xe8e412e0c5ed22611707a9cbf78a174106dbf957a313c3deb7477db848c8bf4c',
-          globalPauseStatusObjectId: '0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f',
-          poolsId: '0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d0',
-          lpBurnManger: '0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845',
-          moduleName: 'kappadotmeme'
-        };
-        setConfig(defaultConfig);
-        return;
-      }
+      const factoryData = data?.data || data;
 
       // Map API response to our module config format
+      // The individual factory endpoint returns the factory object directly
       const moduleConfig: ModuleConfig = {
-        bondingContract: factoryData.address || factoryData.packageId,
-        CONFIG: factoryData.configAddress || factoryData.configId,
-        globalPauseStatusObjectId: factoryData.pauseStatusAddress || factoryData.pauseStatusObjectId || '0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f',
-        poolsId: factoryData.poolsAddress || factoryData.poolsId || '0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d0',
-        lpBurnManger: factoryData.lpBurnManagerAddress || factoryData.lpBurnManger || '0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845',
-        moduleName: factoryData.moduleName || 'kappadotmeme'
+        bondingContract: factoryData.packageID || factoryData.address || factoryData.packageId,
+        CONFIG: factoryData.configObjectID || factoryData.configAddress || factoryData.configId,
+        globalPauseStatusObjectId: factoryData.pauseStatusObjectID || factoryData.pauseStatusAddress || factoryData.pauseStatusObjectId || '0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f',
+        poolsId: factoryData.poolsObjectID || factoryData.poolsAddress || factoryData.poolsId || '0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d0',
+        lpBurnManger: factoryData.lpBurnManagerObjectID || factoryData.lpBurnManagerAddress || factoryData.lpBurnManger || '0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845',
+        moduleName: factoryData.packageName || factoryData.moduleName || 'kappadotmeme'
       };
 
       // Cache the config

@@ -41,35 +41,26 @@ export const FactoryProvider: React.FC<{ children: React.ReactNode }> = ({ child
     console.log('[FactoryContext] Fetching factory config for:', factoryAddress);
     
     try {
-      // Fetch all factories and find the matching one
-      const response = await fetch(`${apiBase}/v1/coins/factories`);
+      // Fetch specific factory configuration
+      const response = await fetch(`${apiBase}/v1/coins/factories/${factoryAddress}`);
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch factories: ${response.statusText}`);
+        throw new Error(`Failed to fetch factory config: ${response.statusText}`);
       }
       
       const json = await response.json();
-      const factories = json?.data?.factories || [];
-      
-      // Find the matching factory by packageID
-      const factoryData = factories.find((f: any) => 
-        f.packageID === factoryAddress
-      );
-      
-      if (!factoryData) {
-        throw new Error(`No factory found with address: ${factoryAddress}`);
-      }
+      const factoryData = json?.data || json;
       
       // Transform API response to our internal format
       const config: FactoryConfig = {
-        name: factoryData.packageName || 'Unknown',
+        name: factoryData.packageName || factoryData.name || 'Unknown',
         address: factoryAddress,
-        packageId: factoryData.packageID || factoryAddress,
-        configAddress: factoryData.configObjectID,
-        pauseStatusAddress: factoryData.pauseStatusObjectID,
-        poolsAddress: factoryData.poolsObjectID,
-        lpBurnManagerAddress: factoryData.lpBurnManagerObjectID,
-        moduleName: factoryData.packageName || 'kappadotmeme', // Use packageName from API
+        packageId: factoryData.packageID || factoryData.address || factoryAddress,
+        configAddress: factoryData.configObjectID || factoryData.configAddress || factoryData.configId,
+        pauseStatusAddress: factoryData.pauseStatusObjectID || factoryData.pauseStatusAddress || factoryData.pauseStatusObjectId,
+        poolsAddress: factoryData.poolsObjectID || factoryData.poolsAddress || factoryData.poolsId,
+        lpBurnManagerAddress: factoryData.lpBurnManagerObjectID || factoryData.lpBurnManagerAddress || factoryData.lpBurnManger,
+        moduleName: factoryData.packageName || factoryData.moduleName || 'kappadotmeme',
         cachedAt: Date.now()
       };
       
