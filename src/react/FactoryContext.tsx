@@ -41,26 +41,25 @@ export const FactoryProvider: React.FC<{ children: React.ReactNode }> = ({ child
     console.log('[FactoryContext] Fetching factory config for:', factoryAddress);
     
     try {
-      // Fetch specific factory configuration
+      // Fetch factory configuration
       const response = await fetch(`${apiBase}/v1/coins/factories/${factoryAddress}`);
       
       if (!response.ok) {
         throw new Error(`Failed to fetch factory config: ${response.statusText}`);
       }
       
-      const json = await response.json();
-      const factoryData = json?.data || json;
+      const data = await response.json();
       
       // Transform API response to our internal format
       const config: FactoryConfig = {
-        name: factoryData.packageName || factoryData.name || 'Unknown',
+        name: data.data?.name || 'Unknown',
         address: factoryAddress,
-        packageId: factoryData.packageID || factoryData.address || factoryAddress,
-        configAddress: factoryData.configObjectID || factoryData.configAddress || factoryData.configId,
-        pauseStatusAddress: factoryData.pauseStatusObjectID || factoryData.pauseStatusAddress || factoryData.pauseStatusObjectId,
-        poolsAddress: factoryData.poolsObjectID || factoryData.poolsAddress || factoryData.poolsId,
-        lpBurnManagerAddress: factoryData.lpBurnManagerObjectID || factoryData.lpBurnManagerAddress || factoryData.lpBurnManger,
-        moduleName: factoryData.packageName || factoryData.moduleName || 'kappadotmeme',
+        packageId: data.data?.address || factoryAddress, // Some APIs might return it as 'address'
+        configAddress: data.data?.configAddress || data.data?.configId,
+        pauseStatusAddress: data.data?.pauseStatusAddress || data.data?.pauseStatusObjectId,
+        poolsAddress: data.data?.poolsAddress || data.data?.poolsId,
+        lpBurnManagerAddress: data.data?.lpBurnManagerAddress || data.data?.lpBurnManger,
+        moduleName: data.data?.moduleName || 'kappadotmeme', // Default module name
         cachedAt: Date.now()
       };
       

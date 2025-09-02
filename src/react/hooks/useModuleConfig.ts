@@ -51,7 +51,7 @@ export function useModuleConfig(factoryAddress: string | undefined, apiBase: str
         return;
       }
 
-      // 2) Remote API as fallback - fetch specific factory by address
+      // 2) Remote API as fallback
       console.log('[useModuleConfig] Fetching config for factory:', factoryAddress);
       const response = await fetch(`${apiBase}/v1/coins/factories/${factoryAddress}`);
       
@@ -71,17 +71,16 @@ export function useModuleConfig(factoryAddress: string | undefined, apiBase: str
       }
 
       const data = await response.json();
-      const factoryData = data?.data || data;
+      const factoryData = data.data || data;
 
       // Map API response to our module config format
-      // The individual factory endpoint returns the factory object directly
       const moduleConfig: ModuleConfig = {
-        bondingContract: factoryData.packageID || factoryData.address || factoryData.packageId,
-        CONFIG: factoryData.configObjectID || factoryData.configAddress || factoryData.configId,
-        globalPauseStatusObjectId: factoryData.pauseStatusObjectID || factoryData.pauseStatusAddress || factoryData.pauseStatusObjectId || '0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f',
-        poolsId: factoryData.poolsObjectID || factoryData.poolsAddress || factoryData.poolsId || '0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d0',
-        lpBurnManger: factoryData.lpBurnManagerObjectID || factoryData.lpBurnManagerAddress || factoryData.lpBurnManger || '0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845',
-        moduleName: factoryData.packageName || factoryData.moduleName || 'kappadotmeme'
+        bondingContract: factoryData.address || factoryData.packageId,
+        CONFIG: factoryData.configAddress || factoryData.configId,
+        globalPauseStatusObjectId: factoryData.pauseStatusAddress || factoryData.pauseStatusObjectId || '0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f',
+        poolsId: factoryData.poolsAddress || factoryData.poolsId || '0xf699e7f2276f5c9a75944b37a0c5b5d9ddfd2471bf6242483b03ab2887d198d0',
+        lpBurnManger: factoryData.lpBurnManagerAddress || factoryData.lpBurnManger || '0x1d94aa32518d0cb00f9de6ed60d450c9a2090761f326752ffad06b2e9404f845',
+        moduleName: factoryData.moduleName || 'kappadotmeme'
       };
 
       // Cache the config
