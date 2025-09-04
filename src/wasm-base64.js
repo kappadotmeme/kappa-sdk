@@ -1,3 +1,4 @@
+/* global window */
 // Auto-generated file containing base64-encoded WASM
 // Generated from move-bytecode/move_bytecode.wasm
 // DO NOT EDIT MANUALLY
@@ -7,8 +8,7 @@ const WASM_BASE64 = 'AGFzbQEAAAAB8QI1YAJ/fwF/YAJ/fwBgA39/fwF/YAF/AGADf39/AGABfwF
 
 // Helper function to decode base64 to Uint8Array
 function decodeWasmBase64() {
-  /* global window */
-  if (typeof window !== 'undefined' && typeof window.atob === 'function') {
+  if (typeof window !== 'undefined' && window.atob) {
     // Browser environment
     const binaryString = window.atob(WASM_BASE64);
     const bytes = new Uint8Array(binaryString.length);

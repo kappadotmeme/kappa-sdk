@@ -19,7 +19,8 @@ try {
   const base64 = wasmBytes.toString('base64');
   
   // Generate the JS module
-  const jsContent = `// Auto-generated file containing base64-encoded WASM
+  const jsContent = `/* global window */
+// Auto-generated file containing base64-encoded WASM
 // Generated from move-bytecode/move_bytecode.wasm
 // DO NOT EDIT MANUALLY
 
