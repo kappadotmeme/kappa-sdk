@@ -1,6 +1,6 @@
 'use client';
 
-import { WidgetV2Standalone } from '../../../../src/react/Widgetv2';
+import { WidgetV2Standalone } from '../../../../src/react/WidgetV2';
 
 // Example theme presets
 const themes = {

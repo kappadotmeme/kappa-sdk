@@ -1,5 +1,5 @@
 "use client";
-import { WidgetV2Standalone } from '../../../../src/react/Widgetv2';
+import { WidgetV2Standalone } from '../../../../src/react/WidgetV2';
 
 export default function Page() {
   // Example using a default contract with locked selection
