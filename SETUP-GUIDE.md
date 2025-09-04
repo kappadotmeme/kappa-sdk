@@ -47,11 +47,11 @@ module.exports = nextConfig;
 ## Step 3: Use the Widget
 
 ```jsx
-import { WidgetStandalone } from 'kappa-create/react';
+import { WidgetV2Standalone } from 'kappa-create/react';
 
 export default function MyPage() {
   return (
-    <WidgetStandalone
+    <WidgetV2Standalone
       defaultContract="0x4722649f9f874823aec93834eda3a5c769dfd9aad216bda9d45afa2e4c0a1451::Trolf::TROLF"
       projectName="My DEX"
     />
