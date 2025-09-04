@@ -274,15 +274,52 @@ function TokenSelectModal(props: {
     const delayTimer = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const res = await fetch(`${apiBase}/v1/coins?nameOrSymbol=${searchQuery.trim().toLowerCase()}`);
-        const json = await res.json();
-        const all = (json?.data?.coins || []) as any[];
-        const normalizedAll = all.map((c: any) => ({
-          ...c,
-          contractAddress: c.address || c.contractAddress,
-          coinType: c.address || c.coinType,
-        }));
-        setSearchResults(normalizedAll.slice(0, 50));
+        const query = searchQuery.trim();
+        
+        // Check if the query looks like a contract address (starts with 0x or contains ::)
+        const isContractAddress = query.startsWith('0x') || query.includes('::');
+        
+        let res;
+        if (isContractAddress) {
+          // If it looks like a contract address, try to fetch it directly
+          res = await fetch(`${apiBase}/v1/coins/${encodeURIComponent(query)}`);
+          if (res.ok) {
+            const json = await res.json();
+            const tokenData = json?.data || json;
+            if (tokenData) {
+              const normalizedToken = {
+                ...tokenData,
+                contractAddress: tokenData.address || tokenData.contractAddress || query,
+                coinType: tokenData.address || tokenData.coinType || query,
+              };
+              setSearchResults([normalizedToken]);
+            } else {
+              setSearchResults([]);
+            }
+          } else {
+            // If direct fetch fails, fall back to search
+            res = await fetch(`${apiBase}/v1/coins?nameOrSymbol=${query.toLowerCase()}`);
+            const json = await res.json();
+            const all = (json?.data?.coins || []) as any[];
+            const normalizedAll = all.map((c: any) => ({
+              ...c,
+              contractAddress: c.address || c.contractAddress,
+              coinType: c.address || c.coinType,
+            }));
+            setSearchResults(normalizedAll.slice(0, 50));
+          }
+        } else {
+          // Regular search by name or symbol
+          res = await fetch(`${apiBase}/v1/coins?nameOrSymbol=${query.toLowerCase()}`);
+          const json = await res.json();
+          const all = (json?.data?.coins || []) as any[];
+          const normalizedAll = all.map((c: any) => ({
+            ...c,
+            contractAddress: c.address || c.contractAddress,
+            coinType: c.address || c.coinType,
+          }));
+          setSearchResults(normalizedAll.slice(0, 50));
+        }
       } catch (err) {
         console.error('Error searching tokens:', err);
         setSearchResults([]);
