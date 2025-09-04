@@ -16,6 +16,7 @@ const { networkConfig } = createNetworkConfig({
 });
 
 const defaultTheme = {
+  // Base colors
   '--kappa-bg': '#0f1218',
   '--kappa-panel': '#1a1d26',
   '--kappa-input-bg': '#0b0d12',
@@ -26,6 +27,10 @@ const defaultTheme = {
   '--kappa-primary': '#2563eb',
   '--kappa-text-on-primary': '#ffffff',
   '--kappa-success': '#10b981',
+  '--kappa-error': '#f87171',
+  '--kappa-warning': '#f59e0b',
+  
+  // Component specific
   '--kappa-chip-bg': '#151c26',
   '--kappa-chip-border': '#274057',
   '--kappa-status-ok-bg': '#151c26',
@@ -33,9 +38,94 @@ const defaultTheme = {
   '--kappa-status-err-bg': '#2a1515',
   '--kappa-status-err-border': '#7f1d1d',
   '--kappa-tab-active-bg': '#0f172a',
-  '--kappa-error': '#f87171',
   '--kappa-avatar-bg': '#233B53',
   '--kappa-modal-bg': 'rgba(0, 0, 0, 0.75)',
+  
+  // Button variants
+  '--kappa-button-primary-bg': '#2563eb',
+  '--kappa-button-primary-hover': '#1d4ed8',
+  '--kappa-button-primary-text': '#ffffff',
+  '--kappa-button-secondary-bg': '#151c26',
+  '--kappa-button-secondary-hover': '#1a2332',
+  '--kappa-button-secondary-text': '#e5e7eb',
+  '--kappa-button-danger-bg': '#ef4444',
+  '--kappa-button-danger-hover': '#dc2626',
+  '--kappa-button-danger-text': '#ffffff',
+  
+  // Quick select buttons
+  '--kappa-quick-bg': 'var(--kappa-chip-bg)',
+  '--kappa-quick-border': 'var(--kappa-chip-border)',
+  '--kappa-quick-text': 'var(--kappa-accent)',
+  '--kappa-quick-hover-bg': 'rgba(37, 99, 235, 0.15)',
+  '--kappa-quick-hover-border': 'var(--kappa-accent)',
+  '--kappa-quick-max-text': '#ef4444',
+  '--kappa-quick-max-hover-bg': 'rgba(239, 68, 68, 0.15)',
+  '--kappa-quick-max-hover-border': '#ef4444',
+  
+  // Token select
+  '--kappa-token-button-bg': 'var(--kappa-chip-bg)',
+  '--kappa-token-button-border': 'var(--kappa-chip-border)',
+  '--kappa-token-button-hover-bg': 'rgba(37, 99, 235, 0.1)',
+  '--kappa-token-button-hover-border': 'var(--kappa-accent)',
+  '--kappa-token-list-hover': 'var(--kappa-panel)',
+  
+  // Input fields
+  '--kappa-input-border': 'var(--kappa-border)',
+  '--kappa-input-focus-border': 'var(--kappa-accent)',
+  '--kappa-input-text': 'var(--kappa-text)',
+  '--kappa-input-placeholder': 'var(--kappa-muted)',
+  
+  // Swap button
+  '--kappa-swap-button-bg': 'var(--kappa-panel)',
+  '--kappa-swap-button-hover': 'var(--kappa-chip-bg)',
+  '--kappa-swap-icon': 'var(--kappa-accent)',
+  
+  // Shadows and effects
+  '--kappa-shadow-sm': '0 2px 4px rgba(0,0,0,0.1)',
+  '--kappa-shadow-md': '0 4px 12px rgba(0,0,0,0.15)',
+  '--kappa-shadow-lg': '0 10px 30px rgba(0,0,0,0.45)',
+  '--kappa-shadow-xl': '0 20px 40px rgba(0,0,0,0.5)',
+  '--kappa-shadow-primary': '0 4px 12px rgba(37, 99, 235, 0.2)',
+  '--kappa-shadow-danger': '0 4px 12px rgba(239, 68, 68, 0.2)',
+  
+  // Border radius
+  '--kappa-radius-sm': '6px',
+  '--kappa-radius-md': '8px',
+  '--kappa-radius-lg': '12px',
+  '--kappa-radius-xl': '16px',
+  '--kappa-radius-full': '9999px',
+  
+  // Spacing
+  '--kappa-space-xs': '4px',
+  '--kappa-space-sm': '8px',
+  '--kappa-space-md': '12px',
+  '--kappa-space-lg': '16px',
+  '--kappa-space-xl': '20px',
+  '--kappa-space-2xl': '24px',
+  
+  // Typography
+  '--kappa-font-family': 'Inter, system-ui, sans-serif',
+  '--kappa-font-size-xs': '11px',
+  '--kappa-font-size-sm': '12px',
+  '--kappa-font-size-md': '14px',
+  '--kappa-font-size-lg': '16px',
+  '--kappa-font-size-xl': '18px',
+  '--kappa-font-size-2xl': '24px',
+  '--kappa-font-weight-normal': '400',
+  '--kappa-font-weight-medium': '500',
+  '--kappa-font-weight-semibold': '600',
+  '--kappa-font-weight-bold': '700',
+  
+  // Transitions
+  '--kappa-transition-fast': '0.15s ease',
+  '--kappa-transition-base': '0.2s ease',
+  '--kappa-transition-slow': '0.3s ease',
+  
+  // Z-index layers
+  '--kappa-z-base': '1',
+  '--kappa-z-dropdown': '100',
+  '--kappa-z-modal': '9999',
+  '--kappa-z-tooltip': '10000',
 } as const;
 
 const sanitizeDecimalInput = (raw: string): string => {
@@ -92,6 +182,14 @@ function SlippageModal(props: {
           <h3 style={{ margin: 0, color: 'var(--kappa-text)', fontSize: 18 }}>Slippage Settings</h3>
           <button
             onClick={onClose}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'var(--kappa-text)';
+              e.currentTarget.style.transform = 'scale(1.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--kappa-muted)';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
             style={{
               background: 'transparent',
               border: 'none',
@@ -104,6 +202,8 @@ function SlippageModal(props: {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              transition: 'all 0.2s ease',
+              transform: 'scale(1)',
             }}
           >
             ✕
@@ -169,6 +269,20 @@ function SlippageModal(props: {
         
         <button 
           onClick={onClose} 
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.02)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+          onMouseDown={(e) => {
+            e.currentTarget.style.transform = 'scale(0.98)';
+          }}
+          onMouseUp={(e) => {
+            e.currentTarget.style.transform = 'scale(1.02)';
+          }}
           style={{ 
             width: '100%',
             padding: '10px', 
@@ -179,6 +293,9 @@ function SlippageModal(props: {
             cursor: 'pointer',
             fontSize: 14,
             fontWeight: 500,
+            transition: 'all 0.2s ease',
+            transform: 'scale(1)',
+            boxShadow: 'none',
           }}
         >
           Save Settings
@@ -196,9 +313,10 @@ function TransactionModal(props: {
   error: string | null;
   spentLabel: string;
   forLabel: string;
+  receiveAmount: string;
   onClose: () => void;
 }) {
-  const { open, loading, digest, error, spentLabel, forLabel, onClose } = props;
+  const { open, loading, digest, error, spentLabel, forLabel, receiveAmount, onClose } = props;
   if (!open) return null;
   const statusText = loading ? 'Submitting…' : (error ? `Failed: ${error}` : 'Submitted');
   const explorer = digest ? `https://suivision.xyz/txblock/${digest}?network=mainnet` : '';
@@ -207,10 +325,10 @@ function TransactionModal(props: {
       <div style={{ width: '100%', maxWidth: 360, background: 'var(--kappa-panel)', border: '1px solid var(--kappa-border)', borderRadius: 12, padding: 16, color: 'var(--kappa-text)', boxShadow: '0 10px 30px rgba(0,0,0,0.45)' }}>
         <h3 style={{ marginTop: 0, marginBottom: 8 }}>Transaction</h3>
         <div style={{ fontSize: 13, marginBottom: 8 }}>
-          <span style={{ color: 'var(--kappa-muted)' }}>Amount spent</span> ➜ <span style={{ fontWeight: 600 }}>{spentLabel}</span>
+          <span style={{ color: 'var(--kappa-muted)' }}>You Pay</span> ➜ <span style={{ fontWeight: 600 }}>{spentLabel}</span>
         </div>
         <div style={{ fontSize: 13, marginBottom: 12 }}>
-          <span style={{ color: 'var(--kappa-muted)' }}>For</span> ➜ <span style={{ fontWeight: 600 }}>{forLabel}</span>
+          <span style={{ color: 'var(--kappa-muted)' }}>You Receive</span> ➜ <span style={{ fontWeight: 600 }}>{receiveAmount} {forLabel}</span>
         </div>
         <div style={{ fontSize: 13, marginBottom: 12, color: error ? '#f87171' : 'var(--kappa-muted)' }}>{statusText}</div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -230,8 +348,9 @@ function TokenSelectModal(props: {
   onClose: () => void;
   onSelect: (token: any) => void;
   apiBase: string;
+  client?: any;
 }) {
-  const { open, onClose, onSelect, apiBase } = props;
+  const { open, onClose, onSelect, apiBase, client } = props;
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -266,27 +385,45 @@ function TokenSelectModal(props: {
 
   // Search tokens
   useEffect(() => {
-    if (!searchQuery || searchQuery.length < 2) {
+    if (!searchQuery) {
       setSearchResults([]);
       return;
     }
 
+    const query = searchQuery.trim();
+    
+    // Check if the query looks like a contract address (starts with 0x or contains ::)
+    const isContractAddress = query.startsWith('0x') || query.includes('::');
+    
+    // For regular searches, require at least 2 characters
+    if (!isContractAddress && query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    // For contract addresses, search immediately; for regular searches, add delay
+    const delayTime = isContractAddress ? 0 : 500;
+    
     const delayTimer = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const query = searchQuery.trim();
-        
-        // Check if the query looks like a contract address (starts with 0x or contains ::)
-        const isContractAddress = query.startsWith('0x') || query.includes('::');
         
         let res;
         if (isContractAddress) {
-          // If it looks like a contract address, try to fetch it directly
-          res = await fetch(`${apiBase}/v1/coins/${encodeURIComponent(query)}`);
+          // If it looks like a contract address, try to fetch it using the correct endpoint
+          console.log('[Token Search] Detected contract address:', query);
+          // Use the query parameter endpoint instead of path parameter
+          res = await fetch(`${apiBase}/v1/coins?address=${encodeURIComponent(query)}&size=50`);
+          console.log('[Token Search] Direct fetch response:', res.status, res.statusText);
+          
           if (res.ok) {
             const json = await res.json();
-            const tokenData = json?.data || json;
-            if (tokenData) {
+            console.log('[Token Search] Direct fetch data:', json);
+            const coins = json?.data?.coins || [];
+            
+            if (coins.length > 0) {
+              // Take the first matching coin
+              const tokenData = coins[0];
               const normalizedToken = {
                 ...tokenData,
                 contractAddress: tokenData.address || tokenData.contractAddress || query,
@@ -297,16 +434,9 @@ function TokenSelectModal(props: {
               setSearchResults([]);
             }
           } else {
-            // If direct fetch fails, fall back to search
-            res = await fetch(`${apiBase}/v1/coins?nameOrSymbol=${query.toLowerCase()}`);
-            const json = await res.json();
-            const all = (json?.data?.coins || []) as any[];
-            const normalizedAll = all.map((c: any) => ({
-              ...c,
-              contractAddress: c.address || c.contractAddress,
-              coinType: c.address || c.coinType,
-            }));
-            setSearchResults(normalizedAll.slice(0, 50));
+            console.log('[Token Search] Token not found in API');
+            // Token not found in API, show no results
+            setSearchResults([]);
           }
         } else {
           // Regular search by name or symbol
@@ -326,7 +456,7 @@ function TokenSelectModal(props: {
       } finally {
         setIsSearching(false);
       }
-    }, 300);
+    }, delayTime);
 
     return () => clearTimeout(delayTimer);
   }, [searchQuery, apiBase]);
@@ -337,6 +467,49 @@ function TokenSelectModal(props: {
   const isLoading = searchQuery ? isSearching : isLoadingTrending;
 
   return (
+    <>
+      <style>{`
+        .kappa-close-btn {
+          transition: transform 0.3s ease, color 0.3s ease, filter 0.3s ease;
+          transform-origin: center center;
+          transform: rotate(0deg);
+        }
+        
+        .kappa-close-btn:hover {
+          transform: rotate(125deg);
+          color: var(--kappa-accent) !important;
+          filter: brightness(1.2);
+        }
+        
+        .kappa-close-btn:active {
+          transform: rotate(125deg) scale(0.95);
+        }
+        
+        /* Minimal scrollbar styling */
+        .kappa-token-list::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        .kappa-token-list::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        
+        .kappa-token-list::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 3px;
+        }
+        
+        /* Keep the same minimal style on hover */
+        .kappa-token-list::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.15);
+        }
+        
+        /* Firefox scrollbar */
+        .kappa-token-list {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+        }
+      `}</style>
     <div style={{
       position: 'fixed',
       inset: 0,
@@ -362,14 +535,14 @@ function TokenSelectModal(props: {
       }}>
         {/* Header */}
         <div style={{
-          padding: 20,
-          paddingBottom: 10,
+          padding: '20px 16px 10px 20px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
         }}>
           <h3 style={{ margin: 0, color: 'var(--kappa-text)', fontSize: 18 }}>Select a token</h3>
           <button
+            className="kappa-close-btn"
             onClick={onClose}
             style={{
               background: 'transparent',
@@ -380,12 +553,19 @@ function TokenSelectModal(props: {
               padding: 0,
               width: 32,
               height: 32,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              position: 'relative',
+              marginRight: -4,
             }}
           >
-            ×
+            <span style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              display: 'block',
+              lineHeight: 1,
+              marginTop: '-1px', // Fine-tune vertical centering for the × character
+            }}>×</span>
           </button>
         </div>
 
@@ -411,11 +591,13 @@ function TokenSelectModal(props: {
         </div>
 
         {/* Token List */}
-        <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '0 10px',
-        }}>
+        <div 
+          className="kappa-token-list"
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '0 10px',
+          }}>
           {!searchQuery && !isLoading && (
             <div style={{
               padding: '0 10px 10px',
@@ -542,11 +724,17 @@ function TokenSelectModal(props: {
                 {/* Symbol and Name */}
                 <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
                   <div style={{ 
-                    color: 'var(--kappa-text)', 
-                    fontWeight: 600,
-                    fontSize: 14,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
                   }}>
-                    {token.symbol?.toUpperCase()}
+                    <span style={{ 
+                      color: 'var(--kappa-text)', 
+                      fontWeight: 600,
+                      fontSize: 14,
+                    }}>
+                      {token.symbol?.toUpperCase()}
+                    </span>
                   </div>
                   <div style={{ 
                     color: 'var(--kappa-muted)', 
@@ -584,7 +772,7 @@ function TokenSelectModal(props: {
                       return addr;
                     })()}
                   </span>
-                  <button
+                  <div
                     onClick={(e) => {
                       e.stopPropagation();
                       const addr = token.address || token.contractAddress || '';
@@ -640,7 +828,7 @@ function TokenSelectModal(props: {
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                       <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                     </svg>
-                  </button>
+                  </div>
                 </div>
               </button>
             ))
@@ -652,6 +840,7 @@ function TokenSelectModal(props: {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
@@ -813,6 +1002,7 @@ export function WidgetV2Embedded(props: {
   const [fromAmount, setFromAmount] = useState('');
   const [toAmount, setToAmount] = useState('');
   const [showTokenModal, setShowTokenModal] = useState(false);
+  const [tokenModalPosition, setTokenModalPosition] = useState<'from' | 'to'>('to'); // Track which position opened the modal
   const [showSlippageModal, setShowSlippageModal] = useState(false);
   const [slippage, setSlippage] = useState('1');
   
@@ -905,7 +1095,7 @@ export function WidgetV2Embedded(props: {
   }, [apiBase]);
 
   // Load token metadata
-  async function loadTokenMetadata(contractAddress: string, setInToPosition: boolean = true) {
+  async function loadTokenMetadata(contractAddress: string, setInToPosition: boolean = true, skipPositionUpdate: boolean = false) {
     try {
       // Try fetching with the contract address
       console.log('[Token] Fetching metadata for:', contractAddress);
@@ -927,10 +1117,12 @@ export function WidgetV2Embedded(props: {
             avatarUrl: meta?.iconUrl || '',
           };
           
-          if (setInToPosition) {
-            setToToken(tokenObj);
-          } else {
-            setFromToken(tokenObj);
+          if (!skipPositionUpdate) {
+            if (setInToPosition) {
+              setToToken(tokenObj);
+            } else {
+              setFromToken(tokenObj);
+            }
           }
           
           if (meta?.decimals) setTokenDecimals(meta.decimals);
@@ -970,10 +1162,12 @@ export function WidgetV2Embedded(props: {
       };
       
       // Set token in appropriate position
-      if (setInToPosition) {
-        setToToken(tokenObj);
-      } else {
-        setFromToken(tokenObj);
+      if (!skipPositionUpdate) {
+        if (setInToPosition) {
+          setToToken(tokenObj);
+        } else {
+          setFromToken(tokenObj);
+        }
       }
       
       // Load factory configuration if factoryAddress is available
@@ -1078,26 +1272,25 @@ export function WidgetV2Embedded(props: {
     
     console.log('[Swap] Before swap - from:', fromToken, 'to:', toToken);
     
-    // Handle the swap based on current state
-    if (fromToken?.isSui && toToken && !toToken?.isSui) {
-      // SUI -> Token becomes Token -> SUI
-      setFromToken(toToken);
-      setToToken(SUI_TOKEN);
-    } else if (fromToken && !fromToken?.isSui && toToken?.isSui) {
-      // Token -> SUI becomes SUI -> Token
-      setFromToken(SUI_TOKEN);
-      setToToken(fromToken);
-    } else if (!toToken && fromToken?.isSui) {
-      // If only SUI is selected, do nothing
+    // Simple swap logic: Always keep one side as SUI and the other as the selected token
+    // Find the non-SUI token (if any)
+    const selectedToken = fromToken?.isSui ? toToken : fromToken;
+    
+    if (!selectedToken || selectedToken.isSui) {
+      // No token selected or both are SUI (shouldn't happen), do nothing
+      console.log('[Swap] No valid token to swap');
       return;
-    } else if (!toToken && fromToken && !fromToken?.isSui) {
-      // If only a token is in from, move it to bottom and put SUI on top
-      setFromToken(SUI_TOKEN);
-      setToToken(fromToken);
-    } else if (toToken && !toToken?.isSui && !fromToken) {
-      // If only a token is in bottom, move it to top and put SUI on bottom
-      setFromToken(toToken);
+    }
+    
+    // Simply swap positions: if SUI is on top, move it to bottom and vice versa
+    if (fromToken?.isSui) {
+      // SUI on top -> Move SUI to bottom, token to top
+      setFromToken(selectedToken);
       setToToken(SUI_TOKEN);
+    } else {
+      // Token on top -> Move token to bottom, SUI to top
+      setFromToken(SUI_TOKEN);
+      setToToken(selectedToken);
     }
     
     // Also swap the amounts
@@ -1149,27 +1342,42 @@ export function WidgetV2Embedded(props: {
       }
     }
     
-    // Determine where to place the token based on what was clicked
-    let placedInTo = false;
-    if (fromToken && !fromToken.isSui) {
-      // If "from" position has a non-SUI token, replace it
+    // Debug logging
+    console.log('[Token Select] Current state before selection:', {
+      fromToken: fromToken?.symbol || 'null',
+      fromIsSui: fromToken?.isSui,
+      toToken: toToken?.symbol || 'null',
+      toIsSui: toToken?.isSui,
+      selectedToken: token.symbol,
+      modalPosition: tokenModalPosition
+    });
+    
+    // Use the modal position to determine where to place the token
+    // Always ensure one side is SUI and the other is the token
+    if (tokenModalPosition === 'from') {
+      // User clicked on the FROM position to select a token
+      // Put the token in FROM and ensure SUI is in TO
+      console.log('[Token Select] Placing token in FROM position, SUI in TO');
       setFromToken(token);
-    } else if (toToken && !toToken.isSui) {
-      // If "to" position has a non-SUI token, replace it
+      setToToken(SUI_TOKEN);
+    } else if (tokenModalPosition === 'to') {
+      // User clicked on the TO position to select a token
+      // Put the token in TO and ensure SUI is in FROM
+      console.log('[Token Select] Placing token in TO position, ensuring SUI in FROM');
       setToToken(token);
-      placedInTo = true;
-    } else if (fromToken?.isSui) {
-      // If from is SUI, put token at bottom
-      setToToken(token);
-      placedInTo = true;
-    } else if (toToken?.isSui) {
-      // If to is SUI, put token at top
-      setFromToken(token);
+      // Only set FROM to SUI if it's not already SUI
+      if (!fromToken || !fromToken.isSui) {
+        console.log('[Token Select] FROM is not SUI, setting it to SUI');
+        setFromToken(SUI_TOKEN);
+      }
     } else {
-      // Default: put token at bottom (SUI stays on top)
-      setToToken(token);
-      placedInTo = true;
+      console.error('[Token Select] Unknown modal position:', tokenModalPosition);
     }
+    
+    console.log('[Token Select] After setting - expecting:', {
+      from: tokenModalPosition === 'from' ? token.symbol : 'SUI',
+      to: tokenModalPosition === 'to' ? token.symbol : 'SUI'
+    });
     
     // If token already has curve data from trending/search, use it
     if (token.curveAddress) {
@@ -1218,7 +1426,10 @@ export function WidgetV2Embedded(props: {
     
     // Still try to load full metadata for factory config
     if (contractAddress && contractAddress !== 'SUI') {
-      loadTokenMetadata(contractAddress, placedInTo);
+      // Skip position update since we've already set the positions correctly
+      const isInToPosition = tokenModalPosition === 'to';
+      console.log('[Token Select] Loading metadata, skipping position update');
+      loadTokenMetadata(contractAddress, isInToPosition, true); // true = skipPositionUpdate
     }
   };
 
@@ -1381,9 +1592,8 @@ export function WidgetV2Embedded(props: {
       if (res?.success) {
         setTxDigest(res?.digest || null);
         console.log('[WidgetV2] Transaction successful:', res?.digest);
-        // Reset amounts after successful transaction
-        setFromAmount('');
-        setToAmount('');
+        // Don't reset amounts here - they're needed for the modal display
+        // Amounts will be reset when the modal is closed
         // Refresh balances after successful transaction
         setTimeout(() => {
           refreshBalances();
@@ -1409,13 +1619,13 @@ export function WidgetV2Embedded(props: {
       width: '100%',
       maxWidth: 480,
       background: 'var(--kappa-bg)',
-      borderRadius: 16,
-      padding: 20,
-      boxShadow: '0 10px 30px rgba(0,0,0,0.45)',
+      borderRadius: 'var(--kappa-radius-xl)',
+      padding: 'var(--kappa-space-xl)',
+      boxShadow: 'var(--kappa-shadow-lg)',
       border: '1px solid var(--kappa-border)',
       position: 'relative',
       ...(themeVars as any),
-      fontFamily: 'Inter, system-ui, sans-serif',
+      fontFamily: 'var(--kappa-font-family)',
     }}>
       <style>{`
         .kappa-root * { box-sizing: border-box; }
@@ -1518,7 +1728,27 @@ export function WidgetV2Embedded(props: {
             type="text"
             placeholder="0.0"
             value={fromAmount}
-            onChange={(e) => setFromAmount(sanitizeDecimalInput(e.target.value))}
+            onChange={(e) => {
+              const sanitized = sanitizeDecimalInput(e.target.value);
+              const numValue = parseFloat(sanitized) || 0;
+              const balance = fromToken?.isSui ? suiBalance : tokenBalance;
+              
+              // Apply different limits for SUI vs tokens
+              let maxAllowed;
+              if (fromToken?.isSui) {
+                // For SUI, limit to 97% of balance
+                maxAllowed = balance * 0.97;
+              } else {
+                // For tokens, limit to balance minus 1 token
+                maxAllowed = Math.max(0, balance - 1);
+              }
+              
+              if (numValue > maxAllowed) {
+                setFromAmount(maxAllowed.toFixed(6));
+              } else {
+                setFromAmount(sanitized);
+              }
+            }}
             style={{
               flex: 1,
               background: 'transparent',
@@ -1534,7 +1764,22 @@ export function WidgetV2Embedded(props: {
           {fromToken && !fromToken.isSui ? (
             // If from is a token, show selector button (disabled if locked)
             <button
-              onClick={() => !lockContract && setShowTokenModal(true)}
+              onClick={() => {
+                if (!lockContract) {
+                  setTokenModalPosition('from');
+                  setShowTokenModal(true);
+                }
+              }}
+              onMouseEnter={(e) => {
+                if (!lockContract) {
+                  e.currentTarget.style.background = 'var(--kappa-token-button-hover-bg)';
+                  e.currentTarget.style.borderColor = 'var(--kappa-token-button-hover-border)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'var(--kappa-token-button-bg)';
+                e.currentTarget.style.borderColor = 'var(--kappa-token-button-border)';
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1546,6 +1791,7 @@ export function WidgetV2Embedded(props: {
                 cursor: lockContract ? 'not-allowed' : 'pointer',
                 opacity: lockContract ? 0.7 : 1,
                 color: 'var(--kappa-text)',
+                transition: 'background 0.2s ease, border-color 0.2s ease',
               }}
             >
               {fromToken.avatarUrl && (
@@ -1602,22 +1848,65 @@ export function WidgetV2Embedded(props: {
               onClick={() => {
                 // Use SUI balance when SUI is in the FROM field, token balance when token is in FROM field
                 const balance = fromToken?.isSui ? suiBalance : tokenBalance;
-                let amount = balance;
-                if (percent === '25%') amount = balance * 0.25;
-                else if (percent === '50%') amount = balance * 0.5;
-                else if (percent === '75%') amount = balance * 0.75;
-                setFromAmount(amount.toFixed(6));
+                let amount = 0;
+                
+                // Apply percentage based on button clicked
+                if (percent === '25%') {
+                  amount = balance * 0.25;
+                } else if (percent === '50%') {
+                  amount = balance * 0.5;
+                } else if (percent === '75%') {
+                  amount = balance * 0.75;
+                } else if (percent === 'MAX') {
+                  if (fromToken?.isSui) {
+                    // For SUI, use 97% to leave buffer for gas
+                    amount = balance * 0.97;
+                  } else {
+                    // For tokens, subtract 1 token as buffer
+                    amount = Math.max(0, balance - 1);
+                  }
+                }
+                
+                // Set the amount with 6 decimal places
+                const finalAmount = amount.toFixed(6);
+                setFromAmount(finalAmount);
+              }}
+              onMouseEnter={(e) => {
+                if (percent === 'MAX') {
+                  e.currentTarget.style.background = 'var(--kappa-quick-max-hover-bg)';
+                  e.currentTarget.style.borderColor = 'var(--kappa-quick-max-hover-border)';
+                  e.currentTarget.style.color = 'var(--kappa-quick-max-text)';
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                } else {
+                  e.currentTarget.style.background = 'var(--kappa-quick-hover-bg)';
+                  e.currentTarget.style.borderColor = 'var(--kappa-quick-hover-border)';
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'var(--kappa-quick-bg)';
+                e.currentTarget.style.borderColor = 'var(--kappa-quick-border)';
+                e.currentTarget.style.color = percent === 'MAX' ? 'var(--kappa-quick-max-text)' : 'var(--kappa-quick-text)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'scale(0.95)';
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
               }}
               style={{
                 flex: 1,
-                padding: '4px 8px',
-                borderRadius: 6,
-                border: '1px solid var(--kappa-chip-border)',
-                background: 'var(--kappa-chip-bg)',
-                color: 'var(--kappa-accent)',
+                padding: 'var(--kappa-space-xs) var(--kappa-space-sm)',
+                borderRadius: 'var(--kappa-radius-sm)',
+                border: '1px solid var(--kappa-quick-border)',
+                background: 'var(--kappa-quick-bg)',
+                color: percent === 'MAX' ? 'var(--kappa-quick-max-text)' : 'var(--kappa-quick-text)',
                 cursor: 'pointer',
-                fontSize: 11,
-                fontWeight: 600,
+                fontSize: 'var(--kappa-font-size-xs)',
+                fontWeight: 'var(--kappa-font-weight-semibold)',
+                transition: 'all var(--kappa-transition-base)',
+                transform: 'scale(1)',
               }}
             >
               {percent}
@@ -1719,7 +2008,22 @@ export function WidgetV2Embedded(props: {
           {toToken && !toToken.isSui ? (
             // If to is a token, show selector button (disabled if locked)
             <button
-              onClick={() => !lockContract && setShowTokenModal(true)}
+              onClick={() => {
+                if (!lockContract) {
+                  setTokenModalPosition('to');
+                  setShowTokenModal(true);
+                }
+              }}
+              onMouseEnter={(e) => {
+                if (!lockContract) {
+                  e.currentTarget.style.background = 'var(--kappa-token-button-hover-bg)';
+                  e.currentTarget.style.borderColor = 'var(--kappa-token-button-hover-border)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'var(--kappa-token-button-bg)';
+                e.currentTarget.style.borderColor = 'var(--kappa-token-button-border)';
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1731,6 +2035,7 @@ export function WidgetV2Embedded(props: {
                 cursor: lockContract ? 'not-allowed' : 'pointer',
                 opacity: lockContract ? 0.7 : 1,
                 color: 'var(--kappa-text)',
+                transition: 'background 0.2s ease, border-color 0.2s ease',
               }}
             >
               {toToken.avatarUrl && (
@@ -1779,7 +2084,20 @@ export function WidgetV2Embedded(props: {
           ) : (
             // If to is empty (default state), show "Select token" button (disabled if locked with defaultContract)
             <button
-              onClick={() => !lockContract && setShowTokenModal(true)}
+              onClick={() => {
+                if (!lockContract) {
+                  setTokenModalPosition('to');
+                  setShowTokenModal(true);
+                }
+              }}
+              onMouseEnter={(e) => {
+                if (!(lockContract && defaultContract)) {
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.2)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = 'none';
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1791,6 +2109,7 @@ export function WidgetV2Embedded(props: {
                 cursor: lockContract && defaultContract ? 'not-allowed' : 'pointer',
                 opacity: lockContract && defaultContract ? 0.7 : 1,
                 color: lockContract && defaultContract ? 'var(--kappa-text)' : 'var(--kappa-text-on-primary)',
+                transition: 'box-shadow 0.2s ease',
               }}
             >
               <span>{lockContract && defaultContract ? 'Loading...' : 'Select token'}</span>
@@ -1804,6 +2123,26 @@ export function WidgetV2Embedded(props: {
       <button
         onClick={handleExecuteSwap}
         disabled={!account || !fromAmount || txLoading || (!toToken && !fromToken)}
+        onMouseEnter={(e) => {
+          if (account && fromAmount && !txLoading && (toToken || fromToken)) {
+            e.currentTarget.style.transform = 'scale(1.02)';
+            e.currentTarget.style.boxShadow = 'var(--kappa-shadow-primary)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = 'none';
+        }}
+        onMouseDown={(e) => {
+          if (account && fromAmount && !txLoading && (toToken || fromToken)) {
+            e.currentTarget.style.transform = 'scale(0.98)';
+          }
+        }}
+        onMouseUp={(e) => {
+          if (account && fromAmount && !txLoading && (toToken || fromToken)) {
+            e.currentTarget.style.transform = 'scale(1.02)';
+          }
+        }}
         style={{
           width: '100%',
           padding: 16,
@@ -1815,6 +2154,9 @@ export function WidgetV2Embedded(props: {
           fontSize: 16,
           fontWeight: 600,
           opacity: (!account || !fromAmount || txLoading || (!toToken && !fromToken)) ? 0.5 : 1,
+          transition: 'all 0.2s ease',
+          transform: 'scale(1)',
+          boxShadow: 'none',
         }}
       >
         {txLoading ? 'Processing...' : 
@@ -1831,6 +2173,7 @@ export function WidgetV2Embedded(props: {
         onClose={() => setShowTokenModal(false)}
         onSelect={handleTokenSelect}
         apiBase={apiBase}
+        client={client}
       />
 
       {/* Slippage Modal */}
@@ -1849,9 +2192,15 @@ export function WidgetV2Embedded(props: {
         error={txError}
         spentLabel={isBuy ? `${fromAmount || 0} SUI` : `${fromAmount || 0} ${fromToken?.symbol || ''}`}
         forLabel={isBuy ? `${toToken?.symbol || ''}` : 'SUI'}
+        receiveAmount={toAmount || '0'}
         onClose={() => {
           setTxOpen(false);
           setTxLoading(false);
+          // Clear amounts when closing the modal after a successful transaction
+          if (txDigest) {
+            setFromAmount('');
+            setToAmount('');
+          }
         }}
       />
 

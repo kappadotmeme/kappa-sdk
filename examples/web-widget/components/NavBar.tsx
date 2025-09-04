@@ -6,6 +6,7 @@ const tabs = [
   { href: '/', label: 'Standalone', title: 'Standalone widget' },
   { href: '/default-token', label: 'Default Token', title: 'Default token widget' },
   { href: '/deployer', label: 'Deployer', title: 'Deployer widget' },
+  { href: '/themed', label: 'Themes', title: 'Theme examples' },
 ];
 
 export default function NavBar() {

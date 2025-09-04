@@ -1,6 +1,6 @@
-# Kappa Trading Widget
+# Kappa Trading Widget V2
 
-Add a complete buy/sell interface for tokens on Sui using the Kappa protocol. Drop-in UI with wallet connection (Standalone) or integrate with your existing providers.
+A powerful, customizable trading interface for tokens on Sui using the Kappa protocol. Features wallet connection, real-time quotes, and comprehensive theming support.
 
 ## Installation
 
@@ -8,10 +8,7 @@ Add a complete buy/sell interface for tokens on Sui using the Kappa protocol. Dr
 npm install kappa-create @tanstack/react-query @mysten/dapp-kit @mysten/sui
 ```
 
-## Widget Variants
-
-### 1) Standalone (Recommended)
-Includes wallet + client providers built-in.
+## Quick Start
 
 ```jsx
 import { WidgetV2Standalone } from 'kappa-create/react';
@@ -21,153 +18,363 @@ function App() {
     <WidgetV2Standalone 
       projectName="My DEX"
       defaultContract="0xabc...::Token::TOKEN"
-      lockContract={false}  // Optional: set to true to lock token selection
+      lockContract={false}
     />
   );
 }
 ```
 
-### 2) Embedded
-Use when your app already provides wallet/context wrappers.
+## Widget Variants
+
+### 1. Standalone (Recommended)
+Includes all required providers (wallet, query client, SUI client). Perfect for quick integration.
+
+```jsx
+import { WidgetV2Standalone } from 'kappa-create/react';
+
+function App() {
+  return (
+    <WidgetV2Standalone 
+      projectName="My DEX"
+      defaultContract="0xabc...::Token::TOKEN"
+      lockContract={false}
+      theme={customTheme}
+      logoUrl="/logo.png"
+    />
+  );
+}
+```
+
+### 2. Embedded
+For apps with existing wallet/context providers.
 
 ```jsx
 import { WidgetV2Embedded } from 'kappa-create/react';
 
-function TradingSection({ selected }) {
+// Inside your existing providers
+function TradingSection({ selectedToken }) {
   return (
     <WidgetV2Embedded 
-      defaultContract={selected}
-      lockContract={false}  // Set to true to prevent token changes
+      defaultContract={selectedToken}
+      lockContract={true}  // Lock to specific token
+      theme={darkTheme}
     />
   );
 }
-```
-
-### 3) Note on Variants
-WidgetV2 currently supports two variants:
-- **WidgetV2Standalone**: Includes all providers (recommended)
-- **WidgetV2Embedded**: For apps with existing providers
-
-There is no separate Integrated variant for WidgetV2.
 ```
 
 ## Props
 
-```ts
-// From kappa-create/react
-export interface WidgetProps {
-  theme?: Record<string, string>;
-  defaultContract?: string;
-  lockContract?: boolean;  // Lock token selection when true
-  logoUrl?: string;
-  projectName?: string;
-  apiBase?: string;  // API endpoint configuration
-  network?: any;  // Custom network configuration
+```typescript
+interface WidgetProps {
+  theme?: Partial<ThemeTokens>;     // 100+ theming tokens
+  defaultContract?: string;         // Initial token contract
+  lockContract?: boolean;           // Lock token selection
+  logoUrl?: string;                 // Brand logo URL
+  projectName?: string;             // Display name
+  apiBase?: string;                 // API endpoint
+  network?: NetworkConfig;         // Custom network config
 }
 ```
 
-- **theme**: CSS variable map for theming.
-- **defaultContract**: Contract type, e.g. `0x...::Token::TOKEN`.
-- **lockContract**: If true, prevents token selection changes (useful for fixed-token interfaces).
-- **logoUrl**: Brand logo in header (40x40px).
-- **projectName**: Title in header.
-- **apiBase**: API endpoint (defaults to '/api' for proxy or 'https://api.kappa.fun').
-- **network**: Custom module configuration for third-party bonding curves.
+### Prop Details
+
+- **theme**: Object with CSS variables for complete customization (see Theming section)
+- **defaultContract**: Token contract address (e.g., `0x123...::Token::SYMBOL`)
+- **lockContract**: When `true`, prevents users from changing the selected token
+- **logoUrl**: URL to your logo (displays at 40x40px in header)
+- **projectName**: Your project name shown in the header
+- **apiBase**: API endpoint (defaults to `/api` for proxy or `https://api.kappa.fun`)
+- **network**: Custom module configuration for third-party bonding curves
+
+## Features
+
+### Core Trading
+- ✅ **Buy & Sell**: Seamless token trading with SUI
+- ✅ **Real-time Quotes**: Live price calculations using bonding curve math
+- ✅ **Slippage Protection**: Configurable slippage (0.5%, 1%, 2%, 5% presets)
+- ✅ **Balance Display**: Shows SUI and token balances with auto-refresh
+
+### User Experience
+- ✅ **Quick Amounts**: 25%, 50%, 75%, MAX buttons for easy input
+- ✅ **Smart MAX**: 97% for SUI (gas buffer), balance-1 for tokens
+- ✅ **Token Search**: Search by name, symbol, or contract address
+- ✅ **Trending Tokens**: Popular tokens displayed in selector
+- ✅ **Token Avatars**: Automatic token image loading
+- ✅ **Directional Swap**: Maintains SUI on one side during swaps
+
+### Visual & Interaction
+- ✅ **Hover Effects**: Interactive buttons with visual feedback
+- ✅ **Loading States**: Skeleton loaders and smooth transitions
+- ✅ **Error Handling**: Clear error messages and validation
+- ✅ **Mobile Responsive**: Adapts to all screen sizes
+- ✅ **Transaction Modal**: Shows transaction details and status
+- ✅ **Animations**: Smooth transitions and micro-interactions
+
+### Technical
+- ✅ **Multi-Module Support**: Auto-detects bonding curve modules
+- ✅ **Factory Config**: Automatic factory detection and configuration
+- ✅ **Type Safety**: Full TypeScript support
+- ✅ **Performance**: Optimized with React hooks and memoization
 
 ## Theming
 
-Pass CSS variables to match your brand.
+The widget supports 100+ CSS variables for complete customization.
+
+### Basic Theme Example
 
 ```jsx
-<WidgetV2Standalone
-  theme={{
-    '--kappa-bg': '#0f1218',
-    '--kappa-panel': '#1a1d24',
-    '--kappa-border': '#2a2f3a',
-    '--kappa-text': '#ffffff',
-    '--kappa-muted': '#9ca3af',
-    '--kappa-primary': '#2563eb',
-    '--kappa-success': '#10b981',
-    '--kappa-error': '#ef4444',
-    '--kappa-accent': '#7aa6cc'
-  }}
-/>
+const myTheme = {
+  // Base colors
+  '--kappa-bg': '#ffffff',
+  '--kappa-text': '#000000',
+  '--kappa-primary': '#007bff',
+  '--kappa-accent': '#6c757d',
+  
+  // Quick select buttons
+  '--kappa-quick-bg': '#f8f9fa',
+  '--kappa-quick-text': '#007bff',
+  '--kappa-quick-max-text': '#dc3545',
+  '--kappa-quick-hover-bg': 'rgba(0, 123, 255, 0.1)',
+  
+  // Shadows and radius
+  '--kappa-shadow-lg': '0 10px 30px rgba(0,0,0,0.1)',
+  '--kappa-radius-xl': '16px',
+};
+
+<WidgetV2Standalone theme={myTheme} />
 ```
 
-Common variables:
-- `--kappa-bg`, `--kappa-panel`, `--kappa-border`
-- `--kappa-text`, `--kappa-muted`
-- `--kappa-primary`, `--kappa-success`, `--kappa-error`
-- `--kappa-accent`
+### Theme Categories
+
+#### Base Colors
+- Background, panels, borders
+- Text (primary, muted)
+- States (primary, success, error, warning)
+- Accent colors
+
+#### Components
+- Quick select buttons (including MAX)
+- Token selection buttons
+- Input fields
+- Swap button
+- Modals and overlays
+
+#### Layout & Effects
+- Shadows (sm, md, lg, xl, primary, danger)
+- Border radius (sm, md, lg, xl, full)
+- Spacing (xs, sm, md, lg, xl, 2xl)
+- Transitions (fast, base, slow)
+
+#### Typography
+- Font family
+- Font sizes (xs to 2xl)
+- Font weights (normal, medium, semibold, bold)
+
+See [THEMING.md](./THEMING.md) for complete token reference.
 
 ## Examples
 
-### Minimal Next.js page
-```jsx
-import { WidgetV2Standalone } from 'kappa-create/react';
+### Fixed Token Trading
 
-export default function Page() {
+```jsx
+// Lock to a specific token - users cannot change it
+<WidgetV2Standalone 
+  defaultContract="0x123...::PEPE::PEPE"
+  lockContract={true}
+  projectName="PEPE Trading"
+/>
+```
+
+### Custom Branded Interface
+
+```jsx
+const brandTheme = {
+  '--kappa-primary': '#ff6b35',
+  '--kappa-bg': '#1a1a2e',
+  '--kappa-panel': '#16213e',
+  '--kappa-text': '#eee',
+  '--kappa-accent': '#ff8c42',
+};
+
+<WidgetV2Standalone 
+  theme={brandTheme}
+  logoUrl="/brand-logo.png"
+  projectName="My Brand DEX"
+/>
+```
+
+### With Custom API Endpoint
+
+```jsx
+<WidgetV2Standalone 
+  apiBase="https://my-api.example.com"
+  defaultContract={tokenAddress}
+/>
+```
+
+### Embedded in Existing App
+
+```jsx
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SuiClientProvider, WalletProvider } from '@mysten/dapp-kit';
+import { WidgetV2Embedded } from 'kappa-create/react';
+
+function App() {
+  const queryClient = new QueryClient();
+  
   return (
-    <main style={{ padding: 24 }}>
-      <WidgetV2Standalone 
-        projectName="My DEX"
-        defaultContract="0xabc...::Token::TOKEN"
-        lockContract={false}
-      />
-    </main>
+    <QueryClientProvider client={queryClient}>
+      <SuiClientProvider>
+        <WalletProvider>
+          <YourAppHeader />
+          <WidgetV2Embedded 
+            defaultContract={selectedToken}
+            theme={appTheme}
+          />
+          <YourAppFooter />
+        </WalletProvider>
+      </SuiClientProvider>
+    </QueryClientProvider>
   );
 }
 ```
 
-### Custom layout with Embedded variant
-```jsx
-import { WidgetV2Embedded } from 'kappa-create/react';
+## Next.js Integration
 
-function TradingApp({ selectedToken, theme }) {
+### 1. Configure API Proxy (avoid CORS)
+
+```js
+// next.config.js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: { externalDir: true },
+  transpilePackages: [
+    'kappa-create',
+    '@mysten/dapp-kit',
+    '@mysten/sui',
+    '@tanstack/react-query',
+  ],
+  async rewrites() {
+    return [
+      { 
+        source: '/api/v1/:path*', 
+        destination: 'https://api.kappa.fun/v1/:path*' 
+      },
+    ];
+  },
+};
+module.exports = nextConfig;
+```
+
+### 2. Create Trading Page
+
+```tsx
+// app/trade/page.tsx (App Router)
+'use client';
+
+import { WidgetV2Standalone } from 'kappa-create/react';
+
+export default function TradePage() {
   return (
-    <div className="trading-container">
-      <header>My Header</header>
-      <WidgetV2Embedded 
-        defaultContract={selectedToken}
-        lockContract={true}  // Locks the token selection
-        theme={theme}
+    <div style={{ 
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px'
+    }}>
+      <WidgetV2Standalone 
+        projectName="My DEX"
+        // apiBase="/api" is default when using proxy
       />
-      <footer>My Footer</footer>
     </div>
   );
 }
 ```
 
-## Features
+## Advanced Configuration
 
-- **Smart Token Detection**: Automatically loads token metadata and factory configurations
-- **Dynamic Module Support**: Auto-detects and uses appropriate bonding curve modules
-- **Built-in Slippage Control**: Configurable slippage settings (0.5%, 1%, 2%, 5% presets)
-- **Real-time Quotes**: Live price calculations using bonding curve math
-- **Balance Display**: Shows SUI and token balances
-- **Quick Amount Selection**: 25%, 50%, 75%, MAX buttons for easy input
-- **Token Search**: Search by name, symbol, or contract address
-- **Trending Tokens**: Shows popular tokens when opening selector
-- **Skeleton Loading**: Smooth loading animations for better UX
-- **Mobile Responsive**: Adapts to mobile screens automatically
+### Custom Network/Module
 
-## Tips
+```jsx
+const customNetwork = {
+  bondingContract: "0x1234...",
+  CONFIG: "0x5678...",
+  globalPauseStatusObjectId: "0x9abc...",
+  poolsId: "0xdef0...",
+  lpBurnManger: "0x1111...",
+  moduleName: "my_custom_module"
+};
 
-- **Lock Contract**: Use `lockContract={true}` for single-token interfaces
-- **Custom Theme**: Match your brand with CSS variables
-- **API Proxy**: Configure `apiBase` to avoid CORS issues
-- **Network Config**: Pass custom module config for third-party curves
+<WidgetV2Standalone network={customNetwork} />
+```
 
-## Related Docs
+### Dynamic Theme Switching
 
-- SDK usage: `./README_SDK.md`
-- Deployer widget: `./README_DEPLOYER.md`
+```jsx
+function ThemedWidget() {
+  const [isDark, setIsDark] = useState(true);
+  
+  const theme = isDark ? darkTheme : lightTheme;
+  
+  return (
+    <>
+      <button onClick={() => setIsDark(!isDark)}>
+        Toggle Theme
+      </button>
+      <WidgetV2Standalone theme={theme} />
+    </>
+  );
+}
+```
+
+## Troubleshooting
+
+### CORS Issues
+- Use the Next.js proxy configuration shown above
+- Or set `apiBase` to a proxied endpoint
+- Ensure your domain is whitelisted if using direct API
+
+### Token Not Loading
+- Verify contract address format: `0x...::Module::SYMBOL`
+- Check network configuration
+- Ensure token exists on mainnet
+
+### Wallet Connection Issues
+- Ensure Sui wallet extension is installed
+- Check wallet is on mainnet
+- Verify wallet has SUI for gas
+
+### Theme Not Applying
+- CSS variables must start with `--kappa-`
+- Pass theme as an object, not a string
+- Check for typos in variable names
+
+## Browser Support
+
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
 
 ## Requirements
 
 - React 18+
 - Node.js 16+
-- Sui wallet extension for Web3
+- Sui wallet extension for Web3 features
+
+## Related Documentation
+
+- [SDK Documentation](./Read%20me-SDK.md) - Programmatic trading
+- [Deployer Widget](./Read%20me-DEPLOYER.md) - Token creation interface
+- [Theming Guide](./THEMING.md) - Complete theme customization
+
+## Support
+
+- **Documentation**: [https://docs.kappa.fun](https://docs.kappa.fun)
+- **GitHub**: [https://github.com/kappa-labs/kappa-sdk](https://github.com/kappa-labs/kappa-sdk)
+- **Website**: [https://kappa.fun](https://kappa.fun)
 
 ## License
 

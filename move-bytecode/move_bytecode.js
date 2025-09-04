@@ -653,8 +653,9 @@ const isBrowser = typeof window !== 'undefined' || (typeof globalThis !== 'undef
 if (!isBrowser) {
     // Node.js environment - use fs to read the file synchronously
     try {
-        const path = require('path').join(__dirname, 'move_bytecode.wasm');
-        const fs = require('fs');
+        // Use eval to prevent webpack from trying to bundle these Node.js modules
+        const path = eval("require('path')").join(__dirname, 'move_bytecode.wasm');
+        const fs = eval("require('fs')");
         const bytes = fs.readFileSync(path);
         
         const wasmModule = new WebAssembly.Module(bytes);

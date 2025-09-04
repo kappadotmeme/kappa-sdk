@@ -10,6 +10,7 @@ Complete SDK and React components for creating and trading tokens on Sui with Ka
 - **SDK**: [docs/Read me-SDK.md](./docs/Read%20me-SDK.md)
 - **Trading Widget**: [docs/Read me-BUY_WIDGET.md](./docs/Read%20me-BUY_WIDGET.md)
 - **Deployer Widget**: [docs/Read me-DEPLOYER.md](./docs/Read%20me-DEPLOYER.md)
+- **Theming Guide**: [docs/THEMING.md](./docs/THEMING.md)
 
 ## 🚀 Features
 
@@ -18,7 +19,10 @@ Complete SDK and React components for creating and trading tokens on Sui with Ka
 - **React Widgets**: Pre-built, customizable UI components
 - **Multi-Module Support**: Automatic detection of different bonding curve modules
 - **Third-party Ready**: Use your own Sui modules
-- **Full Theming**: Match your brand identity
+- **Advanced Theming**: 100+ CSS variables for complete customization
+- **Smart Features**: Intelligent MAX button (97% SUI, balance-1 for tokens)
+- **Token Search**: Search by name, symbol, or contract address
+- **Real-time Quotes**: Live price calculations with slippage protection
 - **TypeScript Support**: Complete type definitions
 
 ## 📦 Installation
@@ -98,21 +102,39 @@ await buyTokens({
 - **[SDK Documentation](./docs/Read%20me-SDK.md)** - Programmatic token operations
 - **[Trading Widget Guide](./docs/Read%20me-BUY_WIDGET.md)** - Buy/sell interface component
 - **[Deployer Widget Guide](./docs/Read%20me-DEPLOYER.md)** - Token creation interface
+- **[Theming Guide](./docs/THEMING.md)** - Complete theme customization
+- **[WASM Bundling](./docs/WASM-BUNDLING.md)** - WASM bundling details
 
 ## 🎨 Customization
 
 ### Theming
-Match your brand with custom themes:
+Match your brand with 100+ customizable theme tokens:
 
 ```jsx
 const theme = {
+  // Base colors
   '--kappa-primary': '#007bff',
   '--kappa-bg': '#1a1b23',
-  '--kappa-text': '#ffffff'
+  '--kappa-text': '#ffffff',
+  '--kappa-accent': '#3b82f6',
+  
+  // Components
+  '--kappa-quick-max-text': '#ef4444',
+  '--kappa-token-button-hover-bg': 'rgba(37, 99, 235, 0.1)',
+  
+  // Effects
+  '--kappa-shadow-lg': '0 10px 30px rgba(0,0,0,0.45)',
+  '--kappa-radius-xl': '16px',
+  
+  // Typography
+  '--kappa-font-family': 'Inter, system-ui, sans-serif',
+  '--kappa-font-size-lg': '16px'
 };
 
 <WidgetV2Standalone theme={theme} />
 ```
+
+See [docs/THEMING.md](./docs/THEMING.md) for all available tokens.
 
 ### Third-Party Modules
 Use your own Sui modules:
@@ -250,7 +272,7 @@ MIT
 ## 🤝 Support
 
 - **Documentation**: [https://docs.kappa.fun](https://docs.kappa.fun)
-- **GitHub**: [https://github.com/kappadotmeme/kappa-sdk](https://github.com/kappa-labs/kappa-sdk)
+- **GitHub**: [https://github.com/kappa-labs/kappa-sdk](https://github.com/kappa-labs/kappa-sdk)
 - **Website**: [https://kappa.fun](https://kappa.fun)
 
 ## 🌟 Built With Kappa

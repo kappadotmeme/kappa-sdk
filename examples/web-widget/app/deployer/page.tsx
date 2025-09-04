@@ -1,5 +1,5 @@
 "use client";
-import { DeployerWidgetStandalone } from 'kappa-create/react';
+import { DeployerWidgetStandalone } from '../../../../src/react/DeployerWidget';
 
 export default function Page() {
   return (

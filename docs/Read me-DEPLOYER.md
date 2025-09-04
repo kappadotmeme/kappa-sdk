@@ -2,6 +2,8 @@
 
 A React component for launching tokens on Sui with the Kappa protocol. Supports default Kappa modules and third-party/partner modules via configuration. Provides Standalone, Embedded, and Integrated variants.
 
+> **✨ Automatic WASM Loading**: The widget includes bundled WebAssembly (WASM) for Move bytecode compilation. The WASM loads automatically from the NPM package - no manual setup required! See [WASM-BUNDLING.md](./WASM-BUNDLING.md) for advanced configuration.
+
 ## Installation
 
 ```bash

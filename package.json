@@ -26,10 +26,9 @@
     "kappa-trade.js",
     "math.js",
     "move-bytecode",
+    "scripts",
     "README.md",
-    "README_SDK.md",
-    "README_BUY_WIDGET.md",
-    "README_DEPLOYER.md"
+    "docs"
   ],
   "engines": {
     "node": ">=18"
@@ -57,7 +56,8 @@
     "start": "node -e \"console.log('kappa-sdk: library only')\"",
     "lint": "eslint .",
     "test": "node --test",
-    "prepublishOnly": "npm run lint && npm test"
+    "build:wasm": "node scripts/bundle-wasm.js",
+    "prepublishOnly": "npm run build:wasm && npm run lint && npm test"
   },
   "keywords": [
     "sui",
@@ -77,10 +77,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kappadotmeme/kappa-sdk"
+    "url": "https://github.com/kappa-labs/kappa-sdk"
   },
   "bugs": {
-    "url": "https://github.com/kappa-labs/kappa-create/issues"
+    "url": "https://github.com/kappa-labs/kappa-sdk/issues"
   },
   "homepage": "https://kappa.meme"
 }

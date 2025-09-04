@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from 'react';
-import { WidgetStandalone } from '../../../../src/react/Widget';
+import { WidgetV2Standalone } from '../../../../src/react/Widgetv2';
 
 export default function TestApiPage() {
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function TestApiPage() {
       </div>
       
       <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <WidgetStandalone 
+        <WidgetV2Standalone 
           projectName="API TEST"
         />
       </div>

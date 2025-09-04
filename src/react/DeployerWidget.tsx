@@ -334,6 +334,8 @@ function DeployerInner(props: {
   const [status, setStatus] = useState<string>('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successCoinAddress, setSuccessCoinAddress] = useState('');
+  const [suiBalance, setSuiBalance] = useState<number>(0);
+  const [loadingBalance, setLoadingBalance] = useState(false);
 
   const validator = useValidation(coinData, { fileError, fileSizeError, isImagePreviewValid });
 
@@ -341,6 +343,33 @@ function DeployerInner(props: {
     const { valid, errors } = validator.validateAll();
     setIsFormValid(valid); setErrors(errors);
   }, [coinData, fileError, fileSizeError, isImagePreviewValid]);
+
+  // Fetch SUI balance when account changes
+  useEffect(() => {
+    async function fetchBalance() {
+      if (!account?.address || !suiClient) {
+        setSuiBalance(0);
+        return;
+      }
+      
+      setLoadingBalance(true);
+      try {
+        const balance = await suiClient.getBalance({
+          owner: account.address,
+          coinType: '0x2::sui::SUI'
+        });
+        const totalBalance = Number(balance.totalBalance || 0) / 1e9;
+        setSuiBalance(totalBalance);
+      } catch (err) {
+        console.error('Failed to fetch SUI balance:', err);
+        setSuiBalance(0);
+      } finally {
+        setLoadingBalance(false);
+      }
+    }
+    
+    fetchBalance();
+  }, [account?.address, suiClient]);
 
   const handleFileChange = (file?: File) => {
     if (!file) return;
@@ -695,6 +724,22 @@ function DeployerInner(props: {
       setShowSuccessModal(true);
       setSuccessCoinAddress(coinAddress);
       
+      // Refresh balance after successful transaction
+      setTimeout(async () => {
+        if (account?.address && suiClient) {
+          try {
+            const balance = await suiClient.getBalance({
+              owner: account.address,
+              coinType: '0x2::sui::SUI'
+            });
+            const totalBalance = Number(balance.totalBalance || 0) / 1e9;
+            setSuiBalance(totalBalance);
+          } catch (err) {
+            console.error('Failed to refresh balance:', err);
+          }
+        }
+      }, 3000);
+      
       if (props.onSuccess) props.onSuccess(coinAddress);
     } catch (e: any) {
       alert('Failed: ' + (e?.message || String(e)));
@@ -703,7 +748,7 @@ function DeployerInner(props: {
     }
   };
 
-  const disabled = !account || !isFormValid || publishing || !devBuy || Number(devBuy) < 0.1 || !!devBuyError;
+  const disabled = !account || !isFormValid || publishing || !devBuy || Number(devBuy) < 0.1 || !!devBuyError || (account && Number(devBuy) > suiBalance - 0.5);
   
   // Apply theme
   const themeVars = { ...defaultTheme, ...(theme || {}) } as Record<string, string>;
@@ -727,7 +772,7 @@ function DeployerInner(props: {
       `}</style>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <img src={props.logoUrl || DEFAULT_LOGO_DATA} alt="logo" style={{ width: 22, height: 22, borderRadius: 4 }} />
+          <img src={props.logoUrl || DEFAULT_LOGO_DATA} alt="logo" style={{ width: 40, height: 40, borderRadius: 4 }} />
           <div style={{ width: 1, height: 16, background: 'var(--kappa-border)', opacity: 0.8 }} />
           <div className="kappa-header-name" style={{ color: 'var(--kappa-text)', fontWeight: 700 }}>{props.projectName || 'Kappa Deployer'}</div>
         </div>
@@ -844,7 +889,29 @@ function DeployerInner(props: {
       </div>
 
       <div style={{ background: 'var(--kappa-panel)', border: '1px solid var(--kappa-border)', borderRadius: 12, padding: 16, marginBottom: 12 }}>
-        <h3 style={{ margin: '0 0 16px 0', color: 'var(--kappa-text)', fontSize: 14, fontWeight: 600 }}>Initial Purchase</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <h3 style={{ margin: 0, color: 'var(--kappa-text)', fontSize: 14, fontWeight: 600 }}>Initial Purchase</h3>
+          {account && (
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 8,
+              padding: '4px 10px',
+              background: 'var(--kappa-bg)',
+              borderRadius: 8,
+              border: '1px solid var(--kappa-border)'
+            }}>
+              <img 
+                src="https://strapi-dev.scand.app/uploads/sui_c07df05f00.png" 
+                alt="SUI" 
+                style={{ width: 16, height: 16, borderRadius: '50%' }}
+              />
+              <span style={{ fontSize: 12, color: 'var(--kappa-text)', fontWeight: 500 }}>
+                {loadingBalance ? '...' : suiBalance.toFixed(2)} SUI
+              </span>
+            </div>
+          )}
+        </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ flex: 1 }}>
             <label style={label}>Dev Buy Amount (SUI) - Minimum 0.1 SUI</label>
@@ -857,9 +924,13 @@ function DeployerInner(props: {
               onChange={(e) => {
                 const value = e.target.value;
                 setDevBuy(value);
+                
                 // Validate minimum 0.1 SUI
                 if (value && Number(value) < 0.1) {
                   setDevBuyError('Minimum dev buy is 0.1 SUI');
+                } else if (account && value && Number(value) > suiBalance - 0.5) {
+                  // Ensure user has enough SUI for dev buy + gas (keeping 0.5 SUI for gas)
+                  setDevBuyError(`Insufficient balance. You have ${suiBalance.toFixed(2)} SUI (need ${Number(value)} + ~0.5 for gas)`);
                 } else {
                   setDevBuyError('');
                 }
@@ -879,6 +950,20 @@ function DeployerInner(props: {
         {publishing ? 'Processing…' : 'Create coin'}
       </button>
       {status && <div style={{ marginTop: 8, fontSize: 12, color: '#9ca3af', textAlign: 'center' }}>{status}</div>}
+      {account && Number(devBuy) > 0 && suiBalance < Number(devBuy) + 0.5 && (
+        <div style={{ 
+          marginTop: 8, 
+          padding: '8px 12px', 
+          borderRadius: 8, 
+          background: 'rgba(248, 113, 113, 0.1)', 
+          border: '1px solid #f87171',
+          fontSize: 12, 
+          color: '#f87171', 
+          textAlign: 'center' 
+        }}>
+          ⚠️ Insufficient SUI balance. You need at least {(Number(devBuy) + 0.5).toFixed(2)} SUI
+        </div>
+      )}
 
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16, gap: 4, position: 'relative', zIndex: 100 }}>
         <span style={{ color: 'var(--kappa-muted)', fontSize: 12 }}>Powered by</span>

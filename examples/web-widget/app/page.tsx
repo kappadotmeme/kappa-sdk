@@ -1,5 +1,5 @@
 "use client";
-import { WidgetV2Standalone } from 'kappa-create/react';
+import { WidgetV2Standalone } from '../../../src/react/Widgetv2';
 
 export default function Page() {
   return (
