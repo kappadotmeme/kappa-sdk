@@ -1641,11 +1641,77 @@ export function WidgetV2Embedded(props: {
           50% { opacity: 0.5; }
         }
         
-        @media (max-width: 500px) {
+        /* Mobile responsiveness */
+        @media (max-width: 640px) {
           .kappa-root { 
-            width: calc(100vw - 10px) !important; 
-            max-width: none !important; 
-            margin: 0 5px !important; 
+            width: 100% !important; 
+            max-width: 100% !important; 
+            margin: 0 !important;
+            padding: 16px !important;
+            border-radius: 0 !important;
+            border-left: none !important;
+            border-right: none !important;
+          }
+          
+          .kappa-header-logo {
+            width: 32px !important;
+            height: 32px !important;
+          }
+          
+          .kappa-header-text {
+            font-size: 14px !important;
+          }
+          
+          .kappa-input-amount {
+            font-size: 20px !important;
+          }
+          
+          .kappa-token-button {
+            padding: 6px 10px !important;
+            font-size: 13px !important;
+          }
+          
+          .kappa-quick-button {
+            padding: 6px 4px !important;
+            font-size: 10px !important;
+          }
+          
+          .kappa-swap-button-icon {
+            width: 36px !important;
+            height: 36px !important;
+            top: -16px !important;
+          }
+          
+          .kappa-main-button {
+            padding: 14px !important;
+            font-size: 15px !important;
+          }
+        }
+        
+        @media (max-width: 400px) {
+          .kappa-header-logo {
+            width: 28px !important;
+            height: 28px !important;
+          }
+          
+          .kappa-header-divider {
+            display: none !important;
+          }
+          
+          .kappa-input-amount {
+            font-size: 18px !important;
+          }
+          
+          .kappa-token-badge img {
+            width: 20px !important;
+            height: 20px !important;
+          }
+        }
+        
+        /* Prevent horizontal scroll on mobile */
+        @media (max-width: 640px) {
+          body {
+            overflow-x: hidden;
           }
         }
       `}</style>
@@ -1656,15 +1722,18 @@ export function WidgetV2Embedded(props: {
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 20,
+        flexWrap: 'wrap',
+        gap: 10,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <img 
+            className="kappa-header-logo"
             src={logoUrl || defaultLogoDataUri} 
             alt="logo" 
             style={{ width: 40, height: 40, borderRadius: 4 }} 
           />
-          <div style={{ width: 1, height: 16, background: 'var(--kappa-border)', opacity: 0.8 }} />
-          <div style={{ color: 'var(--kappa-text)', fontWeight: 700 }}>{projectName || 'Kappa'}</div>
+          <div className="kappa-header-divider" style={{ width: 1, height: 16, background: 'var(--kappa-border)', opacity: 0.8 }} />
+          <div className="kappa-header-text" style={{ color: 'var(--kappa-text)', fontWeight: 700 }}>{projectName || 'Kappa'}</div>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <button
@@ -1725,6 +1794,7 @@ export function WidgetV2Embedded(props: {
         
         <div style={{ display: 'flex', gap: 12 }}>
           <input
+            className="kappa-input-amount"
             type="text"
             placeholder="0.0"
             value={fromAmount}
@@ -1758,12 +1828,14 @@ export function WidgetV2Embedded(props: {
               fontSize: 24,
               fontWeight: 600,
               padding: 0,
+              minWidth: 0,
             }}
           />
           
           {fromToken && !fromToken.isSui ? (
             // If from is a token, show selector button (disabled if locked)
             <button
+              className="kappa-token-button"
               onClick={() => {
                 if (!lockContract) {
                   setTokenModalPosition('from');
@@ -1792,6 +1864,7 @@ export function WidgetV2Embedded(props: {
                 opacity: lockContract ? 0.7 : 1,
                 color: 'var(--kappa-text)',
                 transition: 'background 0.2s ease, border-color 0.2s ease',
+                flexShrink: 0,
               }}
             >
               {fromToken.avatarUrl && (
@@ -1813,6 +1886,7 @@ export function WidgetV2Embedded(props: {
           ) : (
             // If from is SUI, show static badge
             <div
+              className="kappa-token-badge"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1822,6 +1896,7 @@ export function WidgetV2Embedded(props: {
                 background: 'var(--kappa-chip-bg)',
                 border: '1px solid var(--kappa-chip-border)',
                 color: 'var(--kappa-text)',
+                flexShrink: 0,
               }}
             >
               <img 
@@ -1844,6 +1919,7 @@ export function WidgetV2Embedded(props: {
         <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
           {['25%', '50%', '75%', 'MAX'].map((percent) => (
             <button
+              className="kappa-quick-button"
               key={percent}
               onClick={() => {
                 // Use SUI balance when SUI is in the FROM field, token balance when token is in FROM field
@@ -1923,6 +1999,7 @@ export function WidgetV2Embedded(props: {
         height: 0,
       }}>
         <button
+          className="kappa-swap-button-icon"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -1989,6 +2066,7 @@ export function WidgetV2Embedded(props: {
         
         <div style={{ display: 'flex', gap: 12 }}>
           <input
+            className="kappa-input-amount"
             type="text"
             placeholder="0.0"
             value={toAmount}
@@ -2002,12 +2080,14 @@ export function WidgetV2Embedded(props: {
               fontSize: 24,
               fontWeight: 600,
               padding: 0,
+              minWidth: 0,
             }}
           />
           
           {toToken && !toToken.isSui ? (
             // If to is a token, show selector button (disabled if locked)
             <button
+              className="kappa-token-button"
               onClick={() => {
                 if (!lockContract) {
                   setTokenModalPosition('to');
@@ -2036,6 +2116,7 @@ export function WidgetV2Embedded(props: {
                 opacity: lockContract ? 0.7 : 1,
                 color: 'var(--kappa-text)',
                 transition: 'background 0.2s ease, border-color 0.2s ease',
+                flexShrink: 0,
               }}
             >
               {toToken.avatarUrl && (
@@ -2057,6 +2138,7 @@ export function WidgetV2Embedded(props: {
           ) : toToken?.isSui ? (
             // If to is SUI (because from is a token), show static SUI badge
             <div
+              className="kappa-token-badge"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -2066,6 +2148,7 @@ export function WidgetV2Embedded(props: {
                 background: 'var(--kappa-chip-bg)',
                 border: '1px solid var(--kappa-chip-border)',
                 color: 'var(--kappa-text)',
+                flexShrink: 0,
               }}
             >
               <img 
@@ -2084,6 +2167,7 @@ export function WidgetV2Embedded(props: {
           ) : (
             // If to is empty (default state), show "Select token" button (disabled if locked with defaultContract)
             <button
+              className="kappa-token-button"
               onClick={() => {
                 if (!lockContract) {
                   setTokenModalPosition('to');
@@ -2110,6 +2194,7 @@ export function WidgetV2Embedded(props: {
                 opacity: lockContract && defaultContract ? 0.7 : 1,
                 color: lockContract && defaultContract ? 'var(--kappa-text)' : 'var(--kappa-text-on-primary)',
                 transition: 'box-shadow 0.2s ease',
+                flexShrink: 0,
               }}
             >
               <span>{lockContract && defaultContract ? 'Loading...' : 'Select token'}</span>
@@ -2121,6 +2206,7 @@ export function WidgetV2Embedded(props: {
 
       {/* Swap Button */}
       <button
+        className="kappa-main-button"
         onClick={handleExecuteSwap}
         disabled={!account || !fromAmount || txLoading || (!toToken && !fromToken)}
         onMouseEnter={(e) => {
