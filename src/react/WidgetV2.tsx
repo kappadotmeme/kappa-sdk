@@ -1644,13 +1644,11 @@ export function WidgetV2Embedded(props: {
         /* Mobile responsiveness */
         @media (max-width: 640px) {
           .kappa-root { 
-            width: 100% !important; 
-            max-width: 100% !important; 
-            margin: 0 !important;
+            width: calc(100vw - 10px) !important; 
+            max-width: none !important; 
+            margin: 0 5px !important;
             padding: 16px !important;
-            border-radius: 0 !important;
-            border-left: none !important;
-            border-right: none !important;
+            border-radius: 16px !important;
           }
           
           .kappa-header-logo {
@@ -1688,6 +1686,13 @@ export function WidgetV2Embedded(props: {
           }
         }
         
+        @media (max-width: 480px) {
+          .kappa-root { 
+            padding: 14px !important;
+            border-radius: 12px !important;
+          }
+        }
+        
         @media (max-width: 400px) {
           .kappa-header-logo {
             width: 28px !important;
@@ -1705,6 +1710,12 @@ export function WidgetV2Embedded(props: {
           .kappa-token-badge img {
             width: 20px !important;
             height: 20px !important;
+          }
+        }
+        
+        @media (max-width: 320px) {
+          .kappa-root { 
+            padding: 12px !important;
           }
         }
         
