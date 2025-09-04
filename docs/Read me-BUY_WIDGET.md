@@ -14,13 +14,14 @@ npm install kappa-create @tanstack/react-query @mysten/dapp-kit @mysten/sui
 Includes wallet + client providers built-in.
 
 ```jsx
-import { WidgetStandalone } from 'kappa-create/react';
+import { WidgetV2Standalone } from 'kappa-create/react';
 
 function App() {
   return (
-    <WidgetStandalone 
+    <WidgetV2Standalone 
       projectName="My DEX"
       defaultContract="0xabc...::Token::TOKEN"
+      lockContract={false}  // Optional: set to true to lock token selection
     />
   );
 }
@@ -30,27 +31,24 @@ function App() {
 Use when your app already provides wallet/context wrappers.
 
 ```jsx
-import { WidgetEmbedded } from 'kappa-create/react';
+import { WidgetV2Embedded } from 'kappa-create/react';
 
 function TradingSection({ selected }) {
   return (
-    <WidgetEmbedded 
+    <WidgetV2Embedded 
       defaultContract={selected}
-      lockContract={false}
+      lockContract={false}  // Set to true to prevent token changes
     />
   );
 }
 ```
 
-### 3) Integrated
-Maximum control; render where you already manage providers.
+### 3) Note on Variants
+WidgetV2 currently supports two variants:
+- **WidgetV2Standalone**: Includes all providers (recommended)
+- **WidgetV2Embedded**: For apps with existing providers
 
-```jsx
-import { WidgetIntegrated } from 'kappa-create/react';
-
-export default function Trading() {
-  return <WidgetIntegrated defaultContract="0x...::Token::TOKEN" />;
-}
+There is no separate Integrated variant for WidgetV2.
 ```
 
 ## Props
@@ -60,24 +58,28 @@ export default function Trading() {
 export interface WidgetProps {
   theme?: Record<string, string>;
   defaultContract?: string;
-  lockContract?: boolean;
+  lockContract?: boolean;  // Lock token selection when true
   logoUrl?: string;
   projectName?: string;
+  apiBase?: string;  // API endpoint configuration
+  network?: any;  // Custom network configuration
 }
 ```
 
 - **theme**: CSS variable map for theming.
 - **defaultContract**: Contract type, e.g. `0x...::Token::TOKEN`.
-- **lockContract**: If true, hides contract switch/search.
-- **logoUrl**: Brand logo in header.
+- **lockContract**: If true, prevents token selection changes (useful for fixed-token interfaces).
+- **logoUrl**: Brand logo in header (40x40px).
 - **projectName**: Title in header.
+- **apiBase**: API endpoint (defaults to '/api' for proxy or 'https://api.kappa.fun').
+- **network**: Custom module configuration for third-party bonding curves.
 
 ## Theming
 
 Pass CSS variables to match your brand.
 
 ```jsx
-<WidgetStandalone
+<WidgetV2Standalone
   theme={{
     '--kappa-bg': '#0f1218',
     '--kappa-panel': '#1a1d24',
@@ -102,14 +104,15 @@ Common variables:
 
 ### Minimal Next.js page
 ```jsx
-import { WidgetStandalone } from 'kappa-create/react';
+import { WidgetV2Standalone } from 'kappa-create/react';
 
 export default function Page() {
   return (
     <main style={{ padding: 24 }}>
-      <WidgetStandalone 
+      <WidgetV2Standalone 
         projectName="My DEX"
         defaultContract="0xabc...::Token::TOKEN"
+        lockContract={false}
       />
     </main>
   );
@@ -118,15 +121,15 @@ export default function Page() {
 
 ### Custom layout with Embedded variant
 ```jsx
-import { WidgetEmbedded } from 'kappa-create/react';
+import { WidgetV2Embedded } from 'kappa-create/react';
 
 function TradingApp({ selectedToken, theme }) {
   return (
     <div className="trading-container">
       <header>My Header</header>
-      <WidgetEmbedded 
+      <WidgetV2Embedded 
         defaultContract={selectedToken}
-        lockContract
+        lockContract={true}  // Locks the token selection
         theme={theme}
       />
       <footer>My Footer</footer>
@@ -135,11 +138,25 @@ function TradingApp({ selectedToken, theme }) {
 }
 ```
 
+## Features
+
+- **Smart Token Detection**: Automatically loads token metadata and factory configurations
+- **Dynamic Module Support**: Auto-detects and uses appropriate bonding curve modules
+- **Built-in Slippage Control**: Configurable slippage settings (0.5%, 1%, 2%, 5% presets)
+- **Real-time Quotes**: Live price calculations using bonding curve math
+- **Balance Display**: Shows SUI and token balances
+- **Quick Amount Selection**: 25%, 50%, 75%, MAX buttons for easy input
+- **Token Search**: Search by name, symbol, or contract address
+- **Trending Tokens**: Shows popular tokens when opening selector
+- **Skeleton Loading**: Smooth loading animations for better UX
+- **Mobile Responsive**: Adapts to mobile screens automatically
+
 ## Tips
 
-- **Quote before trading**: Use SDK quote functions for pre-trade estimates.
-- **Slippage**: Always set slippage in SDK trade calls.
-- **Cache token info**: Cache results in your app for speed.
+- **Lock Contract**: Use `lockContract={true}` for single-token interfaces
+- **Custom Theme**: Match your brand with CSS variables
+- **API Proxy**: Configure `apiBase` to avoid CORS issues
+- **Network Config**: Pass custom module config for third-party curves
 
 ## Related Docs
 

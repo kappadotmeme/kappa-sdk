@@ -38,13 +38,14 @@ npm install kappa-create @tanstack/react-query @mysten/dapp-kit @mysten/sui
 Add a complete trading interface in one line:
 
 ```jsx
-import { WidgetStandalone } from 'kappa-create/react';
+import { WidgetV2Standalone } from 'kappa-create/react';
 
 function App() {
   return (
-    <WidgetStandalone 
+    <WidgetV2Standalone 
       defaultContract="0xabc...::Token::TOKEN"
       projectName="My DEX"
+      lockContract={false}  // Optional: lock token selection
     />
   );
 }
@@ -131,19 +132,20 @@ const config = {
 ### Standalone (Recommended)
 Includes all required providers - just drop in and use:
 ```jsx
-import { WidgetStandalone, DeployerWidgetStandalone } from 'kappa-create/react';
+import { WidgetV2Standalone, DeployerWidgetStandalone } from 'kappa-create/react';
 ```
 
 ### Embedded
 For apps with existing wallet providers:
 ```jsx
-import { WidgetEmbedded, DeployerWidgetEmbedded } from 'kappa-create/react';
+import { WidgetV2Embedded, DeployerWidgetEmbedded } from 'kappa-create/react';
 ```
 
 ### Integrated
 Maximum control with existing infrastructure:
 ```jsx
-import { WidgetIntegrated, DeployerWidgetIntegrated } from 'kappa-create/react';
+import { DeployerWidgetIntegrated } from 'kappa-create/react';
+// Note: WidgetV2 only has Standalone and Embedded variants
 ```
 
 ## 💡 Examples
@@ -171,15 +173,15 @@ export default function LaunchPage() {
 
 ### Custom Trading Interface
 ```jsx
-import { WidgetEmbedded } from 'kappa-create/react';
+import { WidgetV2Embedded } from 'kappa-create/react';
 
 function TradingApp() {
   return (
     <div className="trading-container">
       <YourHeader />
-      <WidgetEmbedded 
+      <WidgetV2Embedded 
         defaultContract={selectedToken}
-        lockContract={true}
+        lockContract={true}  // Prevents changing the token
         theme={darkTheme}
       />
       <YourFooter />
@@ -220,13 +222,14 @@ module.exports = nextConfig;
 Use the widget:
 
 ```tsx
-import { WidgetStandalone } from 'kappa-create/react';
+import { WidgetV2Standalone } from 'kappa-create/react';
 
 export default function App() {
   return (
-    <WidgetStandalone
+    <WidgetV2Standalone
       projectName="My DEX"
       defaultContract="0x...::Token::SYMBOL"
+      lockContract={false}  // Set to true to lock token selection
       // If you need to force the proxy path:
       // apiBase="/api"
     />
