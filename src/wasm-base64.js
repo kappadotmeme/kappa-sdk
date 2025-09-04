@@ -7,7 +7,8 @@ const WASM_BASE64 = 'AGFzbQEAAAAB8QI1YAJ/fwF/YAJ/fwBgA39/fwF/YAF/AGADf39/AGABfwF
 
 // Helper function to decode base64 to Uint8Array
 function decodeWasmBase64() {
-  if (typeof window !== 'undefined' && window.atob) {
+  /* global window */
+  if (typeof window !== 'undefined' && typeof window.atob === 'function') {
     // Browser environment
     const binaryString = window.atob(WASM_BASE64);
     const bytes = new Uint8Array(binaryString.length);

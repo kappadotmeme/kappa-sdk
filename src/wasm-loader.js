@@ -1,3 +1,4 @@
+/* global window */
 // WASM Loader for move_bytecode
 // This module handles loading the WASM file in both browser and Node.js environments
 
@@ -138,17 +139,17 @@ async function loadWasmBytes() {
 }
 
 // Export a function to set the WASM programmatically
-export function setWasmBase64(base64) {
+function setWasmBase64(base64) {
   if (typeof globalThis !== 'undefined') {
     globalThis.KAPPA_WASM_BASE64 = base64;
   }
 }
 
 // Export a function to set the WASM URL programmatically
-export function setWasmUrl(url) {
+function setWasmUrl(url) {
   if (typeof globalThis !== 'undefined') {
     globalThis.KAPPA_WASM_URL = url;
   }
 }
 
-export { loadWasmBytes };
+module.exports = { loadWasmBytes, setWasmBase64, setWasmUrl };
