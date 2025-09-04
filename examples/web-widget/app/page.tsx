@@ -1,13 +1,14 @@
 "use client";
-import { WidgetStandalone } from 'kappa-create/react';
+import { WidgetV2Standalone } from 'kappa-create/react';
 
 export default function Page() {
   return (
     <div style={{ width: '100%', height: '100vh', background: 'rgb(23, 23, 23)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', paddingTop: '100px', boxSizing: 'border-box', overflow: 'hidden' }}>
-      <WidgetStandalone 
+      <WidgetV2Standalone 
         projectName="KAPPA"
-        // No apiBase needed - widget v2.0.25+ uses proxy by default
-        // Make sure next.config.js has the proxy configured
+        // Widget v2.0.35+ includes the new lockContract prop
+        // lockContract={true} // Uncomment to lock token selection
+        // defaultContract="0x..." // Uncomment to set a default token
       />
     </div>
   );
