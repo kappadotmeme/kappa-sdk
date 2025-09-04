@@ -22,6 +22,8 @@ export interface WidgetProps {
 
 export declare function WidgetStandalone(props?: WidgetProps): JSX.Element;
 export declare function WidgetEmbedded(props?: WidgetProps): JSX.Element;
+export declare function WidgetV2Standalone(props?: WidgetProps): JSX.Element;
+export declare function WidgetV2Embedded(props?: WidgetProps): JSX.Element;
 
 export interface DeployerWidgetProps {
   network?: ModuleConfig;

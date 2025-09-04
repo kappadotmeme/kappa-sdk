@@ -163,7 +163,12 @@ function DevBuyQuotePreview(props: { devBuy: string }) {
     async function compute() {
       try {
         const amt = Math.max(0, Number(devBuy) || 0);
-        if (!amt) { if (active) setQuote(''); return; }
+        console.log('[DevBuyQuotePreview] Computing quote for:', devBuy, 'SUI, amt:', amt);
+        if (!amt) { 
+          console.log('[DevBuyQuotePreview] No amount, clearing quote');
+          if (active) setQuote(''); 
+          return; 
+        }
         
         // Import math.js and use firstBuyMath like deployer-exmaple.md does
         const mathMod = await import('../../math.js');
@@ -173,9 +178,23 @@ function DevBuyQuotePreview(props: { devBuy: string }) {
           // firstBuyMath expects MIST, returns tokens in smallest units
           const suiMist = amt * 1e9;
           const tokensSmallest = firstBuyMath(suiMist);
-          // Convert to display units (assuming 9 decimals)
-          const tokensDisplay = tokensSmallest / 1e9;
-          if (active) setQuote(tokensDisplay.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+          
+          // Apply the same 95% reduction we use in the actual transaction
+          // This ensures the quote matches what the user will actually receive
+          const safeTokensSmallest = tokensSmallest * 0.95;
+          
+          // Tokens are created with 9 decimals (876_800_000 * 1e9 in math.js)
+          // Convert to human-readable format by dividing by 1e9
+          const tokenDecimals = 9;
+          const scale = Math.pow(10, tokenDecimals);
+          const tokensDisplay = safeTokensSmallest / scale;
+          
+          console.log('[DevBuyQuotePreview] Calculated tokens:', tokensDisplay);
+          if (active) {
+            const formatted = tokensDisplay.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            console.log('[DevBuyQuotePreview] Setting quote to:', formatted);
+            setQuote(formatted);
+          }
         } else {
           // Fallback calculation if import fails
           const INITIAL_INPUT_RESERVE = 1_900 * 1e9; // From math.js
@@ -189,21 +208,47 @@ function DevBuyQuotePreview(props: { devBuy: string }) {
           
           const tokensSmallest = (amount_after_fee * INITIAL_OUTPUT_RESERVE) / 
                                  (INITIAL_INPUT_RESERVE + amount_after_fee);
-          const tokensDisplay = tokensSmallest / 1e9;
           
-          if (active) setQuote(tokensDisplay.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+          // Apply the same 95% reduction for safety
+          const safeTokensSmallest = tokensSmallest * 0.95;
+          
+          // Tokens use 9 decimals, convert to human-readable
+          const tokenDecimals = 9;
+          const scale = Math.pow(10, tokenDecimals);
+          const tokensDisplay = safeTokensSmallest / scale;
+          
+          console.log('[DevBuyQuotePreview] Fallback calculation tokens:', tokensDisplay);
+          if (active) {
+            const formatted = tokensDisplay.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            console.log('[DevBuyQuotePreview] Fallback setting quote to:', formatted);
+            setQuote(formatted);
+          }
         }
-      } catch {
+      } catch (error) {
+        console.error('[DevBuyQuotePreview] Error calculating quote:', error);
         if (active) setQuote('');
       }
     }
     compute();
     return () => { active = false; };
   }, [devBuy]);
+  
+  console.log('[DevBuyQuotePreview] Current quote state:', quote);
+  
+  // Show loading state while calculating
+  if (!quote && devBuy && Number(devBuy) > 0) {
+    return (
+      <div style={{ marginTop: 8, fontSize: 12, color: '#9ca3af' }}>
+        Calculating...
+      </div>
+    );
+  }
+  
   if (!quote) return null;
+  
   return (
     <div style={{ marginTop: 8, fontSize: 12, color: '#9ca3af' }}>
-      ≈ {quote} tokens
+      You will receive approximately {quote} tokens
     </div>
   );
 }
@@ -324,7 +369,7 @@ function DeployerInner(props: {
 
       // Prepare metadata object
       const coinMetadata = {
-        decimals: 6,
+        decimals: 9,
         symbol: toDisplayTicker(coinData.ticker),
         name: toDisplayName(coinData.name),
         description: coinData.description,
@@ -568,32 +613,34 @@ function DeployerInner(props: {
       const suiAmount = Math.floor(devBuyNum * 1e9);
       
       // Execute first buy using the SDK
-      // Import firstBuyMath from math module
+      // Import math functions
       const math = await import('../../math.js');
       
-      // Calculate expected tokens
-      const expectedTokens = math.firstBuyMath(Number(devBuy) * 1e9); // Full calculation
+      // Calculate expected tokens for the UI quote
+      const expectedTokens = math.firstBuyMath(Number(devBuy) * 1e9);
       
-      // The partner module has a max transaction limit of 0.01 tokens (10000000000000000 in smallest units)
-      // We need to ensure min_tokens doesn't exceed this limit
-      const maxAllowedTokens = 10000000000000000; // 0.01 tokens in smallest units
+      // The SDK's first_buy is hardcoded to use is_exact_out=true (line 597 in kappa.js)
+      // When is_exact_out=true:
+      // - The coin amount is the MAX SUI we're willing to spend
+      // - The max_tokens is the EXACT amount of tokens we want
+      // But the contract will fail if the SUI isn't enough for the exact tokens
       
-      // Use the smaller of expected tokens with 90% slippage or max allowed
-      const minTokens = Math.floor(Math.min(expectedTokens * 0.9, maxAllowedTokens));
+      // To avoid failures, we need to:
+      // 1. Request slightly fewer tokens than expected (95% to be safe)
+      // 2. Provide the exact SUI amount from user input
+      const safeTokensOut = Math.floor(expectedTokens * 0.95);
       
-      console.log('Executing first buy:');
-      console.log('  Dev buy input:', devBuy);
+      console.log('Executing first buy (SDK forces is_exact_out=true):');
+      console.log('  Dev buy input:', devBuy, 'SUI');
       console.log('  SUI amount (MIST):', suiAmount);
-      console.log('  SUI amount (SUI):', suiAmount / 1e9);
-      console.log('  Expected tokens (calculation):', expectedTokens);
-      console.log('  Expected tokens (formatted):', (expectedTokens / 1e9).toFixed(2));
-      console.log('  Max allowed tokens (partner limit):', maxAllowedTokens);
-      console.log('  Min tokens (with limit applied):', minTokens);
-      console.log('  Min tokens (formatted):', (minTokens / 1e9).toFixed(6));
+      console.log('  Expected tokens (from math):', expectedTokens);
+      console.log('  Expected tokens (human):', (expectedTokens / 1e9).toFixed(6));
+      console.log('  Safe tokens to request (95%):', safeTokensOut);
+      console.log('  Safe tokens (human):', (safeTokensOut / 1e9).toFixed(6));
       
       console.log('Passing to SDK:', {
-        sui: suiAmount,
-        min_tokens: minTokens,
+        sui: suiAmount, // The SUI amount from user input
+        min_tokens: safeTokensOut, // 95% of expected tokens for safety
         name: coinMetadata.name,
       });
       
@@ -605,8 +652,8 @@ function DeployerInner(props: {
         {
           publishedObject: publishedObject,
           name: coinMetadata.name,
-          sui: suiAmount,
-          min_tokens: minTokens,
+          sui: suiAmount, // The SUI amount from user input
+          min_tokens: safeTokensOut, // Safe tokens (95% of expected)
           bondingContract: network.bondingContract,
           CONFIG: network.CONFIG,
           moduleName: network.moduleName,
