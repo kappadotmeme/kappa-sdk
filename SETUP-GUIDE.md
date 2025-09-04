@@ -90,7 +90,7 @@ Any platform that supports Next.js rewrites will work.
 If you absolutely need to override:
 
 ```jsx
-<WidgetStandalone
+<WidgetV2Standalone
   apiBase="https://api.kappa.fun"  // Will cause CORS unless domain is whitelisted
   // ... other props
 />

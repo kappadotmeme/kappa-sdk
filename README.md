@@ -111,7 +111,7 @@ const theme = {
   '--kappa-text': '#ffffff'
 };
 
-<WidgetStandalone theme={theme} />
+<WidgetV2Standalone theme={theme} />
 ```
 
 ### Third-Party Modules
