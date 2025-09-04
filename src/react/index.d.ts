@@ -20,8 +20,8 @@ export interface WidgetProps {
   network?: ModuleConfig;
 }
 
-export declare function WidgetV2Standalone(props?: WidgetProps): JSX.Element;
-export declare function WidgetV2Embedded(props?: WidgetProps): JSX.Element;
+export declare function WidgetV2Standalone(props?: WidgetProps): any;
+export declare function WidgetV2Embedded(props?: WidgetProps): any;
 
 export interface DeployerWidgetProps {
   network?: ModuleConfig;
@@ -33,9 +33,9 @@ export interface DeployerWidgetProps {
   theme?: Partial<WidgetTheme>;
 }
 
-export declare function DeployerWidgetStandalone(props?: DeployerWidgetProps): JSX.Element;
-export declare function DeployerWidgetEmbedded(props?: DeployerWidgetProps): JSX.Element;
-export declare function DeployerWidgetIntegrated(props?: DeployerWidgetProps): JSX.Element;
+export declare function DeployerWidgetStandalone(props?: DeployerWidgetProps): any;
+export declare function DeployerWidgetEmbedded(props?: DeployerWidgetProps): any;
+export declare function DeployerWidgetIntegrated(props?: DeployerWidgetProps): any;
 
 // Hooks
 export interface UseModuleConfigResult {
