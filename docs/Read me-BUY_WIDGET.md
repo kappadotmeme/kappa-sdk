@@ -8,6 +8,8 @@ A powerful, customizable trading interface for tokens on Sui using the Kappa pro
 npm install kappa-create @tanstack/react-query @mysten/dapp-kit @mysten/sui
 ```
 
+> **Note**: As of v2.1.2+, the package is pre-transpiled. No additional build configuration is needed for TypeScript or JSX.
+
 ## Quick Start
 
 ```jsx
@@ -248,13 +250,6 @@ function App() {
 // next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: { externalDir: true },
-  transpilePackages: [
-    'kappa-create',
-    '@mysten/dapp-kit',
-    '@mysten/sui',
-    '@tanstack/react-query',
-  ],
   async rewrites() {
     return [
       { 
@@ -266,6 +261,8 @@ const nextConfig = {
 };
 module.exports = nextConfig;
 ```
+
+> **Note**: The `transpilePackages` and `experimental.externalDir` configurations are no longer needed as the package is now pre-transpiled.
 
 ### 2. Create Trading Page
 
@@ -357,12 +354,20 @@ function ThemedWidget() {
 - Firefox 88+
 - Safari 14+
 - Edge 90+
+- Any ES2020-compatible browser
 
 ## Requirements
 
 - React 18+
-- Node.js 16+
+- Node.js 18+ (required for package installation)
 - Sui wallet extension for Web3 features
+
+## Package Details
+
+- **Pre-compiled**: All components are transpiled from TypeScript/JSX to JavaScript
+- **Type-safe**: Includes complete TypeScript definitions
+- **Tree-shakeable**: Import only what you need
+- **Zero config**: Works out of the box with any React setup
 
 ## Related Documentation
 

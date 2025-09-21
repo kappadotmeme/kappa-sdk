@@ -4,6 +4,7 @@ Complete SDK and React components for creating and trading tokens on Sui with Ka
 
 [![npm version](https://img.shields.io/npm/v/kappa-create.svg)](https://www.npmjs.com/package/kappa-create)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node Version](https://img.shields.io/node/v/kappa-create)](https://nodejs.org)
 
 ## 📚 Docs
 
@@ -35,6 +36,8 @@ For React widgets:
 ```bash
 npm install kappa-create @tanstack/react-query @mysten/dapp-kit @mysten/sui
 ```
+
+> **Note**: The package is pre-transpiled and ready to use. No additional build configuration is required for TypeScript or JSX.
 
 ## 🎯 Quick Start
 
@@ -225,13 +228,6 @@ Add a proxy so the widget can call the Kappa API without CORS issues:
 // next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: { externalDir: true },
-  transpilePackages: [
-    'kappa-create',
-    '@mysten/dapp-kit',
-    '@mysten/sui',
-    '@tanstack/react-query',
-  ],
   async rewrites() {
     return [
       { source: '/api/v1/:path*', destination: 'https://api.kappa.fun/v1/:path*' },
@@ -240,6 +236,8 @@ const nextConfig = {
 };
 module.exports = nextConfig;
 ```
+
+> **Note**: The `transpilePackages` configuration is no longer needed as of v2.1.2+ since the package is now pre-transpiled.
 
 Use the widget:
 
@@ -261,9 +259,17 @@ export default function App() {
 
 ## 🛠️ Requirements
 
-- Node.js 16+
+- Node.js 18+ (required for package installation)
 - React 18+ (for widgets)
 - Sui Wallet extension (for Web3 features)
+
+## 📦 Package Structure
+
+The published NPM package includes:
+- **Pre-transpiled JavaScript** - All TypeScript and JSX is compiled to ES2020 JavaScript
+- **Type definitions** - Full TypeScript support with `.d.ts` files
+- **Bundled WASM** - WebAssembly for Move bytecode compilation
+- **Ready-to-use components** - No build configuration needed
 
 ## 📄 License
 

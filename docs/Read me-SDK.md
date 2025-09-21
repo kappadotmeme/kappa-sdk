@@ -8,6 +8,8 @@ Programmatic interface for creating and trading tokens on Sui using the Kappa Pr
 npm install kappa-create @mysten/sui @mysten/bcs
 ```
 
+> **Note**: The SDK is distributed as pre-transpiled JavaScript with TypeScript definitions. No additional build configuration is required.
+
 ## Initialization
 
 ### Browser/React
@@ -27,6 +29,8 @@ const { SuiClient, getFullnodeUrl } = require('@mysten/sui/client');
 const client = new SuiClient({ url: getFullnodeUrl('mainnet') });
 initKappa({ client, logger: console.log });
 ```
+
+> **Note**: Requires Node.js 18 or higher due to package dependencies.
 
 ## Core Functions
 
@@ -279,6 +283,8 @@ const params: CreateTokenParams = {
 const result = await createToken(params);
 ```
 
+> **Build Note**: All TypeScript code is pre-transpiled to JavaScript in the published package, so you can use the SDK in plain JavaScript projects without any TypeScript tooling.
+
 ## Migration from v1
 
 ```javascript
@@ -299,6 +305,16 @@ await buyTokens({ signer, contract, suiInMist: amount });
 3. **Handle errors gracefully** - network issues are common
 4. **Cache token info** to reduce API calls
 5. **Use TypeScript** for better development experience
+
+## Package Structure
+
+The SDK exports from multiple entry points:
+- Main SDK functions: `kappa-create`
+- Server-only functions: `kappa-create/server`
+- React components: `kappa-create/react`
+- Math utilities: `kappa-create/math`
+
+All exports are pre-compiled CommonJS modules compatible with Node.js 18+.
 
 ## Support
 

@@ -10,6 +10,8 @@ A React component for launching tokens on Sui with the Kappa protocol. Supports 
 npm install kappa-create @tanstack/react-query @mysten/dapp-kit @mysten/sui
 ```
 
+> **Note**: As of v2.1.2+, the package is pre-transpiled. No additional build configuration is needed for TypeScript or JSX. The components are ready to use in any React application.
+
 ## Quick Start
 
 ### Standalone (Recommended)
@@ -134,6 +136,8 @@ Follow these steps to integrate the deployer with your partner module using the 
 npm install kappa-create @tanstack/react-query @mysten/dapp-kit @mysten/sui
 ```
 
+> **Compatibility Note**: The package is pre-transpiled to ES2020 JavaScript, ensuring compatibility with all modern build tools and bundlers.
+
 2) Collect your module IDs (mainnet/testnet as applicable)
 - bondingContract: your factory/package ID
 - CONFIG: your config object ID
@@ -192,6 +196,7 @@ export default function Launch() {
   - Ensure your wallet is on the right network
   - Check browser console for any API/network errors
   - If using Next.js SSR, use the Standalone variant (client-only) on a client page
+  - No `transpilePackages` configuration needed in Next.js config
 
 If `network` is omitted, the widget uses Kappa mainnet defaults:
 
@@ -215,8 +220,15 @@ If `network` is omitted, the widget uses Kappa mainnet defaults:
 ## Requirements
 
 - React 18+
-- Node.js 16+
+- Node.js 18+ (required for package installation)
 - Sui wallet extension
+
+## Package Details
+
+- **Pre-compiled**: All components are transpiled from TypeScript/JSX to JavaScript
+- **Type-safe**: Includes complete TypeScript definitions
+- **WASM included**: Bundled WebAssembly for Move bytecode compilation
+- **Zero config**: Works out of the box with any React setup
 
 ## License
 

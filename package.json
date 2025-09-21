@@ -1,27 +1,27 @@
 {
   "name": "kappa-create",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Complete SDK and React components for creating and trading tokens on Sui with Kappa Protocol. Includes customizable DeployerWidget and TradeWidget with theming support.",
-  "main": "src/index.js",
-  "types": "src/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "require": "./src/index.js",
-      "import": "./src/index.js",
-      "types": "./src/index.d.ts"
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     },
     "./server": {
-      "require": "./src/server.js",
-      "import": "./src/server.js"
+      "require": "./dist/server.js",
+      "import": "./dist/server.js"
     },
     "./react": {
-      "require": "./src/react/index.js",
-      "import": "./src/react/index.js",
-      "types": "./src/react/index.d.ts"
+      "require": "./dist/react/index.js",
+      "import": "./dist/react/index.js",
+      "types": "./dist/react/index.d.ts"
     }
   },
   "files": [
-    "src",
+    "dist",
     "kappa.js",
     "kappa-trade.js",
     "math.js",
@@ -42,9 +42,13 @@
   "devDependencies": {
     "@mysten/dapp-kit": "^0.17.4",
     "@tanstack/react-query": "^5.45.1",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "esbuild": "^0.19.0",
     "eslint": "^8.57.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "typescript": "^5.3.0"
   },
   "peerDependencies": {
     "react": ">=18",
@@ -57,7 +61,9 @@
     "lint": "eslint .",
     "test": "node --test",
     "build:wasm": "node scripts/bundle-wasm.js",
-    "prepublishOnly": "npm run build:wasm && npm run lint && npm test"
+    "build:react": "node scripts/build-react.js",
+    "build": "npm run build:wasm && npm run build:react",
+    "prepublishOnly": "npm run build && npm run lint && npm test"
   },
   "keywords": [
     "sui",
